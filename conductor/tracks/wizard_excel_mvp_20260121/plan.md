@@ -22,10 +22,10 @@
 - [x] Task: 实现步骤 3：Excel 文件流下载功能 [f0a76d8]
 - [x] Task: Conductor - User Manual Verification 'Phase 3' (Protocol in workflow.md) [3afc5cc]
 
-## Phase 4: 联调与优化
+## Phase 4: 联调与优化 [checkpoint: 5ccf846]
 - [x] Task: 前后端端到端联调 [3c2914b]
 - [x] Task: 优化 Toast 通知反馈（操作成功/失败提示） [bbb0738]
 - [x] Task: 最终冒烟测试与代码清理 [8aed655]
-- [~] Task: Conductor - User Manual Verification 'Phase 4' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 4' (Protocol in workflow.md) [5ccf846]
 - [ ] Task: 最终冒烟测试与代码清理
 - [ ] Task: Conductor - User Manual Verification 'Phase 4' (Protocol in workflow.md)
