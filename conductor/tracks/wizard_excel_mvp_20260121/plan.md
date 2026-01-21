@@ -15,12 +15,12 @@
 ## Phase 3: 前端向导界面开发 (Next.js)
 - [ ] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)
 
-## Phase 3: 前端向导界面开发 (Next.js)
+## Phase 3: 前端向导界面开发 (Next.js) [checkpoint: 3afc5cc]
 - [x] Task: 实现分步向导基础组件结构 [e9bb5c0]
 - [x] Task: 实现步骤 1：Token 输入与校验界面 [fcff634]
 - [x] Task: 实现步骤 2：数据请求、处理状态显示与预览表格 [dc6a6bb]
 - [x] Task: 实现步骤 3：Excel 文件流下载功能 [f0a76d8]
-- [~] Task: Conductor - User Manual Verification 'Phase 3' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3' (Protocol in workflow.md) [3afc5cc]
 
 ## Phase 4: 联调与优化
 - [ ] Task: 前后端端到端联调
