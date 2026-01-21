@@ -153,7 +153,10 @@ export default function Home() {
                         }
                       );
 
-                      if (!response.ok) throw new Error('下载失败');
+                      if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({}));
+                        throw new Error(errorData.message || '下载失败');
+                      }
 
                       const blob = await response.blob();
                       const url = window.URL.createObjectURL(blob);
