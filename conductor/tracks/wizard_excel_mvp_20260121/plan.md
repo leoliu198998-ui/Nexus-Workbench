@@ -25,7 +25,7 @@
 ## Phase 4: 联调与优化
 - [x] Task: 前后端端到端联调 [3c2914b]
 - [x] Task: 优化 Toast 通知反馈（操作成功/失败提示） [bbb0738]
-- [~] Task: 最终冒烟测试与代码清理
-- [ ] Task: Conductor - User Manual Verification 'Phase 4' (Protocol in workflow.md)
+- [x] Task: 最终冒烟测试与代码清理 [8aed655]
+- [~] Task: Conductor - User Manual Verification 'Phase 4' (Protocol in workflow.md)
 - [ ] Task: 最终冒烟测试与代码清理
 - [ ] Task: Conductor - User Manual Verification 'Phase 4' (Protocol in workflow.md)
