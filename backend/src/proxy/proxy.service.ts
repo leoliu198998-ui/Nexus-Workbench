@@ -4,7 +4,7 @@ import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class ProxyService {
-  private readonly apiUrl = 'https://api.backend.com/v1/data';
+  private readonly apiUrl = 'https://jsonplaceholder.typicode.com/users';
 
   constructor(private readonly httpService: HttpService) {}
 
