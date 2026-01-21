@@ -6,11 +6,11 @@
 - [x] Task: 配置基础的跨域 (CORS) 与环境变量 [2e0cbd2]
 - [x] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md) [9501484]
 
-## Phase 2: 后端核心逻辑实现 (NestJS)
+## Phase 2: 后端核心逻辑实现 (NestJS) [checkpoint: ff1163f]
 - [x] Task: 实现 API 代理服务，支持替换 Token 并发起外部请求 [f0b4e20]
 - [x] Task: 实现 Excel 生成服务 (基于硬编码映射规则) [24dc833]
 - [x] Task: 编写单元测试验证 JSON 到 Excel 的转换逻辑 [24dc833]
-- [~] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md) [ff1163f]
 
 ## Phase 3: 前端向导界面开发 (Next.js)
 - [ ] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)
