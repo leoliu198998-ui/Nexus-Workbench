@@ -1,12 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProxyService } from './proxy.service';
 import { HttpService } from '@nestjs/axios';
+import { ConfigService } from '@nestjs/config';
 import { of } from 'rxjs';
 import { AxiosResponse } from 'axios';
 
 describe('ProxyService', () => {
   let service: ProxyService;
   let httpService: HttpService;
+  let configService: ConfigService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -18,11 +20,18 @@ describe('ProxyService', () => {
             get: jest.fn(),
           },
         },
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn().mockReturnValue('https://api.test.com'),
+          },
+        },
       ],
     }).compile();
 
     service = module.get<ProxyService>(ProxyService);
     httpService = module.get<HttpService>(HttpService);
+    configService = module.get<ConfigService>(ConfigService);
   });
 
   it('should be defined', () => {
@@ -46,8 +55,9 @@ describe('ProxyService', () => {
 
     const result = await service.fetchData(token);
 
+    expect(configService.get).toHaveBeenCalledWith('EXTERNAL_API_URL');
     expect(httpService.get).toHaveBeenCalledWith(
-      expect.stringContaining('http'), // Expecting some URL
+      'https://api.test.com',
       expect.objectContaining({
         headers: {
           Authorization: `Bearer ${token}`,
