@@ -5,13 +5,9 @@
     - [x] 在 `src/app` 下创建 `apps/excel-export` 目录
     - [x] 将原 `src/app/page.tsx` 的内容移动到 `src/app/apps/excel-export/page.tsx`
     - [x] 修复相关的组件导入路径
-- [~] Task: 编写测试验证路径迁移
-    - [ ] 确保 `/apps/excel-export` 路径可访问且功能正常
-    - [ ] 将原 `src/app/page.tsx` 的内容移动到 `src/app/apps/excel-export/page.tsx`
-    - [ ] 修复相关的组件导入路径
-- [ ] Task: 编写测试验证路径迁移
-    - [ ] 确保 `/apps/excel-export` 路径可访问且功能正常
-- [ ] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md)
+- [x] Task: 编写测试验证路径迁移 [9365aee]
+    - [x] 确保 `/apps/excel-export` 路径可访问且功能正常
+- [~] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md)
 
 ## Phase 2: 仪表盘主页开发
 - [ ] Task: 创建仪表盘卡片组件 `ToolCard`
