@@ -135,10 +135,53 @@ export default function Home() {
             <div className="space-y-4 py-4 text-center">
               <p>数据处理完成。您可以下载生成的 Excel 文件了。</p>
               <div className="flex justify-between mt-8">
-                <Button variant="outline" onClick={prev}>
+                <Button variant="outline" onClick={prev} disabled={isLoading}>
                   上一步
                 </Button>
-                <Button onClick={() => alert('下载功能待实现')}>下载 Excel</Button>
+                <Button
+                  onClick={async () => {
+                    setIsLoading(true);
+                    try {
+                      const response = await fetch(
+                        'http://localhost:4000/proxy/download',
+                        {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                          },
+                          body: JSON.stringify({ token }),
+                        }
+                      );
+
+                      if (!response.ok) throw new Error('下载失败');
+
+                      const blob = await response.blob();
+                      const url = window.URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = 'data.xlsx';
+                      document.body.appendChild(a);
+                      a.click();
+                      window.URL.revokeObjectURL(url);
+                      document.body.removeChild(a);
+                      toast.success('下载开始');
+                    } catch (error) {
+                      toast.error('下载过程中发生错误');
+                    } finally {
+                      setIsLoading(false);
+                    }
+                  }}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      正在准备...
+                    </>
+                  ) : (
+                    '下载 Excel'
+                  )}
+                </Button>
               </div>
             </div>
           )}
