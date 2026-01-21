@@ -19,7 +19,7 @@
     - [x] 验证卡片内容是否按配置正确显示
 - [x] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md) [4b6a4d1]
 
-## Phase 3: 全局导航与体验优化
+## Phase 3: 全局导航与体验优化 [checkpoint: 2fd992e]
 - [x] Task: 创建全局导航栏组件 `Navbar` [3a416fa]
     - [x] 包含项目名称及返回主页的链接
 - [x] Task: 优化响应式布局 [cfcde26]
@@ -29,4 +29,4 @@
     - [x] 在工具页面添加显式的返回仪表盘按钮
 - [x] Task: 最终冒烟测试与代码清理 [f04e61a]
     - [x] 运行所有测试并检查代码质量
-- [~] Task: Conductor - User Manual Verification 'Phase 3' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3' (Protocol in workflow.md) [2fd992e]
