@@ -27,5 +27,6 @@
 - [x] Task: 增强导航体验（面包屑与返回功能） [0b6657c]
     - [x] 在 Navbar 中引入动态面包屑
     - [x] 在工具页面添加显式的返回仪表盘按钮
-- [~] Task: 最终冒烟测试与代码清理
-    - [ ] 运行所有测试并检查代码质量
+- [x] Task: 最终冒烟测试与代码清理 [f04e61a]
+    - [x] 运行所有测试并检查代码质量
+- [~] Task: Conductor - User Manual Verification 'Phase 3' (Protocol in workflow.md)
