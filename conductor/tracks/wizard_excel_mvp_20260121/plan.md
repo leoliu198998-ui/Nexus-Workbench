@@ -1,7 +1,7 @@
 # Implementation Plan - Wizard Excel MVP
 
 ## Phase 1: 项目基础架构搭建
-- [ ] Task: 初始化 Next.js 前端项目 (shadcn/ui, Tailwind, pnpm)
+- [x] Task: 初始化 Next.js 前端项目 (shadcn/ui, Tailwind, pnpm) [bff591a]
 - [ ] Task: 初始化 NestJS 后端项目
 - [ ] Task: 配置基础的跨域 (CORS) 与环境变量
 - [ ] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md)
