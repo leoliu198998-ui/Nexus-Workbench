@@ -10,15 +10,14 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md) [0ce48db]
 
 ## Phase 2: 仪表盘主页开发
-- [ ] Task: 创建仪表盘卡片组件 `ToolCard`
-    - [ ] 基于 shadcn/ui Card 实现
-    - [ ] 支持名称、描述、图标和标签等 props
-- [ ] Task: 实现主页 (`src/app/page.tsx`) 布局
-    - [ ] 编写工具列表配置数据
-    - [ ] 使用 Grid 布局渲染工具卡片
-- [ ] Task: 编写单元测试验证仪表盘渲染
-    - [ ] 验证卡片内容是否按配置正确显示
-- [ ] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)
+- [x] Task: 创建仪表盘卡片组件 `ToolCard` [cb63ab7]
+    - [x] 基于 shadcn/ui Card 实现
+- [x] Task: 实现主页 (`src/app/page.tsx`) 布局 [a97324e]
+    - [x] 编写工具列表配置数据
+    - [x] 使用 Grid 布局渲染工具卡片
+- [x] Task: 编写单元测试验证仪表盘渲染 [a97324e]
+    - [x] 验证卡片内容是否按配置正确显示
+- [~] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)
 
 ## Phase 3: 全局导航与体验优化
 - [ ] Task: 创建全局导航栏组件 `Navbar`
