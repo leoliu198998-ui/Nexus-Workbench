@@ -1,8 +1,12 @@
 # Implementation Plan - Layout Optimization & Dashboard
 
 ## Phase 1: 路由重构与页面迁移
-- [ ] Task: 迁移现有 Excel 向导逻辑
-    - [ ] 在 `src/app` 下创建 `apps/excel-export` 目录
+- [x] Task: 迁移现有 Excel 向导逻辑 [bd48e09]
+    - [x] 在 `src/app` 下创建 `apps/excel-export` 目录
+    - [x] 将原 `src/app/page.tsx` 的内容移动到 `src/app/apps/excel-export/page.tsx`
+    - [x] 修复相关的组件导入路径
+- [~] Task: 编写测试验证路径迁移
+    - [ ] 确保 `/apps/excel-export` 路径可访问且功能正常
     - [ ] 将原 `src/app/page.tsx` 的内容移动到 `src/app/apps/excel-export/page.tsx`
     - [ ] 修复相关的组件导入路径
 - [ ] Task: 编写测试验证路径迁移
