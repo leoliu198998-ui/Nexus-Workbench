@@ -1,6 +1,10 @@
 import { render, screen } from '@testing-library/react';
 import { Navbar } from './navbar';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+
+vi.mock('next/navigation', () => ({
+  usePathname: vi.fn(() => '/'),
+}));
 
 describe('Navbar', () => {
   it('renders project name', () => {

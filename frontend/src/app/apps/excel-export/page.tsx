@@ -13,8 +13,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
+import Link from 'next/link';
 
 interface User {
   id: number;
@@ -47,14 +48,24 @@ export default function Home() {
       toast.success('数据获取成功');
     } catch (error) {
       toast.error(error instanceof Error ? error.message : '发生未知错误');
-    } finally {
+    }
+    finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <main className="min-h-screen p-4 sm:p-8 bg-gray-50 flex items-center justify-center">
-      <Wizard>
+    <main className="min-h-screen p-4 sm:p-8 bg-gray-50">
+      <div className="max-w-2xl mx-auto space-y-4">
+        <Link 
+          href="/" 
+          className="inline-flex items-center text-sm text-muted-foreground hover:text-primary transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4 mr-1" />
+          返回仪表盘
+        </Link>
+        
+        <Wizard>
         <WizardStep title="身份验证">
           {(next) => (
             <div className="space-y-4 py-4">
@@ -196,6 +207,7 @@ export default function Home() {
           )}
         </WizardStep>
       </Wizard>
+      </div>
     </main>
   );
 }

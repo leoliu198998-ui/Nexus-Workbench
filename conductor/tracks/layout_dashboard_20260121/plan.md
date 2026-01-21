@@ -24,6 +24,8 @@
     - [x] 包含项目名称及返回主页的链接
 - [x] Task: 优化响应式布局 [cfcde26]
     - [x] 确保仪表盘在移动端和桌面端都有良好的显示效果
-- [~] Task: 最终冒烟测试与代码清理
+- [~] Task: 增强导航体验（面包屑与返回功能）
+    - [ ] 在 Navbar 中引入动态面包屑
+    - [ ] 在工具页面添加显式的返回仪表盘按钮
+- [ ] Task: 最终冒烟测试与代码清理
     - [ ] 运行所有测试并检查代码质量
-- [ ] Task: Conductor - User Manual Verification 'Phase 3' (Protocol in workflow.md)
