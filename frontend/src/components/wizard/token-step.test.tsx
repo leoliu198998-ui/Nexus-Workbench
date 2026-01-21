@@ -1,18 +1,20 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Wizard, WizardStep } from './wizard';
 import { useState } from 'react';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
 const TokenStepContent = ({ next }: { next: () => void }) => {
   const [token, setToken] = useState('');
   return (
     <div className="space-y-4">
-      <input 
-        placeholder="Enter Token" 
-        value={token} 
-        onChange={(e) => setToken(e.target.value)} 
+      <input
+        placeholder="Enter Token"
+        value={token}
+        onChange={(e) => setToken(e.target.value)}
       />
-      <button disabled={!token} onClick={next}>Next</button>
+      <button disabled={!token} onClick={next}>
+        Next
+      </button>
     </div>
   );
 };
@@ -32,11 +34,13 @@ describe('Token Step', () => {
 
     const nextButton = screen.getByText('Next');
     expect(nextButton).toBeDefined();
-    // @ts-ignore
+    // @ts-expect-error - testing native disabled property
     expect(nextButton.disabled).toBe(true);
 
-    fireEvent.change(screen.getByPlaceholderText('Enter Token'), { target: { value: 'my-token' } });
-    // @ts-ignore
+    fireEvent.change(screen.getByPlaceholderText('Enter Token'), {
+      target: { value: 'my-token' },
+    });
+    // @ts-expect-error - testing native disabled property
     expect(nextButton.disabled).toBe(false);
   });
 });

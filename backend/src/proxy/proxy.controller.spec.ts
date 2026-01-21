@@ -44,7 +44,7 @@ describe('ProxyController', () => {
     jest.spyOn(service, 'fetchData').mockResolvedValue(result);
 
     expect(await controller.fetchData(dto)).toBe(result);
-    expect(service.fetchData).toHaveBeenCalledWith(dto.token);
+    expect(service.fetchData).toHaveBeenCalledWith(dto.token); // eslint-disable-line @typescript-eslint/unbound-method
   });
 
   it('should generate and download excel file', async () => {
@@ -60,11 +60,15 @@ describe('ProxyController', () => {
 
     const result = await controller.downloadExcel(dto, mockRes);
 
-    expect(service.fetchData).toHaveBeenCalledWith(dto.token);
-    expect(excelService.generateExcel).toHaveBeenCalledWith(mockData);
-    expect(mockRes.set).toHaveBeenCalledWith(expect.objectContaining({
-      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    }));
+    expect(service.fetchData).toHaveBeenCalledWith(dto.token); // eslint-disable-line @typescript-eslint/unbound-method
+    expect(excelService.generateExcel).toHaveBeenCalledWith(mockData); // eslint-disable-line @typescript-eslint/unbound-method
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    expect(mockRes.set).toHaveBeenCalledWith(
+      expect.objectContaining({
+        'Content-Type':
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      }),
+    );
     expect(result).toBeInstanceOf(StreamableFile);
   });
 });

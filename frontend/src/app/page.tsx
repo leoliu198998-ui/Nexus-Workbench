@@ -16,9 +16,15 @@ import {
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
+interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
 export default function Home() {
   const [token, setToken] = useState('');
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchData = async () => {
@@ -168,7 +174,7 @@ export default function Home() {
                       window.URL.revokeObjectURL(url);
                       document.body.removeChild(a);
                       toast.success('下载开始');
-                    } catch (error) {
+                    } catch {
                       toast.error('下载过程中发生错误');
                     } finally {
                       setIsLoading(false);

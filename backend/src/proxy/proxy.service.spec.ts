@@ -47,15 +47,16 @@ describe('ProxyService', () => {
       statusText: 'OK',
       headers: {},
       config: {
-        headers: undefined
+        headers: undefined,
       },
     };
 
     jest.spyOn(httpService, 'get').mockReturnValue(of(mockResponse));
 
-    const result = await service.fetchData(token);
+    const result: unknown = await service.fetchData(token);
 
-    expect(configService.get).toHaveBeenCalledWith('EXTERNAL_API_URL');
+    expect(configService.get).toHaveBeenCalledWith('EXTERNAL_API_URL'); // eslint-disable-line @typescript-eslint/unbound-method
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(httpService.get).toHaveBeenCalledWith(
       'https://api.test.com',
       expect.objectContaining({
