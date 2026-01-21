@@ -7,8 +7,8 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md) [9501484]
 
 ## Phase 2: 后端核心逻辑实现 (NestJS)
-- [ ] Task: 实现 API 代理服务，支持替换 Token 并发起外部请求
-- [ ] Task: 实现 Excel 生成服务 (基于硬编码映射规则)
+- [x] Task: 实现 API 代理服务，支持替换 Token 并发起外部请求 [f0b4e20]
+- [~] Task: 实现 Excel 生成服务 (基于硬编码映射规则)
 - [ ] Task: 编写单元测试验证 JSON 到 Excel 的转换逻辑
 - [ ] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)
 
