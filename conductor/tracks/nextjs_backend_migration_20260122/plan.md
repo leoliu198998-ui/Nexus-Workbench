@@ -31,7 +31,7 @@
     - [ ] 设置正确的文件下载响应头。
 - [x] Task: Conductor - User Manual Verification 'API 实现' (Protocol in workflow.md)
 
-## 阶段 4：前端集成与清理
+## 阶段 4：前端集成与清理 [checkpoint: 7b9f36f]
 - [x] Task: 更新前端调用 fa13da6
     - [ ] 修改 `frontend/src/app/apps/excel-export/page.tsx` 以调用新的相对路径 API。
     - [ ] 必要时更新环境变量引用逻辑。
@@ -42,4 +42,4 @@
     - [ ] 验证端到端 (E2E) 流程（抓取与下载）。
     - [ ] 删除 `backend/` 整个目录。
     - [ ] 如果存在 `pnpm-workspace.yaml`，从中移除 `backend`。
-- [ ] Task: Conductor - User Manual Verification '前端集成与清理' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification '前端集成与清理' (Protocol in workflow.md)
