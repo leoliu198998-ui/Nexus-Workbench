@@ -25,7 +25,7 @@
     - [ ] 创建 `frontend/src/app/api/proxy/fetch/route.ts`。
     - [ ] 实现 POST 处理器，调用外部 API。
     - [ ] 确保错误处理和 Token 传递逻辑正确。
-- [ ] Task: 实现文件下载 API (Download API)
+- [x] Task: 实现文件下载 API (Download API) 0cf00dd
     - [ ] 创建 `frontend/src/app/api/proxy/download/route.ts`。
     - [ ] 实现 POST 处理器，抓取数据并使用 `excel-utils` 生成流。
     - [ ] 设置正确的文件下载响应头。
