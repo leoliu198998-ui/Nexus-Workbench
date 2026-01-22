@@ -18,15 +18,33 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 1. Fetch data from external API
+    // 1. Fetch data from external API with FULL headers from curl
     const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'accept': 'application/json, text/plain, */*',
+        'accept-language': 'zh-CN,zh;q=0.9',
         'content-type': 'application/json',
+        'origin': 'https://global.butterglobe.com',
+        'priority': 'u=1, i',
+        'referer': 'https://global.butterglobe.com/app/calendar-schedule-v2/all',
+        'sec-ch-ua': '"Google Chrome";v="143", "Chromium";v="143", "Not A(Brand";v="24"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"macOS"',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-origin',
+        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36',
         'x-actived-menu': 'SD-All Calendar Schedule',
         'x-biz': 'SERVICE_ONLINE_SD',
+        'x-contact-id': '202203310914110067',
         'x-dk-token': token,
+        'x-language': 'en',
+        'x-session-id': 'q3q025q5',
+        'x-sse-session-id': '6b9638f9-d183-469d-ba1f-532929379d02',
+        'x-tenant-code': 'bipo',
+        'x-timezone': 'Asia/Shanghai',
+        'Cookie': 'JSESSIONID=nd8f6cd3y1HbC2mHtUViwh4m7FHl0WJdcwnAB4Y0',
       },
       body: JSON.stringify({
         q: '',
@@ -38,18 +56,42 @@ export async function POST(req: NextRequest) {
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('External API Error:', response.status, errorText);
       return NextResponse.json(
-        { error: 'Failed to fetch data from external API' },
+        { 
+          error: 'Failed to fetch data from external API', 
+          details: {
+            status: response.status,
+            message: errorText
+          }
+        },
         { status: response.status }
       );
     }
 
     const rawData = await response.json();
+    
+    // 从 data.content 中提取数组 (支持分页结构)
+    let dataList: any[] = [];
+    if (rawData.data && Array.isArray(rawData.data.content)) {
+      dataList = rawData.data.content;
+    } else if (Array.isArray(rawData.content)) {
+      dataList = rawData.content;
+    } else if (Array.isArray(rawData.data)) {
+      dataList = rawData.data;
+    } else if (Array.isArray(rawData)) {
+      dataList = rawData;
+    }
+
+    if (dataList.length === 0) {
+      console.warn('Warning: Extracted data list is empty.');
+    }
 
     // 2. Transform data (Replicating Python logic)
-    const transformedData = transformScheduleData(rawData);
+    const transformedData = transformScheduleData(dataList);
 
-    // 3. Define Excel Columns (As per Python script requirement)
+    // 3. Define Excel Columns
     const columns: ExcelColumn[] = [
       { header: 'Schedule ID', key: 'id', width: 15 },
       { header: 'Schedule Name', key: 'name', width: 30 },
@@ -73,7 +115,7 @@ export async function POST(req: NextRequest) {
       status: 200,
       headers: {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'Content-Disposition': 'attachment; filename="schedules_2026.xlsx"',
+        'Content-Disposition': `attachment; filename="schedules_2026_${new Date().toISOString().split('T')[0]}.xlsx"`,
       },
     });
   } catch (error) {

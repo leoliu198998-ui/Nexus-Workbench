@@ -1,0 +1,8 @@
+{
+  "track_id": "vercel_deployment_restructure_20260122",
+  "type": "chore",
+  "status": "new",
+  "created_at": "2026-01-22T17:45:00Z",
+  "updated_at": "2026-01-22T17:45:00Z",
+  "description": "Refactor project structure by moving frontend to root for Vercel deployment."
+}
