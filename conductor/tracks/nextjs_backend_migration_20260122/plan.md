@@ -14,11 +14,11 @@
     - [ ] 实现 `frontend/src/lib/prisma.ts` 以提供单例实例。
 - [x] Task: Conductor - User Manual Verification '环境与数据库设置' (Protocol in workflow.md)
 
-## 阶段 2：业务逻辑迁移 (TDD)
+## 阶段 2：业务逻辑迁移 (TDD) [checkpoint: 8fcb2cc]
 - [x] Task: 迁移 Excel 生成逻辑 1577876
     - [ ] 创建测试文件 `frontend/src/lib/excel-utils.test.ts`。
     - [ ] 实现 `frontend/src/lib/excel-utils.ts` (移植原 `ExcelService` 的逻辑)。
-- [ ] Task: Conductor - User Manual Verification '业务逻辑迁移 (TDD)' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification '业务逻辑迁移 (TDD)' (Protocol in workflow.md)
 
 ## 阶段 3：API 实现
 - [ ] Task: 实现数据抓取 API (Fetch API)
