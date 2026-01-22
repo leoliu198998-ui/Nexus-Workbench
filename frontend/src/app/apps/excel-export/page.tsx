@@ -31,8 +31,7 @@ export default function Home() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      // Note: This URL points to localhost:4000. Ensure the backend proxy is running.
-      const response = await fetch('http://localhost:4000/proxy/fetch', {
+      const response = await fetch('/api/proxy/fetch', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -41,7 +40,8 @@ export default function Home() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch data');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to fetch data');
       }
 
       const result = await response.json();
@@ -204,7 +204,7 @@ export default function Home() {
                     setIsLoading(true);
                     try {
                       const response = await fetch(
-                        'http://localhost:4000/proxy/download',
+                        '/api/proxy/download',
                         {
                           method: 'POST',
                           headers: {
@@ -216,7 +216,7 @@ export default function Home() {
 
                       if (!response.ok) {
                         const errorData = await response.json().catch(() => ({}));
-                        throw new Error(errorData.message || 'Download failed');
+                        throw new Error(errorData.error || 'Download failed');
                       }
 
                       const blob = await response.blob();
