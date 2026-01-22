@@ -37,7 +37,7 @@
     - [ ] 必要时更新环境变量引用逻辑。
 - [x] Task: 环境配置 b78a61d
     - [ ] 在 `frontend/.env` (或 `.env.local`) 中配置 `EXTERNAL_API_URL`。
-- [ ] Task: 验证与清理
+- [x] Task: 验证与清理 acdf07e
     - [ ] 运行完整构建 `pnpm run build` 确保无类型错误。
     - [ ] 验证端到端 (E2E) 流程（抓取与下载）。
     - [ ] 删除 `backend/` 整个目录。
