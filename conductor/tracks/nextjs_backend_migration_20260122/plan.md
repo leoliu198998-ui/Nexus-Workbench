@@ -5,7 +5,7 @@
     - [ ] 在 `frontend` 目录安装 `prisma` 作为开发依赖。
     - [ ] 安装 `@prisma/client` 和 `exceljs` 到 `frontend` 项目中。
     - [ ] 在 `frontend` 中初始化 Prisma（如果尚未存在）。
-- [ ] Task: 迁移 Prisma 配置
+- [x] Task: 迁移 Prisma 配置 2e2119c
     - [ ] 将 `backend/prisma/schema.prisma` 移动到 `frontend/prisma/schema.prisma`。
     - [ ] 更新 `schema.prisma` 的 generator 配置以适配 Next.js。
     - [ ] 生成 Prisma Client (`npx prisma generate`)。
