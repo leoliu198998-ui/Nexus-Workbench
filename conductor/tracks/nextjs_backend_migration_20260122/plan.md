@@ -32,7 +32,7 @@
 - [x] Task: Conductor - User Manual Verification 'API 实现' (Protocol in workflow.md)
 
 ## 阶段 4：前端集成与清理
-- [ ] Task: 更新前端调用
+- [x] Task: 更新前端调用 fa13da6
     - [ ] 修改 `frontend/src/app/apps/excel-export/page.tsx` 以调用新的相对路径 API。
     - [ ] 必要时更新环境变量引用逻辑。
 - [ ] Task: 环境配置
