@@ -1,6 +1,6 @@
 # 执行计划 - 后端迁移至 Next.js API
 
-## 阶段 1：环境与数据库设置
+## 阶段 1：环境与数据库设置 [checkpoint: 2fcc710]
 - [x] Task: 安装依赖 c8bc8fd
     - [ ] 在 `frontend` 目录安装 `prisma` 作为开发依赖。
     - [ ] 安装 `@prisma/client` 和 `exceljs` 到 `frontend` 项目中。
@@ -12,7 +12,7 @@
 - [x] Task: 创建 Prisma 单例 (TDD) 880c0a5
     - [ ] 创建测试文件 `frontend/src/lib/prisma.test.ts` (模拟 prisma)。
     - [ ] 实现 `frontend/src/lib/prisma.ts` 以提供单例实例。
-- [ ] Task: Conductor - User Manual Verification '环境与数据库设置' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification '环境与数据库设置' (Protocol in workflow.md)
 
 ## 阶段 2：业务逻辑迁移 (TDD)
 - [ ] Task: 迁移 Excel 生成逻辑
