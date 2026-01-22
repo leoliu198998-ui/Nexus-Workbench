@@ -10,7 +10,7 @@
     - [ ] 更新 `frontend/src/lib/excel-utils.ts` 以支持动态列定义（如果尚未支持）。
 - [x] Task: Conductor - User Manual Verification '数据转换层实现 (TDD)' (Protocol in workflow.md)
 
-## 阶段 2：后端 API 路由开发
+## 阶段 2：后端 API 路由开发 [checkpoint: 9dc5f46]
 - [x] Task: 配置环境变量 cac277f
     - [ ] 更新 `.env.example` 和 `.env`，添加 `SCHEDULE_REPORT_API_URL` 及其他必要的固定 Header 常量（虽然 URL 是固定的，但放入配置更佳）。
 - [x] Task: 实现专用数据抓取 API e7ca196
@@ -22,7 +22,7 @@
     - [ ] 复用抓取逻辑获取数据。
     - [ ] 调用 `schedule-transformer` 进行数据处理。
     - [ ] 调用 `excel-utils` 生成 Excel 流并返回。
-- [ ] Task: Conductor - User Manual Verification '后端 API 路由开发' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification '后端 API 路由开发' (Protocol in workflow.md)
 
 ## 阶段 3：前端 UI 适配
 - [ ] Task: 更新 Excel 导出向导页面
