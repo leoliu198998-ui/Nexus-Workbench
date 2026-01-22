@@ -4,7 +4,7 @@
 - [x] Task: 定义数据类型与接口 03a3b72
     - [ ] 在 `frontend/src/lib/types/schedule.ts` 中定义 API 响应的 TypeScript 接口（嵌套结构）。
     - [ ] 定义展平后的导出数据接口。
-- [ ] Task: 实现数据转换逻辑
+- [x] Task: 实现数据转换逻辑 d323a37
     - [ ] 创建测试 `frontend/src/lib/schedule-transformer.test.ts`，使用 mock 数据验证 Python 脚本中的特殊逻辑（如 `PUBLIC_HOLIDAY_ERROR` 拼接、联系人合并）。
     - [ ] 实现 `frontend/src/lib/schedule-transformer.ts`，完成从 API 原始数据到 Excel 导出格式的转换。
     - [ ] 更新 `frontend/src/lib/excel-utils.ts` 以支持动态列定义（如果尚未支持）。
