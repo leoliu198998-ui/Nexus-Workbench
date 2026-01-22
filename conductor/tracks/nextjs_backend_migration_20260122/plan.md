@@ -21,7 +21,7 @@
 - [x] Task: Conductor - User Manual Verification '业务逻辑迁移 (TDD)' (Protocol in workflow.md)
 
 ## 阶段 3：API 实现
-- [ ] Task: 实现数据抓取 API (Fetch API)
+- [x] Task: 实现数据抓取 API (Fetch API) 48f1872
     - [ ] 创建 `frontend/src/app/api/proxy/fetch/route.ts`。
     - [ ] 实现 POST 处理器，调用外部 API。
     - [ ] 确保错误处理和 Token 传递逻辑正确。
