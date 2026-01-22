@@ -13,7 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Loader2, ArrowLeft } from 'lucide-react';
+import { Loader2, ArrowLeft, KeyRound, Search, Download, FileSpreadsheet, RefreshCcw, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import Link from 'next/link';
 
@@ -31,6 +31,7 @@ export default function Home() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
+      // Note: This URL points to localhost:4000. Ensure the backend proxy is running.
       const response = await fetch('http://localhost:4000/proxy/fetch', {
         method: 'POST',
         headers: {
@@ -40,14 +41,14 @@ export default function Home() {
       });
 
       if (!response.ok) {
-        throw new Error('获取数据失败');
+        throw new Error('Failed to fetch data');
       }
 
       const result = await response.json();
       setData(Array.isArray(result) ? result : [result]);
-      toast.success('数据获取成功');
+      toast.success('Data retrieved successfully');
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : '发生未知错误');
+      toast.error(error instanceof Error ? error.message : 'An unknown error occurred');
     }
     finally {
       setIsLoading(false);
@@ -56,106 +57,149 @@ export default function Home() {
 
   return (
     <main className="min-h-screen p-4 sm:p-8 bg-background bg-dot-pattern">
-      <div className="max-w-3xl mx-auto space-y-6">
+      <div className="max-w-5xl mx-auto space-y-8">
         <Link 
           href="/" 
-          className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-primary transition-colors px-1"
+          className="group inline-flex items-center text-sm font-medium text-muted-foreground hover:text-primary transition-colors px-1"
         >
-          <ArrowLeft className="w-4 h-4 mr-1.5" />
+          <div className="mr-2 p-1 rounded-md bg-muted group-hover:bg-primary/10 transition-colors">
+            <ArrowLeft className="w-4 h-4" />
+          </div>
           Back to Dashboard
         </Link>
         
         <Wizard>
-        <WizardStep title="身份验证">
+        <WizardStep title="Authentication" description="Verify your identity to access the data source.">
           {(next) => (
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="token">身份令牌 (Token)</Label>
-                <Input
-                  id="token"
-                  placeholder="请输入您的 Token"
-                  value={token}
-                  onChange={(e) => setToken(e.target.value)}
-                />
-                <p className="text-sm text-gray-500">
-                  请输入有效的令牌以继续数据处理。
-                </p>
+            <div className="space-y-6 max-w-md">
+              <div className="space-y-4">
+                 <div className="bg-primary/5 border border-primary/10 rounded-lg p-4 flex items-start gap-3">
+                   <KeyRound className="w-5 h-5 text-primary mt-0.5" />
+                   <div className="text-sm">
+                     <p className="font-medium text-foreground">Secure Token Required</p>
+                     <p className="text-muted-foreground mt-1">Please enter your valid access token. This ensures you have the necessary permissions to export this dataset.</p>
+                   </div>
+                 </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="token">Access Token</Label>
+                  <Input
+                    id="token"
+                    placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    value={token}
+                    onChange={(e) => setToken(e.target.value)}
+                    className="font-mono text-sm"
+                  />
+                </div>
               </div>
-              <div className="flex justify-end">
-                <Button disabled={!token} onClick={next}>
-                  下一步
+              <div className="flex justify-end pt-4">
+                <Button disabled={!token} onClick={next} className="w-full sm:w-auto">
+                  Continue
+                  <ArrowLeft className="w-4 h-4 ml-2 rotate-180" />
                 </Button>
               </div>
             </div>
           )}
         </WizardStep>
 
-        <WizardStep title="数据处理与预览">
+        <WizardStep title="Data Preview" description="Review the fetched data before exporting.">
           {(next, prev) => (
-            <div className="space-y-4 py-4">
+            <div className="space-y-6">
               {data.length === 0 && !isLoading ? (
-                <div className="text-center py-8 space-y-4">
-                  <p className="text-gray-500">尚未获取数据，点击下方按钮开始。</p>
-                  <Button onClick={fetchData}>获取数据</Button>
+                <div className="flex flex-col items-center justify-center py-12 border-2 border-dashed border-border rounded-xl bg-muted/20">
+                  <div className="p-4 rounded-full bg-muted mb-4">
+                    <Search className="w-8 h-8 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-lg font-semibold">Ready to Fetch</h3>
+                  <p className="text-muted-foreground text-center max-w-sm mt-1 mb-6">
+                    Click the button below to retrieve the data associated with your token.
+                  </p>
+                  <Button onClick={fetchData} size="lg">
+                    Fetch Data
+                  </Button>
                 </div>
               ) : isLoading ? (
-                <div className="flex flex-col items-center justify-center py-12 space-y-4">
-                  <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-                  <p>正在从后端获取并处理数据...</p>
+                <div className="flex flex-col items-center justify-center py-16 space-y-4">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl animate-pulse" />
+                    <Loader2 className="relative h-10 w-10 animate-spin text-primary" />
+                  </div>
+                  <p className="text-sm font-medium text-muted-foreground animate-pulse">Retrieving data from secure endpoint...</p>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <div className="border rounded-md max-h-64 overflow-auto">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="h-2 w-2 rounded-full bg-emerald-500" />
+                      <span className="text-sm font-medium">{data.length} records found</span>
+                    </div>
+                    <Button onClick={fetchData} variant="outline" size="sm" className="h-8">
+                      <RefreshCcw className="w-3.5 h-3.5 mr-2" />
+                      Refresh
+                    </Button>
+                  </div>
+
+                  <div className="border rounded-lg overflow-hidden bg-card">
                     <Table>
-                      <TableHeader>
+                      <TableHeader className="bg-muted/50">
                         <TableRow>
-                          <TableHead className="w-16">ID</TableHead>
-                          <TableHead>姓名</TableHead>
-                          <TableHead>邮箱</TableHead>
+                          <TableHead className="w-20">ID</TableHead>
+                          <TableHead>Name</TableHead>
+                          <TableHead>Email</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {data.slice(0, 5).map((item) => (
-                          <TableRow key={item.id}>
-                            <TableCell>{item.id}</TableCell>
-                            <TableCell>{item.name}</TableCell>
-                            <TableCell>{item.email}</TableCell>
+                          <TableRow key={item.id} className="hover:bg-muted/30">
+                            <TableCell className="font-mono text-xs">{item.id}</TableCell>
+                            <TableCell className="font-medium">{item.name}</TableCell>
+                            <TableCell className="text-muted-foreground">{item.email}</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
                     </Table>
                   </div>
-                  <p className="text-sm text-gray-500 italic text-right">
-                    仅显示前 5 条预览数据（总计 {data.length} 条）
-                  </p>
-                  <div className="flex justify-center pt-4">
-                    <Button onClick={fetchData} variant="outline" size="sm">
-                      重新获取
-                    </Button>
-                  </div>
+                  
+                  {data.length > 5 && (
+                    <p className="text-xs text-muted-foreground text-center py-2 bg-muted/20 rounded border border-dashed">
+                      Showing preview of first 5 records only. Full dataset will be exported.
+                    </p>
+                  )}
                 </div>
               )}
-              <div className="flex justify-between pt-4">
-                <Button variant="outline" onClick={prev}>
-                  上一步
+
+              <div className="flex justify-between pt-6 border-t border-border/40">
+                <Button variant="ghost" onClick={prev}>
+                  Back
                 </Button>
                 <Button disabled={data.length === 0 || isLoading} onClick={next}>
-                  确认并继续
+                  Confirm & Continue
                 </Button>
               </div>
             </div>
           )}
         </WizardStep>
 
-        <WizardStep title="下载 Excel">
+        <WizardStep title="Export" description="Generate and download your Excel report.">
           {(next, prev) => (
-            <div className="space-y-4 py-4 text-center">
-              <p>数据处理完成。您可以下载生成的 Excel 文件了。</p>
-              <div className="flex justify-between mt-8">
-                <Button variant="outline" onClick={prev} disabled={isLoading}>
-                  上一步
+            <div className="flex flex-col items-center justify-center py-8 text-center space-y-6">
+              <div className="w-24 h-24 bg-emerald-500/10 rounded-full flex items-center justify-center ring-8 ring-emerald-500/5 mb-2">
+                <FileSpreadsheet className="w-10 h-10 text-emerald-600" />
+              </div>
+              
+              <div className="max-w-md space-y-2">
+                <h3 className="text-xl font-semibold">Ready to Export</h3>
+                <p className="text-muted-foreground">
+                  Your data has been processed and is ready for download. The file will be generated in .xlsx format.
+                </p>
+              </div>
+
+              <div className="flex gap-4 mt-8 w-full max-w-xs">
+                <Button variant="outline" onClick={prev} disabled={isLoading} className="flex-1">
+                  Back
                 </Button>
                 <Button
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white"
                   onClick={async () => {
                     setIsLoading(true);
                     try {
@@ -172,21 +216,21 @@ export default function Home() {
 
                       if (!response.ok) {
                         const errorData = await response.json().catch(() => ({}));
-                        throw new Error(errorData.message || '下载失败');
+                        throw new Error(errorData.message || 'Download failed');
                       }
 
                       const blob = await response.blob();
                       const url = window.URL.createObjectURL(blob);
                       const a = document.createElement('a');
                       a.href = url;
-                      a.download = 'data.xlsx';
+                      a.download = `export_${new Date().toISOString().split('T')[0]}.xlsx`;
                       document.body.appendChild(a);
                       a.click();
                       window.URL.revokeObjectURL(url);
                       document.body.removeChild(a);
-                      toast.success('下载开始');
+                      toast.success('Download started');
                     } catch {
-                      toast.error('下载过程中发生错误');
+                      toast.error('Error during download');
                     } finally {
                       setIsLoading(false);
                     }
@@ -196,17 +240,21 @@ export default function Home() {
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      正在准备...
+                      Preparing...
                     </>
                   ) : (
-                    '下载 Excel'
+                    <>
+                      <Download className="mr-2 h-4 w-4" />
+                      Download
+                    </>
                   )}
                 </Button>
               </div>
             </div>
           )}
         </WizardStep>
-                      </Wizard>            </div>
-          </main>
-        );
-      }
+        </Wizard>
+      </div>
+    </main>
+  );
+}
