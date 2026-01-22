@@ -1,0 +1,8 @@
+{
+  "track_id": "schedule_report_integration_20260122",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-01-22T16:45:00Z",
+  "updated_at": "2026-01-22T16:45:00Z",
+  "description": "Integration of real-world Schedule Report API replacing mock data in Excel Export Wizard."
+}
