@@ -35,7 +35,7 @@
 - [x] Task: 更新前端调用 fa13da6
     - [ ] 修改 `frontend/src/app/apps/excel-export/page.tsx` 以调用新的相对路径 API。
     - [ ] 必要时更新环境变量引用逻辑。
-- [ ] Task: 环境配置
+- [x] Task: 环境配置 b78a61d
     - [ ] 在 `frontend/.env` (或 `.env.local`) 中配置 `EXTERNAL_API_URL`。
 - [ ] Task: 验证与清理
     - [ ] 运行完整构建 `pnpm run build` 确保无类型错误。
