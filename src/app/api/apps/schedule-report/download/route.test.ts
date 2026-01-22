@@ -21,7 +21,7 @@ describe('Schedule Report Download API', () => {
   it('should fetch, transform and return excel stream', async () => {
     (global.fetch as any).mockResolvedValue({
       ok: true,
-      json: async () => [{ raw: true }],
+      json: async () => ({ data: { content: [{ raw: true }] } }),
     });
 
     const req = new NextRequest('http://localhost/api/apps/schedule-report/download', {
@@ -36,13 +36,14 @@ describe('Schedule Report Download API', () => {
     expect(res.status).toBe(200);
     expect(text).toBe('mock-excel');
     expect(res.headers.get('Content-Type')).toBe('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    expect(res.headers.get('Content-Disposition')).toContain('attachment; filename="schedules_2026.xlsx"');
+    expect(res.headers.get('Content-Disposition')).toContain('attachment; filename="schedules_2026_');
   });
 
   it('should handle fetch errors', async () => {
     (global.fetch as any).mockResolvedValue({
       ok: false,
       status: 401,
+      text: async () => 'Unauthorized',
     });
 
     const req = new NextRequest('http://localhost/api/apps/schedule-report/download', {
