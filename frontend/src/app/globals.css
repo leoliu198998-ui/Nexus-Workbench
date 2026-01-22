@@ -123,3 +123,12 @@
     @apply bg-background text-foreground;
   }
 }
+
+.bg-dot-pattern {
+  background-image: radial-gradient(oklch(0.205 0 0 / 0.1) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.dark .bg-dot-pattern {
+  background-image: radial-gradient(oklch(0.985 0 0 / 0.1) 1px, transparent 1px);
+}

@@ -55,14 +55,14 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen p-4 sm:p-8 bg-gray-50">
-      <div className="max-w-2xl mx-auto space-y-4">
+    <main className="min-h-screen p-4 sm:p-8 bg-background bg-dot-pattern">
+      <div className="max-w-3xl mx-auto space-y-6">
         <Link 
           href="/" 
-          className="inline-flex items-center text-sm text-muted-foreground hover:text-primary transition-colors"
+          className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-primary transition-colors px-1"
         >
-          <ArrowLeft className="w-4 h-4 mr-1" />
-          返回仪表盘
+          <ArrowLeft className="w-4 h-4 mr-1.5" />
+          Back to Dashboard
         </Link>
         
         <Wizard>
@@ -206,9 +206,7 @@ export default function Home() {
             </div>
           )}
         </WizardStep>
-      </Wizard>
-      </div>
-    </main>
-  );
-}
-
+                      </Wizard>            </div>
+          </main>
+        );
+      }
