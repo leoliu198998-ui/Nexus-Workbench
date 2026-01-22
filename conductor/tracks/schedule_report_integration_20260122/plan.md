@@ -13,7 +13,7 @@
 ## 阶段 2：后端 API 路由开发
 - [x] Task: 配置环境变量 cac277f
     - [ ] 更新 `.env.example` 和 `.env`，添加 `SCHEDULE_REPORT_API_URL` 及其他必要的固定 Header 常量（虽然 URL 是固定的，但放入配置更佳）。
-- [ ] Task: 实现专用数据抓取 API
+- [x] Task: 实现专用数据抓取 API e7ca196
     - [ ] 创建 `frontend/src/app/api/apps/schedule-report/fetch/route.ts`。
     - [ ] 实现 POST 处理逻辑：组装 Header（注入 `x-dk-token`），构造请求体（固定 year/size），处理外部响应。
     - [ ] 编写集成测试 `route.test.ts` 验证 Header 组装和错误处理。
