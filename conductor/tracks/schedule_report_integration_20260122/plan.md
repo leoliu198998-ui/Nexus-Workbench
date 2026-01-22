@@ -11,7 +11,7 @@
 - [x] Task: Conductor - User Manual Verification '数据转换层实现 (TDD)' (Protocol in workflow.md)
 
 ## 阶段 2：后端 API 路由开发
-- [ ] Task: 配置环境变量
+- [x] Task: 配置环境变量 cac277f
     - [ ] 更新 `.env.example` 和 `.env`，添加 `SCHEDULE_REPORT_API_URL` 及其他必要的固定 Header 常量（虽然 URL 是固定的，但放入配置更佳）。
 - [ ] Task: 实现专用数据抓取 API
     - [ ] 创建 `frontend/src/app/api/apps/schedule-report/fetch/route.ts`。
