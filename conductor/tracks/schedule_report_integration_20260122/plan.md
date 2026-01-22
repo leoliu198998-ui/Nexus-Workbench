@@ -25,11 +25,11 @@
 - [x] Task: Conductor - User Manual Verification '后端 API 路由开发' (Protocol in workflow.md)
 
 ## 阶段 3：前端 UI 适配
-- [ ] Task: 更新 Excel 导出向导页面
+- [x] Task: 更新 Excel 导出向导页面 1dcf893
     - [ ] 修改 `frontend/src/app/apps/excel-export/page.tsx`。
-    - [ ] 将 API 请求路径更新为 `/api/apps/schedule-report/fetch` 和 `/download`。
+    - [ ] 将 API 请求路径更新为专用路由。
     - [ ] 更新 Token 输入的提示文案（如需要 x-dk-token）。
-    - [ ] 更新“数据预览”步骤的表格列，使其展示新的核心字段（Client, Entity, Location, Status）。
+    - [ ] 移除“数据预览”步骤，实现从身份验证直接跳转到下载页面的逻辑。
 - [ ] Task: Conductor - User Manual Verification '前端 UI 适配' (Protocol in workflow.md)
 
 ## 阶段 4：清理与集成验证
