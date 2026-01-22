@@ -9,7 +9,7 @@
     - [ ] 将 `backend/prisma/schema.prisma` 移动到 `frontend/prisma/schema.prisma`。
     - [ ] 更新 `schema.prisma` 的 generator 配置以适配 Next.js。
     - [ ] 生成 Prisma Client (`npx prisma generate`)。
-- [ ] Task: 创建 Prisma 单例 (TDD)
+- [x] Task: 创建 Prisma 单例 (TDD) 880c0a5
     - [ ] 创建测试文件 `frontend/src/lib/prisma.test.ts` (模拟 prisma)。
     - [ ] 实现 `frontend/src/lib/prisma.ts` 以提供单例实例。
 - [ ] Task: Conductor - User Manual Verification '环境与数据库设置' (Protocol in workflow.md)
