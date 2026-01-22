@@ -17,7 +17,7 @@
     - [ ] 创建 `frontend/src/app/api/apps/schedule-report/fetch/route.ts`。
     - [ ] 实现 POST 处理逻辑：组装 Header（注入 `x-dk-token`），构造请求体（固定 year/size），处理外部响应。
     - [ ] 编写集成测试 `route.test.ts` 验证 Header 组装和错误处理。
-- [ ] Task: 实现专用下载 API
+- [x] Task: 实现专用下载 API 9051415
     - [ ] 创建 `frontend/src/app/api/apps/schedule-report/download/route.ts`。
     - [ ] 复用抓取逻辑获取数据。
     - [ ] 调用 `schedule-transformer` 进行数据处理。
