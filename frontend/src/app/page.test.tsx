@@ -5,13 +5,13 @@ import { describe, it, expect } from 'vitest';
 describe('Home Page (Dashboard)', () => {
   it('renders dashboard heading', () => {
     render(<Home />);
-    expect(screen.getByText('仪表盘')).toBeDefined();
-    expect(screen.getByText(/欢迎使用 Nexus Workbench/)).toBeDefined();
+    expect(screen.getByText('Available Tools')).toBeDefined();
+    expect(screen.getByText(/Nexus Workbench v1.0/)).toBeDefined();
   });
 
   it('renders tool cards', () => {
     render(<Home />);
-    expect(screen.getByText('Excel 导出向导')).toBeDefined();
-    expect(screen.getByText(/通过分步向导/)).toBeDefined();
+    expect(screen.getByText('Excel Export Wizard')).toBeDefined();
+    expect(screen.getByText(/Transform API data into Excel reports/)).toBeDefined();
   });
 });

@@ -24,14 +24,14 @@ describe('ToolCard', () => {
 
   it('disables link when status is coming_soon', () => {
     render(<ToolCard {...defaultProps} status="coming_soon" />);
-    const button = screen.getByText('即将推出').closest('button');
-    expect(button).toBeDefined();
-    expect(button).toBeDisabled();
+    const link = screen.getByRole('link');
+    expect(link).toHaveAttribute('href', '#');
+    expect(link).toHaveClass('cursor-not-allowed');
   });
 
   it('renders link when status is active', () => {
     render(<ToolCard {...defaultProps} status="active" />);
-    const link = screen.getByRole('link', { name: '进入工具' });
+    const link = screen.getByRole('link');
     expect(link).toHaveAttribute('href', '/apps/excel-export');
   });
 });

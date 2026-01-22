@@ -9,7 +9,8 @@ vi.mock('next/navigation', () => ({
 describe('Navbar', () => {
   it('renders project name', () => {
     render(<Navbar />);
-    expect(screen.getByText('Nexus Workbench')).toBeDefined();
+    expect(screen.getByText(/Nexus/)).toBeDefined();
+    expect(screen.getByText(/Workbench/)).toBeDefined();
   });
 
   it('contains link to dashboard', () => {
