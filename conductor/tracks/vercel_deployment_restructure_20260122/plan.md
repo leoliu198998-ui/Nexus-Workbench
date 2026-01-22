@@ -1,6 +1,6 @@
 # 执行计划 - 项目结构重构以支持 Vercel 部署
 
-## 阶段 1：目录重组
+## 阶段 1：目录重组 [checkpoint: 9da3039]
 - [x] Task: 备份与准备
 - [x] Task: 文件移动
 - [x] Task: Conductor - User Manual Verification '目录重组' (Protocol in workflow.md)
