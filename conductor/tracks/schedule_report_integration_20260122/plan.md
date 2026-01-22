@@ -32,10 +32,10 @@
     - [ ] 移除“数据预览”步骤，实现从身份验证直接跳转到下载页面的逻辑。
 - [x] Task: Conductor - User Manual Verification '前端 UI 适配' (Protocol in workflow.md)
 
-## 阶段 4：清理与集成验证
+## 阶段 4：清理与集成验证 [checkpoint: b218248]
 - [x] Task: 清理模拟数据 996656b
     - [ ] 移除旧的、不再使用的模拟 API (`/api/mock/...`) 或旧的代理逻辑（如果完全不再需要）。
 - [x] Task: 最终集成测试 fcb99eb
     - [ ] 运行完整构建 `pnpm build`。
     - [ ] 执行全套自动化测试。
-- [ ] Task: Conductor - User Manual Verification '清理与集成验证' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification '清理与集成验证' (Protocol in workflow.md)
