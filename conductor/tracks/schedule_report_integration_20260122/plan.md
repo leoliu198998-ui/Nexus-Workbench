@@ -35,7 +35,7 @@
 ## 阶段 4：清理与集成验证
 - [x] Task: 清理模拟数据 996656b
     - [ ] 移除旧的、不再使用的模拟 API (`/api/mock/...`) 或旧的代理逻辑（如果完全不再需要）。
-- [ ] Task: 最终集成测试
+- [x] Task: 最终集成测试 fcb99eb
     - [ ] 运行完整构建 `pnpm build`。
     - [ ] 执行全套自动化测试。
 - [ ] Task: Conductor - User Manual Verification '清理与集成验证' (Protocol in workflow.md)
