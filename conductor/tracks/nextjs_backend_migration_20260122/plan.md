@@ -20,7 +20,7 @@
     - [ ] 实现 `frontend/src/lib/excel-utils.ts` (移植原 `ExcelService` 的逻辑)。
 - [x] Task: Conductor - User Manual Verification '业务逻辑迁移 (TDD)' (Protocol in workflow.md)
 
-## 阶段 3：API 实现
+## 阶段 3：API 实现 [checkpoint: 28c60e7]
 - [x] Task: 实现数据抓取 API (Fetch API) 48f1872
     - [ ] 创建 `frontend/src/app/api/proxy/fetch/route.ts`。
     - [ ] 实现 POST 处理器，调用外部 API。
@@ -29,7 +29,7 @@
     - [ ] 创建 `frontend/src/app/api/proxy/download/route.ts`。
     - [ ] 实现 POST 处理器，抓取数据并使用 `excel-utils` 生成流。
     - [ ] 设置正确的文件下载响应头。
-- [ ] Task: Conductor - User Manual Verification 'API 实现' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'API 实现' (Protocol in workflow.md)
 
 ## 阶段 4：前端集成与清理
 - [ ] Task: 更新前端调用
