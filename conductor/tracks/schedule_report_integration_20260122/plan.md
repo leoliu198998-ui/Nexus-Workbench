@@ -24,13 +24,13 @@
     - [ ] 调用 `excel-utils` 生成 Excel 流并返回。
 - [x] Task: Conductor - User Manual Verification '后端 API 路由开发' (Protocol in workflow.md)
 
-## 阶段 3：前端 UI 适配
+## 阶段 3：前端 UI 适配 [checkpoint: 20e5c53]
 - [x] Task: 更新 Excel 导出向导页面 1dcf893
     - [ ] 修改 `frontend/src/app/apps/excel-export/page.tsx`。
     - [ ] 将 API 请求路径更新为专用路由。
     - [ ] 更新 Token 输入的提示文案（如需要 x-dk-token）。
     - [ ] 移除“数据预览”步骤，实现从身份验证直接跳转到下载页面的逻辑。
-- [ ] Task: Conductor - User Manual Verification '前端 UI 适配' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification '前端 UI 适配' (Protocol in workflow.md)
 
 ## 阶段 4：清理与集成验证
 - [ ] Task: 清理模拟数据
