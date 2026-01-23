@@ -31,7 +31,7 @@
 - [x] Task: 在 Dashboard 中添加工具入口卡片
 - [x] Task: Conductor - User Manual Verification '前端基础界面与环境选择' (Protocol in workflow.md) 5d72057
 
-## 阶段 4: 四步骤向导式 UI (4-Step Wizard UI)
+## 阶段 4: 四步骤向导式 UI (4-Step Wizard UI) [checkpoint: 7029b45]
 
 - [x] Task: 实现“创建批次”表单界面 (Step 1) 50965d2
 - [x] Task: 实现“发布流程控制”向导组件 (Steps 2-4) 50965d2
