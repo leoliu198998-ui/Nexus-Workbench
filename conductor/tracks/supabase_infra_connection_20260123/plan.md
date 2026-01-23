@@ -1,6 +1,6 @@
 # Implementation Plan: Supabase Infrastructure & Connection Test
 
-## 阶段 1: 环境配置与 Schema 定义 (Environment & Schema Definition)
+## 阶段 1: 环境配置与 Schema 定义 (Environment & Schema Definition) [checkpoint: 6bfd0fc]
 
 - [x] Task: 更新 `.env.example` 包含 Supabase 和 Prisma 必需的环境变量 (DATABASE_URL, DIRECT_URL, NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY) 6c814e2
 - [x] Task: 在 `prisma/schema.prisma` 中定义 `SystemLog` 模型 90580ee
@@ -8,7 +8,7 @@
     - [x] 确保 `User` 模型保持不变
 - [x] Task: 运行 Prisma Migration 创建数据库表 a0cc0a0
     - [x] 执行 `npx prisma migrate dev`
-- [ ] Task: Conductor - User Manual Verification '环境配置与 Schema 定义' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification '环境配置与 Schema 定义' (Protocol in workflow.md) 6bfd0fc
 
 ## 阶段 2: 数据库连接验证逻辑 (Database Connectivity & Verification)
 
