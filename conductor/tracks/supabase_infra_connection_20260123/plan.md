@@ -20,7 +20,7 @@
 - [x] Task: 运行验证并确认数据已同步至 Supabase 控制台 83b6146
 - [x] Task: Conductor - User Manual Verification '数据库连接验证逻辑' (Protocol in workflow.md) 532f76a
 
-## 阶段 3: 最终整理与质量检查 (Finalization)
+## 阶段 3: 最终整理与质量检查 (Finalization) [checkpoint: 71a7531]
 
 - [x] Task: 执行项目质量门禁检查 (Quality Gates) 83b6146
     - [x] 运行 linting (`pnpm lint`) - 存在生成代码相关的 Lint 告警
