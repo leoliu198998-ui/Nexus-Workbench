@@ -1,6 +1,12 @@
+'use client';
+
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { EnvironmentSelector } from '@/components/outage-manager/environment-selector';
 
 export default function OutageManagerPage() {
+  const [selectedEnv, setSelectedEnv] = useState<string>('');
+
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex justify-between items-center">
@@ -13,7 +19,7 @@ export default function OutageManagerPage() {
           <CardDescription>请选择本次发布的目标环境</CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">环境选择器即将推出...</p>
+          <EnvironmentSelector value={selectedEnv} onChange={setSelectedEnv} />
         </CardContent>
       </Card>
 
