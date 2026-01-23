@@ -27,8 +27,8 @@
 - [x] Task: 创建工具主页面 `src/app/apps/outage-manager/page.tsx` e438feb
 - [x] Task: 实现环境选择器组件 8cdc32e
     - [x] 从后端获取环境列表并展示
-- [~] Task: 实现发布批次历史/当前进行中批次的列表展示
-- [ ] Task: Conductor - User Manual Verification '前端基础界面与环境选择' (Protocol in workflow.md)
+- [x] Task: 实现发布批次历史/当前进行中批次的列表展示 59d034e
+- [~] Task: Conductor - User Manual Verification '前端基础界面与环境选择' (Protocol in workflow.md)
 
 ## 阶段 4: 四步骤向导式 UI (4-Step Wizard UI)
 
