@@ -22,13 +22,13 @@
 - [x] Task: 为 API 逻辑编写单元测试 (TDD - 模拟 Fetch 调用)
 - [x] Task: Conductor - User Manual Verification '后端 API 开发与外部接口集成' (Protocol in workflow.md) b694854
 
-## 阶段 3: 前端基础界面与环境选择 (Frontend UI - Basic & Selection)
+## 阶段 3: 前端基础界面与环境选择 (Frontend UI - Basic & Selection) [checkpoint: 5d72057]
 
 - [x] Task: 创建工具主页面 `src/app/apps/outage-manager/page.tsx` e438feb
 - [x] Task: 实现环境选择器组件 8cdc32e
     - [x] 从后端获取环境列表并展示
 - [x] Task: 实现发布批次历史/当前进行中批次的列表展示 59d034e
-- [~] Task: Conductor - User Manual Verification '前端基础界面与环境选择' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification '前端基础界面与环境选择' (Protocol in workflow.md) 5d72057
 
 ## 阶段 4: 四步骤向导式 UI (4-Step Wizard UI)
 
