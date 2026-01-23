@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { OutageStatus, Prisma } from '@/generated/client';
 
-const ACTION_MAP: Record<string, { path: string; nextStatus: string }> = {
-  publish: { path: '/publish', nextStatus: 'NOTIFIED' },
-  release: { path: '/release', nextStatus: 'STARTED' },
-  finish: { path: '/finish', nextStatus: 'COMPLETED' },
+const ACTION_MAP: Record<string, { path: string; nextStatus: OutageStatus }> = {
+  publish: { path: '/publish', nextStatus: OutageStatus.NOTIFIED },
+  release: { path: '/release', nextStatus: OutageStatus.STARTED },
+  finish: { path: '/finish', nextStatus: OutageStatus.COMPLETED },
 };
 
 export async function PATCH(
@@ -41,7 +42,7 @@ export async function PATCH(
       batchId: Number(batch.remoteBatchId),
     };
 
-    let logs: any = batch.logs || { steps: [] };
+    const logs = (batch.logs as { steps: Record<string, unknown>[] }) || { steps: [] };
 
     try {
       const response = await fetch(externalUrl, {
@@ -53,7 +54,7 @@ export async function PATCH(
         body: JSON.stringify(externalPayload),
       });
 
-      const responseData = await response.json();
+      const responseData = (await response.json()) as Record<string, unknown>;
 
       logs.steps.push({
         step: action.toUpperCase(),
@@ -64,20 +65,20 @@ export async function PATCH(
       });
 
       if (!response.ok) {
-        throw new Error(responseData.message || `External API failed for ${action}`);
+        throw new Error((responseData.message as string) || `External API failed for ${action}`);
       }
-    } catch (apiError: any) {
+    } catch (apiError: unknown) {
       console.error(`External API Error (${action}):`, apiError);
       
       // Update logs even on failure
       await prisma.outageBatch.update({
         where: { id },
-        data: { logs },
+        data: { logs: logs as unknown as Prisma.InputJsonValue },
       });
 
       return NextResponse.json({ 
         error: 'External API Error', 
-        details: apiError.message,
+        details: apiError instanceof Error ? apiError.message : 'Unknown error',
         logs 
       }, { status: 502 });
     }
@@ -86,8 +87,8 @@ export async function PATCH(
     const updatedBatch = await prisma.outageBatch.update({
       where: { id },
       data: {
-        status: config.nextStatus as any,
-        logs,
+        status: config.nextStatus,
+        logs: logs as unknown as Prisma.InputJsonValue,
       },
     });
 

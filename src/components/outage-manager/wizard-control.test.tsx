@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
@@ -13,10 +14,11 @@ describe('WizardControl', () => {
 
   const mockBatch = {
     id: 'batch-1',
-    batchName: 'Active Batch',
+    envId: 'env-1',
+    batchName: 'Test Batch',
     status: 'CREATED',
     logs: { steps: [] },
-    environment: { name: 'Test' },
+    environment: { name: 'Production' },
   };
 
   it('renders correctly and handles publish action', async () => {

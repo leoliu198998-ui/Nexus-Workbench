@@ -8,9 +8,25 @@ import { CreateBatchForm } from '@/components/outage-manager/create-batch-form';
 import { WizardControl } from '@/components/outage-manager/wizard-control';
 import { toast } from 'sonner';
 
+interface LogEntry {
+  timestamp: string;
+  step: string;
+  status: number;
+  response: unknown;
+}
+
+interface OutageBatch {
+  id: string;
+  envId: string;
+  status: string;
+  batchName: string;
+  environment?: { name: string };
+  logs?: { steps: LogEntry[] };
+}
+
 export default function OutageManagerPage() {
   const [selectedEnv, setSelectedEnv] = useState<string>('');
-  const [activeBatch, setActiveBatch] = useState<any>(null);
+  const [activeBatch, setActiveBatch] = useState<OutageBatch | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Persistence check: find the most recent incomplete batch
@@ -19,8 +35,8 @@ export default function OutageManagerPage() {
       try {
         const res = await fetch('/api/apps/outage-manager/batches');
         if (res.ok) {
-          const batches = await res.json();
-          const incomplete = batches.find((b: any) => b.status !== 'COMPLETED');
+          const batches: OutageBatch[] = await res.json();
+          const incomplete = batches.find((b) => b.status !== 'COMPLETED');
           if (incomplete) {
             setActiveBatch(incomplete);
             setSelectedEnv(incomplete.envId);

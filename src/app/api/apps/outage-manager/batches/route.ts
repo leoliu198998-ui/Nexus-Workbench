@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { Prisma } from '@/generated/client';
 
 export async function GET(req: NextRequest) {
   try {
@@ -50,7 +51,7 @@ export async function POST(req: NextRequest) {
     };
 
     let remoteBatchId = null;
-    let logs: any = { steps: [] };
+    const logs: { steps: Record<string, unknown>[] } = { steps: [] };
 
     try {
       const response = await fetch(externalUrl, {
@@ -78,11 +79,11 @@ export async function POST(req: NextRequest) {
 
       // 假设接口返回数据包含 batchId
       remoteBatchId = responseData.batchId?.toString();
-    } catch (apiError: any) {
+    } catch (apiError: unknown) {
       console.error('External API Error:', apiError);
       return NextResponse.json({ 
         error: 'External API Error', 
-        details: apiError.message,
+        details: apiError instanceof Error ? apiError.message : 'Unknown error',
         logs 
       }, { status: 502 });
     }
@@ -98,7 +99,7 @@ export async function POST(req: NextRequest) {
         token,
         remoteBatchId,
         status: 'CREATED',
-        logs,
+        logs: logs as unknown as Prisma.InputJsonValue,
       },
     });
 

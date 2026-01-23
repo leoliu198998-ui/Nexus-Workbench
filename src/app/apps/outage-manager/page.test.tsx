@@ -4,7 +4,7 @@ import OutageManagerPage from './page';
 
 // Mock child components to simplify integration testing
 vi.mock('@/components/outage-manager/environment-selector', () => ({
-  EnvironmentSelector: ({ value, onChange }: any) => (
+  EnvironmentSelector: ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
     <div data-testid="env-selector">
       <button onClick={() => onChange('env-1')}>Select Env 1</button>
       <span>Current: {value}</span>
@@ -17,7 +17,7 @@ vi.mock('@/components/outage-manager/batch-list', () => ({
 }));
 
 vi.mock('@/components/outage-manager/create-batch-form', () => ({
-  CreateBatchForm: ({ envId, onSuccess }: any) => (
+  CreateBatchForm: ({ envId, onSuccess }: { envId: string; onSuccess: (batch: { id: string; envId: string; status: string }) => void }) => (
     <div data-testid="create-batch-form">
       Form for {envId}
       <button onClick={() => onSuccess({ id: 'batch-new', envId, status: 'CREATED' })}>
@@ -28,7 +28,7 @@ vi.mock('@/components/outage-manager/create-batch-form', () => ({
 }));
 
 vi.mock('@/components/outage-manager/wizard-control', () => ({
-  WizardControl: ({ batch, onReset }: any) => (
+  WizardControl: ({ batch, onReset }: { batch: { id: string }; onReset: () => void }) => (
     <div data-testid="wizard-control">
       Wizard for {batch.id}
       <button onClick={onReset}>Reset</button>
@@ -50,13 +50,13 @@ describe('OutageManagerPage', () => {
   });
 
   it('renders loading initially', () => {
-    (global.fetch as any).mockImplementation(() => new Promise(() => {})); // Never resolves
+    (global.fetch as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => new Promise(() => {})); // Never resolves
     render(<OutageManagerPage />);
     expect(screen.getByText('加载中...')).toBeInTheDocument();
   });
 
   it('renders environment selector when no active batch exists', async () => {
-    (global.fetch as any).mockResolvedValue({
+    (global.fetch as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
       ok: true,
       json: async () => [], // No batches
     });
@@ -74,7 +74,7 @@ describe('OutageManagerPage', () => {
 
   it('restores active batch if one exists', async () => {
     const activeBatch = { id: 'batch-123', envId: 'env-1', status: 'STARTED' };
-    (global.fetch as any).mockResolvedValue({
+    (global.fetch as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
       ok: true,
       json: async () => [activeBatch],
     });
@@ -90,7 +90,7 @@ describe('OutageManagerPage', () => {
   });
 
   it('shows create form after selecting environment', async () => {
-    (global.fetch as any).mockResolvedValue({
+    (global.fetch as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
       ok: true,
       json: async () => [],
     });

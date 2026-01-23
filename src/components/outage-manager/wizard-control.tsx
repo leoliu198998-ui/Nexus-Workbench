@@ -6,9 +6,25 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 
+interface LogEntry {
+  timestamp: string;
+  step: string;
+  status: number;
+  response: unknown;
+}
+
+interface OutageBatch {
+  id: string;
+  envId: string;
+  batchName: string;
+  status: string;
+  environment?: { name: string };
+  logs?: { steps: LogEntry[] };
+}
+
 interface WizardControlProps {
-  batch: any;
-  onUpdate: (updatedBatch: any) => void;
+  batch: OutageBatch;
+  onUpdate: (updatedBatch: OutageBatch) => void;
   onReset: () => void;
 }
 
@@ -29,18 +45,13 @@ export function WizardControl({ batch, onUpdate, onReset }: WizardControlProps) 
 
       toast.success('状态更新成功');
       onUpdate(data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
-      toast.error(`操作失败: ${error.message}`);
+      toast.error(`操作失败: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
   };
-
-  const currentStep = 
-    batch.status === 'CREATED' ? 2 :
-    batch.status === 'NOTIFIED' ? 3 :
-    batch.status === 'STARTED' ? 4 : 5;
 
   return (
     <Card className="border-primary">
@@ -88,7 +99,7 @@ export function WizardControl({ batch, onUpdate, onReset }: WizardControlProps) 
         <div className="mt-8 space-y-2">
           <h3 className="font-semibold text-sm">执行日志 (最近):</h3>
           <div className="bg-slate-950 text-slate-50 p-4 rounded-md font-mono text-xs max-h-40 overflow-auto">
-            {batch.logs?.steps?.slice().reverse().map((log: any, i: number) => (
+            {batch.logs?.steps?.slice().reverse().map((log: LogEntry, i: number) => (
               <div key={i} className="mb-2 border-b border-slate-800 pb-2">
                 <span className="text-blue-400">[{log.timestamp}]</span>{' '}
                 <span className="text-green-400">{log.step}</span>: {log.status}

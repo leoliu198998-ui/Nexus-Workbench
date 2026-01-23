@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 
 interface CreateBatchFormProps {
   envId: string;
-  onSuccess: (batch: any) => void;
+  onSuccess: (batch: { id: string; status: string; envId: string; batchName: string }) => void;
 }
 
 export function CreateBatchForm({ envId, onSuccess }: CreateBatchFormProps) {
@@ -42,9 +42,9 @@ export function CreateBatchForm({ envId, onSuccess }: CreateBatchFormProps) {
 
       toast.success('发布批次创建成功');
       onSuccess(data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
-      toast.error(`创建失败: ${error.message}`);
+      toast.error(`创建失败: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
     }

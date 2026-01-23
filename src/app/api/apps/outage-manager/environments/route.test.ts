@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { GET } from './route';
 import { prisma } from '@/lib/prisma';
@@ -37,9 +38,11 @@ describe('GET /api/apps/outage-manager/environments', () => {
     (prisma.releaseEnvironment.findMany as any).mockRejectedValue(new Error('DB Error'));
 
     const response = await GET();
-    const data = await response.json();
-
-    expect(response.status).toBe(500);
-    expect(data).toEqual({ error: 'Internal Server Error' });
-  });
-});
+        const data = await response.json();
+        
+        expect(response.status).toBe(500);
+        expect(data.error).toBe('Internal Server Error');
+        expect(data.details).toBe('DB Error');
+        expect(data.env_check).toBeDefined();
+      });
+    });
