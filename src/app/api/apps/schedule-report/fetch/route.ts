@@ -13,8 +13,12 @@ export async function POST(req: NextRequest) {
 
     const apiUrl = process.env.SCHEDULE_REPORT_API_URL;
     if (!apiUrl) {
+      console.error('Missing environment variable: SCHEDULE_REPORT_API_URL');
       return NextResponse.json(
-        { error: 'Server configuration error' },
+        { 
+          error: 'Server configuration error',
+          message: 'SCHEDULE_REPORT_API_URL environment variable is not configured'
+        },
         { status: 500 }
       );
     }
