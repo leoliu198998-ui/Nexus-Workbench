@@ -32,12 +32,12 @@
 
 ## 阶段 4: 四步骤向导式 UI (4-Step Wizard UI)
 
-- [ ] Task: 实现“创建批次”表单界面 (Step 1)
-- [ ] Task: 实现“发布流程控制”向导组件 (Steps 2-4)
-    - [ ] 包含状态持久化检查（如果已有进行中批次，自动恢复步骤）
-    - [ ] 包含每一步的执行日志预览
-- [ ] Task: 编写前端组件单元测试
-- [ ] Task: Conductor - User Manual Verification '四步骤向导式 UI' (Protocol in workflow.md)
+- [x] Task: 实现“创建批次”表单界面 (Step 1) 50965d2
+- [x] Task: 实现“发布流程控制”向导组件 (Steps 2-4) 50965d2
+    - [x] 包含状态持久化检查（如果已有进行中批次，自动恢复步骤）
+    - [x] 包含每一步的执行日志预览
+- [x] Task: 编写前端组件单元测试
+- [~] Task: Conductor - User Manual Verification '四步骤向导式 UI' (Protocol in workflow.md)
 
 ## 阶段 5: 最终整理与质量检查 (Finalization)
 
