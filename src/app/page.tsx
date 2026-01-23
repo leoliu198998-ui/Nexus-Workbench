@@ -1,7 +1,14 @@
 import { ToolCard } from '@/components/dashboard/tool-card';
-import { FileSpreadsheet, Sparkles, Terminal, Database } from 'lucide-react';
+import { FileSpreadsheet, Sparkles, Terminal, Database, Clock } from 'lucide-react';
 
 const tools = [
+  {
+    title: 'Outage Release Manager',
+    description: '4-step standardized workflow for managing system outages during releases across different environments.',
+    icon: Clock,
+    href: '/apps/outage-manager',
+    status: 'active' as const,
+  },
   {
     title: 'Schedule Report Exporter',
     description: 'Export schedule report data from the API and transform it into Excel format. Features token-based authentication and data transformation.',

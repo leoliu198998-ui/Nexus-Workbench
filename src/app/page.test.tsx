@@ -11,6 +11,7 @@ describe('Home Page (Dashboard)', () => {
 
   it('renders tool cards', () => {
     render(<Home />);
+    expect(screen.getByText('Outage Release Manager')).toBeDefined();
     expect(screen.getByText('Schedule Report Exporter')).toBeDefined();
     expect(screen.getByText(/Export schedule report data from the API/)).toBeDefined();
   });
