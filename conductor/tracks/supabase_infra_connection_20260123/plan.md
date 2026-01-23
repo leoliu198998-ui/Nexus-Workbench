@@ -17,7 +17,7 @@
 - [x] Task: 实现数据库验证逻辑 (Green Phase) 83b6146
     - [x] 确保 `src/lib/prisma.ts` 正确初始化 Prisma Client
     - [x] 创建一个验证工具/脚本，能够在 `SystemLog` 中插入并读取测试数据
-- [ ] Task: 运行验证并确认数据已同步至 Supabase 控制台
+- [x] Task: 运行验证并确认数据已同步至 Supabase 控制台 83b6146
 - [ ] Task: Conductor - User Manual Verification '数据库连接验证逻辑' (Protocol in workflow.md)
 
 ## 阶段 3: 最终整理与质量检查 (Finalization)
