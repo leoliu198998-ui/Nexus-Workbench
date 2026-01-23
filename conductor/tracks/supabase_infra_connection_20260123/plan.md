@@ -6,8 +6,8 @@
 - [x] Task: 在 `prisma/schema.prisma` 中定义 `SystemLog` 模型 90580ee
     - [x] 添加 `id`, `action`, `details`, `timestamp` 字段
     - [x] 确保 `User` 模型保持不变
-- [ ] Task: 运行 Prisma Migration 创建数据库表
-    - [ ] 执行 `npx prisma migrate dev`
+- [x] Task: 运行 Prisma Migration 创建数据库表 a0cc0a0
+    - [x] 执行 `npx prisma migrate dev`
 - [ ] Task: Conductor - User Manual Verification '环境配置与 Schema 定义' (Protocol in workflow.md)
 
 ## 阶段 2: 数据库连接验证逻辑 (Database Connectivity & Verification)
