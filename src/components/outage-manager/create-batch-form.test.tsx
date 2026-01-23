@@ -22,10 +22,10 @@ describe('CreateBatchForm', () => {
     render(<CreateBatchForm envId="env-1" onSuccess={mockOnSuccess} />);
 
     fireEvent.change(screen.getByLabelText(/批次名称/), { target: { value: 'Test Batch' } });
-    fireEvent.change(screen.getByLabelText(/发布时间/), { target: { value: '2026-01-23T12:00' } });
-    fireEvent.change(screen.getByLabelText(/操作 Token/), { target: { value: 'secret-token' } });
+    fireEvent.change(screen.getByLabelText(/计划发布时间/), { target: { value: '2026-01-23T12:00' } });
+    fireEvent.change(screen.getByLabelText(/鉴权 Token/), { target: { value: 'secret-token' } });
 
-    fireEvent.click(screen.getByText('创建并进入下一步'));
+    fireEvent.click(screen.getByText('创建并进入向导'));
 
     await waitFor(() => {
       expect(mockOnSuccess).toHaveBeenCalledWith(expect.objectContaining({ id: 'new-batch' }));

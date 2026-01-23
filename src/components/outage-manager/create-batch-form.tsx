@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
 
 interface CreateBatchFormProps {
   envId: string;
@@ -51,26 +51,23 @@ export function CreateBatchForm({ envId, onSuccess }: CreateBatchFormProps) {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>第一步：创建发布批次</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="batchName">批次名称</Label>
             <Input
               id="batchName"
-              placeholder="例如: Wise Iteration hotfix"
+              placeholder="例如: Wise Iteration v2.5.0 hotfix"
               value={formData.batchName}
               onChange={(e) => setFormData({ ...formData, batchName: e.target.value })}
               required
+              className="max-w-md"
             />
+            <p className="text-xs text-muted-foreground">用于标识本次发布的简短描述。</p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="releaseDatetime">发布时间</Label>
+              <Label htmlFor="releaseDatetime">计划发布时间</Label>
               <Input
                 id="releaseDatetime"
                 type="datetime-local"
@@ -80,10 +77,12 @@ export function CreateBatchForm({ envId, onSuccess }: CreateBatchFormProps) {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="duration">预计时长 (分钟)</Label>
+              <Label htmlFor="duration">预计停机时长 (分钟)</Label>
               <Input
                 id="duration"
                 type="number"
+                min="1"
+                max="480"
                 value={formData.duration}
                 onChange={(e) => setFormData({ ...formData, duration: Number(e.target.value) })}
                 required
@@ -91,23 +90,30 @@ export function CreateBatchForm({ envId, onSuccess }: CreateBatchFormProps) {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="token">操作 Token (x-dk-token)</Label>
+          <div className="space-y-2 pt-2 border-t">
+            <Label htmlFor="token">鉴权 Token (x-dk-token)</Label>
             <Input
               id="token"
               type="password"
-              placeholder="请输入有效的 Token"
+              placeholder="请输入有效的 DevOps Token"
               value={formData.token}
               onChange={(e) => setFormData({ ...formData, token: e.target.value })}
               required
+              className="font-mono"
             />
+            <p className="text-xs text-muted-foreground">该 Token 将用于验证您对目标环境的操作权限。</p>
           </div>
 
-          <Button type="submit" className="w-full" disabled={loading || !envId}>
-            {loading ? '正在创建...' : '创建并进入下一步'}
+          <Button type="submit" className="w-full md:w-auto min-w-[200px]" disabled={loading || !envId}>
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                正在创建...
+              </>
+            ) : (
+              '创建并进入向导'
+            )}
           </Button>
         </form>
-      </CardContent>
-    </Card>
   );
 }

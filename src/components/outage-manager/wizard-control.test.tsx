@@ -30,13 +30,25 @@ describe('WizardControl', () => {
 
     render(<WizardControl batch={mockBatch} onUpdate={mockOnUpdate} onReset={vi.fn()} />);
 
-    expect(screen.getByText('步骤 2：公布发布通知')).not.toBeDisabled();
-    expect(screen.getByText('步骤 3：开始发布 (停机)')).toBeDisabled();
+    expect(screen.getByText('Test Batch')).toBeInTheDocument();
+    
+    // Check for the new button
+    const actionButton = screen.getByRole('button', { name: /执行: 发布通知/ });
+    expect(actionButton).toBeInTheDocument();
+    expect(actionButton).not.toBeDisabled();
 
-    fireEvent.click(screen.getByText('步骤 2：公布发布通知'));
+    fireEvent.click(actionButton);
 
     await waitFor(() => {
-      expect(mockOnUpdate).toHaveBeenCalledWith(expect.objectContaining({ status: 'NOTIFIED' }));
+      expect(global.fetch).toHaveBeenCalledWith(
+        '/api/apps/outage-manager/batches/batch-1',
+        expect.objectContaining({
+          method: 'PATCH',
+          body: JSON.stringify({ action: 'publish' }),
+        })
+      );
     });
+    
+    expect(mockOnUpdate).toHaveBeenCalled();
   });
 });

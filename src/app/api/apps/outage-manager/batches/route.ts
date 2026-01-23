@@ -74,11 +74,36 @@ export async function POST(req: NextRequest) {
       });
 
       if (!response.ok) {
-        throw new Error(responseData.message || 'External API failed');
+        throw new Error(responseData.errmsg || responseData.message || 'External API failed');
       }
 
-      // 假设接口返回数据包含 batchId
-      remoteBatchId = responseData.batchId?.toString();
+      // 验证响应格式
+      if (responseData.errcode !== '0' && responseData.errcode !== 0) {
+        throw new Error(responseData.errmsg || `接口返回错误码: ${responseData.errcode}`);
+      }
+
+      // 验证必需的响应字段
+      if (!responseData.data || !Array.isArray(responseData.data) || responseData.data.length === 0) {
+        throw new Error('接口返回数据格式错误: 缺少data数组或数组为空');
+      }
+
+      const batchData = responseData.data[0];
+      
+      // 验证批次数据的必需字段（检查是否存在，但不检查值）
+      const requiredFields = ['batchId', 'batchName', 'originalDateTime', 'originalTimeZone', 'duration', 'releaseDatetime', 'releaseStatus', 'noticeStatus'];
+      const missingFields = requiredFields.filter(field => !(field in batchData));
+      
+      if (missingFields.length > 0) {
+        throw new Error(`接口返回数据格式错误: 缺少必需字段 [${missingFields.join(', ')}]`);
+      }
+
+      // 验证batchId的值是否有效
+      if (!batchData.batchId || (typeof batchData.batchId !== 'number' && typeof batchData.batchId !== 'string')) {
+        throw new Error('接口返回的batchId无效');
+      }
+
+      // 提取远程批次ID
+      remoteBatchId = batchData.batchId.toString();
     } catch (apiError: unknown) {
       console.error('External API Error:', apiError);
       return NextResponse.json({ 

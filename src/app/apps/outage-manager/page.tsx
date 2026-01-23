@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { EnvironmentSelector } from '@/components/outage-manager/environment-selector';
 import { BatchList } from '@/components/outage-manager/batch-list';
-import { CreateBatchForm } from '@/components/outage-manager/create-batch-form';
-import { WizardControl } from '@/components/outage-manager/wizard-control';
-import { toast } from 'sonner';
+import { CreateBatchDialog } from '@/components/outage-manager/create-batch-dialog';
+import { BatchDetailDrawer } from '@/components/outage-manager/batch-detail-drawer';
+import { Plus } from 'lucide-react';
 
 interface LogEntry {
   timestamp: string;
@@ -20,42 +21,37 @@ interface OutageBatch {
   envId: string;
   status: string;
   batchName: string;
+  releaseDatetime: string;
+  releaseTimeZone: string;
+  duration: number;
   environment?: { name: string };
   logs?: { steps: LogEntry[] };
 }
 
 export default function OutageManagerPage() {
   const [selectedEnv, setSelectedEnv] = useState<string>('');
-  const [activeBatch, setActiveBatch] = useState<OutageBatch | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [selectedBatch, setSelectedBatch] = useState<OutageBatch | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  // Persistence check: find the most recent incomplete batch
-  useEffect(() => {
-    async function checkActiveBatch() {
-      try {
-        const res = await fetch('/api/apps/outage-manager/batches');
-        if (res.ok) {
-          const batches: OutageBatch[] = await res.json();
-          const incomplete = batches.find((b) => b.status !== 'COMPLETED');
-          if (incomplete) {
-            setActiveBatch(incomplete);
-            setSelectedEnv(incomplete.envId);
-            toast.info('发现进行中的发布批次，已为您恢复进度');
-          }
-        }
-      } catch (error) {
-        console.error('Failed to check active batch:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
+  const handleCreateSuccess = () => {
+    setRefreshKey((prev) => prev + 1);
+  };
 
-    checkActiveBatch();
+  const handleBatchClick = (batch: OutageBatch) => {
+    setSelectedBatch(batch);
+    setDrawerOpen(true);
+  };
+
+  const handleDrawerClose = () => {
+    setDrawerOpen(false);
+    setSelectedBatch(null);
+  };
+
+  const handleBatchUpdate = useCallback(() => {
+    setRefreshKey((prev) => prev + 1);
   }, []);
-
-  if (loading) {
-    return <div className="container mx-auto py-10 text-center text-muted-foreground">加载中...</div>;
-  }
 
   return (
     <div className="container mx-auto py-6 space-y-6">
@@ -63,44 +59,50 @@ export default function OutageManagerPage() {
         <h1 className="text-3xl font-bold">系统停机发布管理</h1>
       </div>
 
-      {!activeBatch ? (
-        <>
-          <Card>
-            <CardHeader>
-              <CardTitle>环境选择</CardTitle>
-              <CardDescription>请选择本次发布的目标环境</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <EnvironmentSelector value={selectedEnv} onChange={setSelectedEnv} />
-            </CardContent>
-          </Card>
-
-          {selectedEnv && (
-            <CreateBatchForm 
-              envId={selectedEnv} 
-              onSuccess={(batch) => setActiveBatch(batch)} 
-            />
-          )}
-        </>
-      ) : (
-        <WizardControl 
-          batch={activeBatch} 
-          onUpdate={(updated) => setActiveBatch(updated)}
-          onReset={() => {
-            setActiveBatch(null);
-            setSelectedEnv('');
-          }}
-        />
-      )}
-
       <Card>
         <CardHeader>
-          <CardTitle>最近发布记录</CardTitle>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>发布批次管理</CardTitle>
+              <CardDescription>创建和管理系统发布批次，跟踪发布流程</CardDescription>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="w-[200px]">
+                <EnvironmentSelector value={selectedEnv} onChange={setSelectedEnv} />
+              </div>
+              <Button 
+                onClick={() => setCreateDialogOpen(true)}
+                disabled={!selectedEnv}
+                className="gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                创建新批次
+              </Button>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
-          <BatchList envId={activeBatch ? activeBatch.envId : selectedEnv} />
+          <BatchList 
+            key={refreshKey}
+            envId={selectedEnv} 
+            onBatchClick={handleBatchClick}
+          />
         </CardContent>
       </Card>
+
+      <CreateBatchDialog
+        envId={selectedEnv}
+        open={createDialogOpen}
+        onClose={() => setCreateDialogOpen(false)}
+        onSuccess={handleCreateSuccess}
+      />
+
+      <BatchDetailDrawer
+        batch={selectedBatch}
+        open={drawerOpen}
+        onClose={handleDrawerClose}
+        onBatchUpdate={handleBatchUpdate}
+      />
     </div>
   );
 }

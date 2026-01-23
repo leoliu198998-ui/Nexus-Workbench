@@ -33,25 +33,41 @@ describe('POST /api/apps/outage-manager/batches', () => {
     token: 'token-abc',
   };
 
-  it('should create a batch successfully', async () => {
+  it('should create a batch successfully with valid response format', async () => {
     // 1. Mock Environment
     (prisma.releaseEnvironment.findUnique as any).mockResolvedValue({
       id: 'env-123',
       baseUrl: 'https://test-api.com',
     });
 
-    // 2. Mock External API Success
+    // 2. Mock External API Success with correct format
     (global.fetch as any).mockResolvedValue({
       ok: true,
       status: 200,
-      json: async () => ({ batchId: 'remote-999' }),
+      json: async () => ({
+        errcode: '0',
+        errmsg: '',
+        errParams: {},
+        data: [
+          {
+            batchId: 202309081001536790,
+            batchName: 'Test Batch',
+            originalDateTime: '2023-09-08T10:30',
+            originalTimeZone: 'Asia/Shanghai',
+            duration: 5,
+            releaseDatetime: 1694140200000,
+            releaseStatus: 'RELEASED',
+            noticeStatus: 'STOPPED',
+          },
+        ],
+      }),
     });
 
     // 3. Mock Prisma Create
     (prisma.outageBatch.create as any).mockResolvedValue({
       id: 'local-uuid',
       ...validBody,
-      remoteBatchId: 'remote-999',
+      remoteBatchId: '202309081001536790',
       status: 'CREATED',
     });
 
@@ -64,7 +80,7 @@ describe('POST /api/apps/outage-manager/batches', () => {
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(data.remoteBatchId).toBe('remote-999');
+    expect(data.remoteBatchId).toBe('202309081001536790');
     expect(prisma.outageBatch.create).toHaveBeenCalled();
     expect(global.fetch).toHaveBeenCalledWith('https://test-api.com/devops/release-batch', expect.any(Object));
   });
@@ -106,5 +122,171 @@ describe('POST /api/apps/outage-manager/batches', () => {
 
     expect(response.status).toBe(502);
     expect(data.error).toBe('External API Error');
+  });
+
+  it('should return 502 if response errcode is not 0', async () => {
+    (prisma.releaseEnvironment.findUnique as any).mockResolvedValue({
+      id: 'env-123',
+      baseUrl: 'https://test-api.com',
+    });
+
+    (global.fetch as any).mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        errcode: '500',
+        errmsg: '服务器内部错误',
+        errParams: {},
+        data: [],
+      }),
+    });
+
+    const req = new NextRequest('http://localhost/api/batches', {
+      method: 'POST',
+      body: JSON.stringify(validBody),
+    });
+
+    const response = await POST(req);
+    const data = await response.json();
+
+    expect(response.status).toBe(502);
+    expect(data.error).toBe('External API Error');
+    expect(data.details).toContain('服务器内部错误');
+  });
+
+  it('should return 502 if response data array is missing', async () => {
+    (prisma.releaseEnvironment.findUnique as any).mockResolvedValue({
+      id: 'env-123',
+      baseUrl: 'https://test-api.com',
+    });
+
+    (global.fetch as any).mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        errcode: '0',
+        errmsg: '',
+        errParams: {},
+      }),
+    });
+
+    const req = new NextRequest('http://localhost/api/batches', {
+      method: 'POST',
+      body: JSON.stringify(validBody),
+    });
+
+    const response = await POST(req);
+    const data = await response.json();
+
+    expect(response.status).toBe(502);
+    expect(data.error).toBe('External API Error');
+    expect(data.details).toContain('缺少data数组或数组为空');
+  });
+
+  it('should return 502 if response data array is empty', async () => {
+    (prisma.releaseEnvironment.findUnique as any).mockResolvedValue({
+      id: 'env-123',
+      baseUrl: 'https://test-api.com',
+    });
+
+    (global.fetch as any).mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        errcode: '0',
+        errmsg: '',
+        errParams: {},
+        data: [],
+      }),
+    });
+
+    const req = new NextRequest('http://localhost/api/batches', {
+      method: 'POST',
+      body: JSON.stringify(validBody),
+    });
+
+    const response = await POST(req);
+    const data = await response.json();
+
+    expect(response.status).toBe(502);
+    expect(data.error).toBe('External API Error');
+    expect(data.details).toContain('缺少data数组或数组为空');
+  });
+
+  it('should return 502 if required fields are missing in batch data', async () => {
+    (prisma.releaseEnvironment.findUnique as any).mockResolvedValue({
+      id: 'env-123',
+      baseUrl: 'https://test-api.com',
+    });
+
+    (global.fetch as any).mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        errcode: '0',
+        errmsg: '',
+        errParams: {},
+        data: [
+          {
+            batchId: 202309081001536790,
+            batchName: 'Test Batch',
+            // Missing required fields: originalDateTime, originalTimeZone, duration, releaseDatetime, releaseStatus, noticeStatus
+          },
+        ],
+      }),
+    });
+
+    const req = new NextRequest('http://localhost/api/batches', {
+      method: 'POST',
+      body: JSON.stringify(validBody),
+    });
+
+    const response = await POST(req);
+    const data = await response.json();
+
+    expect(response.status).toBe(502);
+    expect(data.error).toBe('External API Error');
+    expect(data.details).toContain('缺少必需字段');
+  });
+
+  it('should return 502 if batchId is invalid', async () => {
+    (prisma.releaseEnvironment.findUnique as any).mockResolvedValue({
+      id: 'env-123',
+      baseUrl: 'https://test-api.com',
+    });
+
+    (global.fetch as any).mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        errcode: '0',
+        errmsg: '',
+        errParams: {},
+        data: [
+          {
+            batchId: null,
+            batchName: 'Test Batch',
+            originalDateTime: '2023-09-08T10:30',
+            originalTimeZone: 'Asia/Shanghai',
+            duration: 5,
+            releaseDatetime: 1694140200000,
+            releaseStatus: 'RELEASED',
+            noticeStatus: 'STOPPED',
+          },
+        ],
+      }),
+    });
+
+    const req = new NextRequest('http://localhost/api/batches', {
+      method: 'POST',
+      body: JSON.stringify(validBody),
+    });
+
+    const response = await POST(req);
+    const data = await response.json();
+
+    expect(response.status).toBe(502);
+    expect(data.error).toBe('External API Error');
+    expect(data.details).toContain('batchId无效');
   });
 });

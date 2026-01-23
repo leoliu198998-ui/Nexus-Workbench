@@ -1,5 +1,6 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import userEvent from '@testing-library/user-event';
 import OutageManagerPage from './page';
 
 // Mock child components to simplify integration testing
@@ -13,97 +14,77 @@ vi.mock('@/components/outage-manager/environment-selector', () => ({
 }));
 
 vi.mock('@/components/outage-manager/batch-list', () => ({
-  BatchList: () => <div data-testid="batch-list">Batch List</div>,
-}));
-
-vi.mock('@/components/outage-manager/create-batch-form', () => ({
-  CreateBatchForm: ({ envId, onSuccess }: { envId: string; onSuccess: (batch: { id: string; envId: string; status: string }) => void }) => (
-    <div data-testid="create-batch-form">
-      Form for {envId}
-      <button onClick={() => onSuccess({ id: 'batch-new', envId, status: 'CREATED' })}>
-        Create Batch
-      </button>
+  BatchList: ({ onBatchClick }: { onBatchClick?: (batch: unknown) => void }) => (
+    <div data-testid="batch-list">
+      Batch List
+      {onBatchClick && (
+        <button onClick={() => onBatchClick({ id: 'batch-1', batchName: 'Test' })}>
+          View Batch
+        </button>
+      )}
     </div>
   ),
 }));
 
-vi.mock('@/components/outage-manager/wizard-control', () => ({
-  WizardControl: ({ batch, onReset }: { batch: { id: string }; onReset: () => void }) => (
-    <div data-testid="wizard-control">
-      Wizard for {batch.id}
-      <button onClick={onReset}>Reset</button>
-    </div>
+vi.mock('@/components/outage-manager/create-batch-dialog', () => ({
+  CreateBatchDialog: ({ open, envId }: { open: boolean; envId: string }) => (
+    open ? <div data-testid="create-batch-dialog">Dialog for {envId}</div> : null
   ),
 }));
 
-// Mock toast
-vi.mock('sonner', () => ({
-  toast: {
-    info: vi.fn(),
-  },
+vi.mock('@/components/outage-manager/batch-detail-drawer', () => ({
+  BatchDetailDrawer: ({ open, batch }: { open: boolean; batch: { id: string } | null }) => (
+    open && batch ? <div data-testid="batch-detail-drawer">Drawer for {batch.id}</div> : null
+  ),
 }));
 
 describe('OutageManagerPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    global.fetch = vi.fn();
   });
 
-  it('renders loading initially', () => {
-    (global.fetch as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => new Promise(() => {})); // Never resolves
+  it('renders page title and main components', () => {
     render(<OutageManagerPage />);
-    expect(screen.getByText('加载中...')).toBeInTheDocument();
-  });
-
-  it('renders environment selector when no active batch exists', async () => {
-    (global.fetch as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
-      ok: true,
-      json: async () => [], // No batches
-    });
-
-    render(<OutageManagerPage />);
-
-    await waitFor(() => {
-      expect(screen.queryByText('加载中...')).not.toBeInTheDocument();
-    });
 
     expect(screen.getByText('系统停机发布管理')).toBeInTheDocument();
+    expect(screen.getByText('发布批次管理')).toBeInTheDocument();
     expect(screen.getByTestId('env-selector')).toBeInTheDocument();
-    expect(screen.queryByTestId('wizard-control')).not.toBeInTheDocument();
+    expect(screen.getByTestId('batch-list')).toBeInTheDocument();
   });
 
-  it('restores active batch if one exists', async () => {
-    const activeBatch = { id: 'batch-123', envId: 'env-1', status: 'STARTED' };
-    (global.fetch as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
-      ok: true,
-      json: async () => [activeBatch],
-    });
-
+  it('disables create button when no environment is selected', () => {
     render(<OutageManagerPage />);
 
-    await waitFor(() => {
-      expect(screen.queryByText('加载中...')).not.toBeInTheDocument();
-    });
-
-    expect(screen.getByTestId('wizard-control')).toBeInTheDocument();
-    expect(screen.getByText('Wizard for batch-123')).toBeInTheDocument();
+    const createButton = screen.getByText('创建新批次');
+    expect(createButton).toBeDisabled();
   });
 
-  it('shows create form after selecting environment', async () => {
-    (global.fetch as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
-      ok: true,
-      json: async () => [],
-    });
-
+  it('enables create button after selecting environment', () => {
     render(<OutageManagerPage />);
-
-    await waitFor(() => {
-      expect(screen.queryByText('加载中...')).not.toBeInTheDocument();
-    });
 
     fireEvent.click(screen.getByText('Select Env 1'));
 
-    expect(screen.getByTestId('create-batch-form')).toBeInTheDocument();
-    expect(screen.getByText('Form for env-1')).toBeInTheDocument();
+    const createButton = screen.getByText('创建新批次');
+    expect(createButton).not.toBeDisabled();
+  });
+
+  it('opens create dialog when create button is clicked', async () => {
+    const user = userEvent.setup();
+    render(<OutageManagerPage />);
+
+    fireEvent.click(screen.getByText('Select Env 1'));
+    await user.click(screen.getByText('创建新批次'));
+
+    expect(screen.getByTestId('create-batch-dialog')).toBeInTheDocument();
+  });
+
+  it('opens batch detail drawer when batch is clicked', async () => {
+    const user = userEvent.setup();
+    render(<OutageManagerPage />);
+
+    await user.click(screen.getByText('View Batch'));
+
+    expect(screen.getByTestId('batch-detail-drawer')).toBeInTheDocument();
+    expect(screen.getByText('Drawer for batch-1')).toBeInTheDocument();
   });
 });
