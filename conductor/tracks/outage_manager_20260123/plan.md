@@ -1,6 +1,6 @@
 # Implementation Plan: 系统停机发布管理工具 (Outage Release Manager)
 
-## 阶段 1: 数据库模型与基础设施 (Database Schema & Infrastructure)
+## 阶段 1: 数据库模型与基础设施 (Database Schema & Infrastructure) [checkpoint: 7a60373]
 
 - [x] Task: 在 `prisma/schema.prisma` 中定义模型 b0283eb
     - [x] `ReleaseEnvironment`: 存储环境名称和基础 URL
@@ -8,7 +8,7 @@
 - [x] Task: 运行 Prisma Migration 应用架构更改
 - [x] Task: 编写并执行 Seed 脚本
     - [x] 初始化常用环境域名数据到数据库
-- [~] Task: Conductor - User Manual Verification '数据库模型与基础设施' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification '数据库模型与基础设施' (Protocol in workflow.md) 7a60373
 
 ## 阶段 2: 后端 API 开发与外部接口集成 (Backend API & Integration)
 
