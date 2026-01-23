@@ -28,6 +28,7 @@
 - [x] Task: 实现环境选择器组件 8cdc32e
     - [x] 从后端获取环境列表并展示
 - [x] Task: 实现发布批次历史/当前进行中批次的列表展示 59d034e
+- [x] Task: 在 Dashboard 中添加工具入口卡片
 - [x] Task: Conductor - User Manual Verification '前端基础界面与环境选择' (Protocol in workflow.md) 5d72057
 
 ## 阶段 4: 四步骤向导式 UI (4-Step Wizard UI)
@@ -37,7 +38,7 @@
     - [x] 包含状态持久化检查（如果已有进行中批次，自动恢复步骤）
     - [x] 包含每一步的执行日志预览
 - [x] Task: 编写前端组件单元测试
-- [~] Task: Conductor - User Manual Verification '四步骤向导式 UI' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification '四步骤向导式 UI' (Protocol in workflow.md) 08bb397
 
 ## 阶段 5: 最终整理与质量检查 (Finalization)
 
