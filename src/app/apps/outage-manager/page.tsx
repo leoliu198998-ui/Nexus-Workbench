@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { EnvironmentSelector } from '@/components/outage-manager/environment-selector';
+import { BatchList } from '@/components/outage-manager/batch-list';
 
 export default function OutageManagerPage() {
   const [selectedEnv, setSelectedEnv] = useState<string>('');
@@ -28,7 +29,7 @@ export default function OutageManagerPage() {
           <CardTitle>最近发布批次</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">批次列表即将推出...</p>
+          <BatchList envId={selectedEnv} />
         </CardContent>
       </Card>
     </div>
