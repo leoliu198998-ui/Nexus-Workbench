@@ -14,8 +14,11 @@
 *   **部署:** 优化支持 Vercel 一键部署，项目根目录即为 Next.js 根目录。
 
 ## 3.0 数据与持久化
-*   **数据库:** PostgreSQL (可选/根据需求)
-*   **ORM:** Prisma (如果使用数据库)
+*   **数据库:** Supabase PostgreSQL (已启用)
+*   **ORM:** Prisma 7 (已启用，使用 `@prisma/adapter-pg` 适配器)
+*   **连接策略:** 
+    *   **DATABASE_URL (端口 6543):** 连接池模式，用于应用程序运行时。
+    *   **DIRECT_URL (端口 5432):** 直连模式，用于 Prisma Migration 及 CLI 操作。
 
 ## 4.0 核心功能实现
 *   **Excel 生成:** 由后端 (Next.js API) 使用 `exceljs` 生成，并以文件流形式提供下载。
