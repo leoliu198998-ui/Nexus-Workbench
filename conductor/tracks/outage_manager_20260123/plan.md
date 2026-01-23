@@ -16,10 +16,10 @@
 - [x] Task: 实现“创建发布批次”后端接口 c13ca09
     - [x] 包含外部接口代理调用
     - [x] 包含本地数据库记录创建
-- [~] Task: 实现“步骤流转”后端通用接口 (Publish, Release, Finish)
-    - [ ] 动态根据环境域名转发请求
-    - [ ] 实时更新本地数据库状态和日志
-- [ ] Task: 为 API 逻辑编写单元测试 (TDD - 模拟 Fetch 调用)
+- [x] Task: 实现“步骤流转”后端通用接口 (Publish, Release, Finish) e3789bf
+    - [x] 动态根据环境域名转发请求
+    - [x] 实时更新本地数据库状态和日志
+- [~] Task: 为 API 逻辑编写单元测试 (TDD - 模拟 Fetch 调用)
 - [ ] Task: Conductor - User Manual Verification '后端 API 开发与外部接口集成' (Protocol in workflow.md)
 
 ## 阶段 3: 前端基础界面与环境选择 (Frontend UI - Basic & Selection)
