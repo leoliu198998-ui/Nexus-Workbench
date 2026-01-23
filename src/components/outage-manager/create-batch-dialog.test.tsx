@@ -4,14 +4,13 @@ import { CreateBatchDialog } from './create-batch-dialog';
 
 // Mock CreateBatchForm
 vi.mock('./create-batch-form', () => ({
-  CreateBatchForm: ({ envId }: { envId: string }) => (
-    <div data-testid="create-batch-form">Form for env: {envId}</div>
+  CreateBatchForm: () => (
+    <div data-testid="create-batch-form">Create Batch Form</div>
   ),
 }));
 
 describe('CreateBatchDialog', () => {
   const mockProps = {
-    envId: 'env-123',
     open: true,
     onClose: vi.fn(),
     onSuccess: vi.fn(),
@@ -35,9 +34,9 @@ describe('CreateBatchDialog', () => {
     }
   });
 
-  it('should pass correct envId to CreateBatchForm', () => {
+  it('should render CreateBatchForm component', () => {
     render(<CreateBatchDialog {...mockProps} />);
     
-    expect(screen.getByText('Form for env: env-123')).toBeInTheDocument();
+    expect(screen.getByTestId('create-batch-form')).toBeInTheDocument();
   });
 });

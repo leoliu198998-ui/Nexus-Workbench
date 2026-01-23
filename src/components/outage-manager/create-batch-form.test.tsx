@@ -7,6 +7,16 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 
 global.fetch = vi.fn();
 
+// Mock EnvironmentSelector
+vi.mock('./environment-selector', () => ({
+  EnvironmentSelector: ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
+    <div data-testid="env-selector">
+      <button onClick={() => onChange('env-1')}>Select Env</button>
+      <span>Selected: {value}</span>
+    </div>
+  ),
+}));
+
 describe('CreateBatchForm', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -19,7 +29,10 @@ describe('CreateBatchForm', () => {
       json: async () => ({ id: 'new-batch', status: 'CREATED' }),
     });
 
-    render(<CreateBatchForm envId="env-1" onSuccess={mockOnSuccess} />);
+    render(<CreateBatchForm onSuccess={mockOnSuccess} />);
+
+    // Select environment
+    fireEvent.click(screen.getByText('Select Env'));
 
     fireEvent.change(screen.getByLabelText(/批次名称/), { target: { value: 'Test Batch' } });
     fireEvent.change(screen.getByLabelText(/计划发布时间/), { target: { value: '2026-01-23T12:00' } });

@@ -4,17 +4,18 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { EnvironmentSelector } from '@/components/outage-manager/environment-selector';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
 interface CreateBatchFormProps {
-  envId: string;
   onSuccess: (batch: { id: string; status: string; envId: string; batchName: string }) => void;
 }
 
-export function CreateBatchForm({ envId, onSuccess }: CreateBatchFormProps) {
+export function CreateBatchForm({ onSuccess }: CreateBatchFormProps) {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
+    envId: '',
     batchName: '',
     releaseDatetime: '',
     releaseTimeZone: 'Asia/Shanghai',
@@ -24,8 +25,8 @@ export function CreateBatchForm({ envId, onSuccess }: CreateBatchFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!envId) {
-      toast.error('请先选择环境');
+    if (!formData.envId) {
+      toast.error('请先选择目标环境');
       return;
     }
 
@@ -34,7 +35,7 @@ export function CreateBatchForm({ envId, onSuccess }: CreateBatchFormProps) {
       const res = await fetch('/api/apps/outage-manager/batches', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, envId }),
+        body: JSON.stringify(formData),
       });
 
       const data = await res.json();
@@ -52,18 +53,26 @@ export function CreateBatchForm({ envId, onSuccess }: CreateBatchFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="batchName">批次名称</Label>
-            <Input
-              id="batchName"
-              placeholder="例如: Wise Iteration v2.5.0 hotfix"
-              value={formData.batchName}
-              onChange={(e) => setFormData({ ...formData, batchName: e.target.value })}
-              required
-              className="max-w-md"
-            />
-            <p className="text-xs text-muted-foreground">用于标识本次发布的简短描述。</p>
-          </div>
+      <div className="space-y-2">
+        <EnvironmentSelector 
+          value={formData.envId} 
+          onChange={(envId) => setFormData({ ...formData, envId })} 
+        />
+        <p className="text-xs text-muted-foreground">选择本次发布的目标环境。</p>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="batchName">批次名称</Label>
+        <Input
+          id="batchName"
+          placeholder="例如: Wise Iteration v2.5.0 hotfix"
+          value={formData.batchName}
+          onChange={(e) => setFormData({ ...formData, batchName: e.target.value })}
+          required
+          className="max-w-md"
+        />
+        <p className="text-xs text-muted-foreground">用于标识本次发布的简短描述。</p>
+      </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
@@ -104,7 +113,7 @@ export function CreateBatchForm({ envId, onSuccess }: CreateBatchFormProps) {
             <p className="text-xs text-muted-foreground">该 Token 将用于验证您对目标环境的操作权限。</p>
           </div>
 
-          <Button type="submit" className="w-full md:w-auto min-w-[200px]" disabled={loading || !envId}>
+          <Button type="submit" className="w-full md:w-auto min-w-[200px]" disabled={loading || !formData.envId}>
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

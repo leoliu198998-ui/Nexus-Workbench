@@ -1,18 +1,9 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import userEvent from '@testing-library/user-event';
 import OutageManagerPage from './page';
 
 // Mock child components to simplify integration testing
-vi.mock('@/components/outage-manager/environment-selector', () => ({
-  EnvironmentSelector: ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
-    <div data-testid="env-selector">
-      <button onClick={() => onChange('env-1')}>Select Env 1</button>
-      <span>Current: {value}</span>
-    </div>
-  ),
-}));
-
 vi.mock('@/components/outage-manager/batch-list', () => ({
   BatchList: ({ onBatchClick }: { onBatchClick?: (batch: unknown) => void }) => (
     <div data-testid="batch-list">
@@ -27,8 +18,8 @@ vi.mock('@/components/outage-manager/batch-list', () => ({
 }));
 
 vi.mock('@/components/outage-manager/create-batch-dialog', () => ({
-  CreateBatchDialog: ({ open, envId }: { open: boolean; envId: string }) => (
-    open ? <div data-testid="create-batch-dialog">Dialog for {envId}</div> : null
+  CreateBatchDialog: ({ open }: { open: boolean }) => (
+    open ? <div data-testid="create-batch-dialog">Create Dialog</div> : null
   ),
 }));
 
@@ -48,21 +39,11 @@ describe('OutageManagerPage', () => {
 
     expect(screen.getByText('系统停机发布管理')).toBeInTheDocument();
     expect(screen.getByText('发布批次管理')).toBeInTheDocument();
-    expect(screen.getByTestId('env-selector')).toBeInTheDocument();
     expect(screen.getByTestId('batch-list')).toBeInTheDocument();
   });
 
-  it('disables create button when no environment is selected', () => {
+  it('renders create button that is always enabled', () => {
     render(<OutageManagerPage />);
-
-    const createButton = screen.getByText('创建新批次');
-    expect(createButton).toBeDisabled();
-  });
-
-  it('enables create button after selecting environment', () => {
-    render(<OutageManagerPage />);
-
-    fireEvent.click(screen.getByText('Select Env 1'));
 
     const createButton = screen.getByText('创建新批次');
     expect(createButton).not.toBeDisabled();
@@ -72,7 +53,6 @@ describe('OutageManagerPage', () => {
     const user = userEvent.setup();
     render(<OutageManagerPage />);
 
-    fireEvent.click(screen.getByText('Select Env 1'));
     await user.click(screen.getByText('创建新批次'));
 
     expect(screen.getByTestId('create-batch-dialog')).toBeInTheDocument();

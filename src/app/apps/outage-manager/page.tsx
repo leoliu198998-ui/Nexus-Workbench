@@ -3,7 +3,6 @@
 import { useState, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { EnvironmentSelector } from '@/components/outage-manager/environment-selector';
 import { BatchList } from '@/components/outage-manager/batch-list';
 import { CreateBatchDialog } from '@/components/outage-manager/create-batch-dialog';
 import { BatchDetailDrawer } from '@/components/outage-manager/batch-detail-drawer';
@@ -29,7 +28,6 @@ interface OutageBatch {
 }
 
 export default function OutageManagerPage() {
-  const [selectedEnv, setSelectedEnv] = useState<string>('');
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [selectedBatch, setSelectedBatch] = useState<OutageBatch | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -66,32 +64,24 @@ export default function OutageManagerPage() {
               <CardTitle>发布批次管理</CardTitle>
               <CardDescription>创建和管理系统发布批次，跟踪发布流程</CardDescription>
             </div>
-            <div className="flex items-center gap-4">
-              <div className="w-[200px]">
-                <EnvironmentSelector value={selectedEnv} onChange={setSelectedEnv} />
-              </div>
-              <Button 
-                onClick={() => setCreateDialogOpen(true)}
-                disabled={!selectedEnv}
-                className="gap-2"
-              >
-                <Plus className="h-4 w-4" />
-                创建新批次
-              </Button>
-            </div>
+            <Button 
+              onClick={() => setCreateDialogOpen(true)}
+              className="gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              创建新批次
+            </Button>
           </div>
         </CardHeader>
         <CardContent>
           <BatchList 
             key={refreshKey}
-            envId={selectedEnv} 
             onBatchClick={handleBatchClick}
           />
         </CardContent>
       </Card>
 
       <CreateBatchDialog
-        envId={selectedEnv}
         open={createDialogOpen}
         onClose={() => setCreateDialogOpen(false)}
         onSuccess={handleCreateSuccess}

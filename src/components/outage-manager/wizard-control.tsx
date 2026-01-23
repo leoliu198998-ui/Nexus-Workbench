@@ -5,7 +5,26 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, Circle, Play, Megaphone, Check, Terminal, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogFooter, 
+  DialogHeader, 
+  DialogTitle 
+} from '@/components/ui/dialog';
+import { 
+  CheckCircle2, 
+  Circle, 
+  Play, 
+  Megaphone, 
+  Check, 
+  Terminal, 
+  ChevronDown, 
+  ChevronUp, 
+  AlertTriangle,
+  Loader2
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface LogEntry {
@@ -40,6 +59,9 @@ const STEPS = [
 export function WizardControl({ batch, onUpdate, onReset }: WizardControlProps) {
   const [loading, setLoading] = useState(false);
   const [logsOpen, setLogsOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<'publish' | 'release' | 'finish' | null>(null);
+  
   const logsEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll logs
@@ -49,14 +71,19 @@ export function WizardControl({ batch, onUpdate, onReset }: WizardControlProps) 
     }
   }, [batch.logs, logsOpen]);
 
-  const handleAction = async (action: 'publish' | 'release' | 'finish') => {
+  const initiateAction = (action: 'publish' | 'release' | 'finish') => {
     if (action === 'release' || action === 'finish') {
-      if (!window.confirm(`确定要执行 "${action === 'release' ? '开始发布/停机' : '完成发布/解除停机'}" 操作吗？此操作将直接影响目标环境。`)) {
-        return;
-      }
+      setPendingAction(action);
+      setConfirmOpen(true);
+    } else {
+      executeAction(action);
     }
+  };
 
+  const executeAction = async (action: 'publish' | 'release' | 'finish') => {
     setLoading(true);
+    setConfirmOpen(false); // Ensure dialog is closed
+
     try {
       const res = await fetch(`/api/apps/outage-manager/batches/${batch.id}`, {
         method: 'PATCH',
@@ -74,6 +101,7 @@ export function WizardControl({ batch, onUpdate, onReset }: WizardControlProps) 
       toast.error(`操作失败: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
+      setPendingAction(null);
     }
   };
 
@@ -83,19 +111,23 @@ export function WizardControl({ batch, onUpdate, onReset }: WizardControlProps) 
   return (
     <div className="space-y-6">
       {/* Header & Status */}
-      <Card className="border-t-4 border-t-primary shadow-sm">
-        <CardHeader>
+      <Card className="border-t-4 border-t-primary shadow-sm overflow-hidden">
+        <CardHeader className="bg-muted/10 pb-6">
           <div className="flex justify-between items-start">
-            <div>
-              <CardTitle className="text-2xl">{batch.batchName}</CardTitle>
-              <CardDescription className="mt-1 flex items-center gap-2">
-                <span className="font-mono bg-muted px-1.5 py-0.5 rounded text-xs text-foreground">ID: {batch.id.slice(-8)}</span>
-                <span>•</span>
-                <span>环境: {batch.environment?.name || '未知'}</span>
+            <div className="space-y-1">
+              <CardTitle className="text-2xl tracking-tight">{batch.batchName}</CardTitle>
+              <CardDescription className="flex items-center gap-3">
+                <span className="font-mono bg-muted px-2 py-0.5 rounded text-xs text-foreground/70 border">
+                  ID: {batch.id.slice(-8)}
+                </span>
+                <span className="text-muted-foreground">•</span>
+                <span className="font-medium text-foreground/80">
+                  环境: {batch.environment?.name || '未知'}
+                </span>
               </CardDescription>
             </div>
             <Badge variant="outline" className={cn(
-              "px-3 py-1 text-sm font-medium",
+              "px-3 py-1 text-sm font-medium shadow-sm",
               batch.status === 'STARTED' ? "bg-red-50 text-red-700 border-red-200" :
               batch.status === 'COMPLETED' ? "bg-green-50 text-green-700 border-green-200" :
               "bg-blue-50 text-blue-700 border-blue-200"
@@ -104,11 +136,17 @@ export function WizardControl({ batch, onUpdate, onReset }: WizardControlProps) 
             </Badge>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-8 pb-10">
           {/* Stepper */}
-          <div className="relative flex justify-between items-center w-full max-w-3xl mx-auto py-4">
-            {/* Connecting Line */}
-            <div className="absolute top-1/2 left-0 w-full h-0.5 bg-muted -z-10 -translate-y-1/2" />
+          <div className="relative flex justify-between items-center w-full max-w-3xl mx-auto">
+            {/* Connecting Line Background */}
+            <div className="absolute top-1/2 left-0 w-full h-1 bg-muted -z-20 -translate-y-1/2 rounded-full" />
+            
+            {/* Active Progress Line */}
+            <div 
+              className="absolute top-1/2 left-0 h-1 bg-primary -z-10 -translate-y-1/2 rounded-full transition-all duration-500 ease-in-out" 
+              style={{ width: `${(currentStepIndex / (STEPS.length - 1)) * 100}%` }}
+            />
             
             {STEPS.map((step, index) => {
               const isCompleted = index <= currentStepIndex;
@@ -116,17 +154,19 @@ export function WizardControl({ batch, onUpdate, onReset }: WizardControlProps) 
               const Icon = isCompleted ? CheckCircle2 : step.icon;
 
               return (
-                <div key={step.id} className="flex flex-col items-center bg-background px-2">
+                <div key={step.id} className="relative flex flex-col items-center group">
                   <div className={cn(
-                    "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-colors",
-                    isCompleted ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/30 text-muted-foreground bg-background",
-                    isCurrent && "ring-4 ring-primary/20"
+                    "w-12 h-12 rounded-full flex items-center justify-center border-4 transition-all duration-300 z-10",
+                    isCompleted 
+                      ? "border-primary bg-primary text-primary-foreground shadow-md scale-110" 
+                      : "border-muted bg-background text-muted-foreground",
+                    isCurrent && "ring-4 ring-primary/20 ring-offset-2"
                   )}>
                     <Icon className="w-5 h-5" />
                   </div>
                   <span className={cn(
-                    "mt-2 text-xs font-medium uppercase tracking-wider",
-                    isCurrent ? "text-primary" : "text-muted-foreground"
+                    "absolute -bottom-8 text-xs font-bold uppercase tracking-wider transition-colors duration-300 whitespace-nowrap",
+                    isCurrent ? "text-primary" : "text-muted-foreground/60"
                   )}>
                     {step.label}
                   </span>
@@ -138,49 +178,69 @@ export function WizardControl({ batch, onUpdate, onReset }: WizardControlProps) 
       </Card>
 
       {/* Main Action Area */}
-      <Card className="shadow-lg border-2 border-primary/10">
-        <CardContent className="flex flex-col items-center justify-center py-10 space-y-4">
+      <Card className="shadow-lg border-2 border-muted/20 bg-gradient-to-b from-background to-muted/5">
+        <CardContent className="flex flex-col items-center justify-center py-12 space-y-6">
           {batch.status === 'COMPLETED' ? (
-            <div className="text-center space-y-4">
-              <div className="inline-flex items-center justify-center p-4 bg-green-100 text-green-600 rounded-full">
-                <Check className="w-8 h-8" />
+            <div className="text-center space-y-6 animate-in fade-in zoom-in duration-500">
+              <div className="inline-flex items-center justify-center p-6 bg-green-100 text-green-600 rounded-full shadow-inner">
+                <Check className="w-12 h-12" />
               </div>
-              <h3 className="text-xl font-semibold">发布流程已全部完成</h3>
-              <p className="text-muted-foreground max-w-md mx-auto">
-                所有步骤已执行完毕。您可以创建新的发布批次或查看历史记录。
-              </p>
-              <Button onClick={onReset} variant="outline" className="mt-4">
+              <div className="space-y-2">
+                <h3 className="text-2xl font-semibold tracking-tight">发布流程已完成</h3>
+                <p className="text-muted-foreground max-w-md mx-auto">
+                  所有步骤已执行完毕。系统已恢复正常运行。
+                </p>
+              </div>
+              <Button onClick={onReset} variant="outline" size="lg" className="mt-4 gap-2">
+                <RefreshCwIcon className="w-4 h-4" />
                 创建新批次
               </Button>
             </div>
           ) : nextStep ? (
             <>
               <div className="text-center space-y-2">
-                <h3 className="text-lg font-medium text-muted-foreground">下一步操作</h3>
-                <p className="text-2xl font-bold flex items-center gap-2 justify-center">
-                  <nextStep.icon className="w-6 h-6 text-primary" />
+                <h3 className="text-lg font-medium text-muted-foreground uppercase tracking-widest text-xs">下一步操作 / Next Step</h3>
+                <p className="text-3xl font-bold flex items-center gap-3 justify-center text-foreground">
+                  <nextStep.icon className={cn(
+                    "w-8 h-8",
+                    nextStep.action === 'release' ? "text-destructive" : "text-primary"
+                  )} />
                   {nextStep.label}
                 </p>
               </div>
               
-              <div className="w-full max-w-sm pt-4">
+              <div className="w-full max-w-md pt-4 space-y-4">
                 {nextStep.action === 'release' && (
-                  <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded text-amber-800 text-sm flex gap-2">
-                    <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
-                    <span>警告：此操作将触发系统停机，请确保已通知相关人员。</span>
+                  <div className="p-4 bg-destructive/5 border border-destructive/20 rounded-lg text-destructive flex gap-3 items-start shadow-sm">
+                    <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5 animate-pulse" />
+                    <div className="space-y-1">
+                      <p className="font-semibold">警告：即将进行系统停机</p>
+                      <p className="text-sm opacity-90">此操作将阻断用户访问，请确保已通过公告或其他方式通知相关人员。</p>
+                    </div>
                   </div>
                 )}
                 
                 <Button 
                   size="lg" 
-                  className={cn("w-full text-lg h-14 shadow-md transition-all hover:scale-[1.02]", 
-                    nextStep.action === 'release' ? "bg-red-600 hover:bg-red-700" :
-                    nextStep.action === 'finish' ? "bg-green-600 hover:bg-green-700" : ""
+                  variant={nextStep.action === 'release' ? "destructive" : nextStep.action === 'finish' ? "default" : "secondary"}
+                  className={cn(
+                    "w-full text-lg h-16 shadow-lg transition-all hover:scale-[1.01] active:scale-[0.99]",
+                    nextStep.action === 'finish' && "bg-green-600 hover:bg-green-700 text-white"
                   )}
-                  onClick={() => nextStep.action && handleAction(nextStep.action as 'publish' | 'release' | 'finish')}
+                  onClick={() => nextStep.action && initiateAction(nextStep.action)}
                   disabled={loading}
                 >
-                  {loading ? '执行中...' : `执行: ${nextStep.label}`}
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      执行中...
+                    </>
+                  ) : (
+                    <>
+                      <Play className="mr-2 h-5 w-5 fill-current" />
+                      开始执行: {nextStep.label}
+                    </>
+                  )}
                 </Button>
               </div>
             </>
@@ -189,16 +249,16 @@ export function WizardControl({ batch, onUpdate, onReset }: WizardControlProps) 
       </Card>
 
       {/* Logs Terminal */}
-      <Card className="bg-slate-950 border-slate-800 text-slate-200 overflow-hidden">
+      <Card className="bg-slate-950 border-slate-800 text-slate-200 overflow-hidden shadow-xl rounded-xl">
         <CardHeader 
-          className="py-3 px-4 flex flex-row items-center justify-between cursor-pointer hover:bg-slate-900 transition-colors"
+          className="py-3 px-4 flex flex-row items-center justify-between cursor-pointer hover:bg-slate-900 transition-colors select-none"
           onClick={() => setLogsOpen(!logsOpen)}
         >
-          <div className="flex items-center gap-2">
-            <Terminal className="w-4 h-4" />
-            <CardTitle className="text-sm font-mono">System Logs</CardTitle>
-            <Badge variant="secondary" className="bg-slate-800 text-slate-300 border-none h-5 px-1.5 text-[10px]">
-              {batch.logs?.steps?.length || 0} events
+          <div className="flex items-center gap-3">
+            <Terminal className="w-4 h-4 text-slate-400" />
+            <CardTitle className="text-sm font-mono tracking-wider text-slate-300">SYSTEM_LOGS</CardTitle>
+            <Badge variant="outline" className="bg-slate-900 text-slate-400 border-slate-700 h-5 px-1.5 text-[10px]">
+              {batch.logs?.steps?.length || 0} EVENTS
             </Badge>
           </div>
           <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-slate-800 text-slate-400">
@@ -208,27 +268,36 @@ export function WizardControl({ batch, onUpdate, onReset }: WizardControlProps) 
         
         {logsOpen && (
           <CardContent className="p-0 border-t border-slate-800 font-mono text-xs">
-            <div className="max-h-[300px] overflow-auto p-4 space-y-4">
+            <div className="max-h-[400px] overflow-auto p-4 space-y-4 bg-slate-950/50">
               {(!batch.logs?.steps || batch.logs.steps.length === 0) && (
-                <div className="text-slate-500 italic">No logs available.</div>
+                <div className="text-slate-600 italic px-2">No logs recorded yet.</div>
               )}
               
               {batch.logs?.steps?.map((log, i) => (
-                <div key={i} className="flex flex-col gap-1 group">
-                  <div className="flex items-center gap-2 text-slate-400">
-                    <span className="text-blue-400">[{new Date(log.timestamp).toLocaleTimeString()}]</span>
-                    <span className={cn(
-                      "font-bold px-1 rounded",
-                      log.status >= 200 && log.status < 300 ? "text-green-400 bg-green-950/30" : "text-red-400 bg-red-950/30"
+                <div key={i} className="flex flex-col gap-1 group animate-in slide-in-from-left-2 duration-300">
+                  <div className="flex items-center gap-3 text-slate-400">
+                    <span className="text-blue-400/80 w-[80px] shrink-0">[{new Date(log.timestamp).toLocaleTimeString()}]</span>
+                    <Badge variant="outline" className={cn(
+                      "font-bold border-0 px-1.5 py-0 rounded text-[10px]",
+                      log.status >= 200 && log.status < 300 
+                        ? "text-green-400 bg-green-950/30" 
+                        : "text-red-400 bg-red-950/30"
                     )}>
                       {log.step}
+                    </Badge>
+                    <span className={cn(
+                      "text-[10px]",
+                      log.status >= 200 && log.status < 300 ? "text-slate-500" : "text-red-500"
+                    )}>
+                      HTTP {log.status}
                     </span>
-                    <span>status: {log.status}</span>
                   </div>
-                  <div className="pl-4 border-l-2 border-slate-800 ml-1 group-hover:border-slate-700 transition-colors">
-                    <pre className="text-slate-300 whitespace-pre-wrap break-all overflow-hidden">
-                      {JSON.stringify(log.response, null, 2)}
-                    </pre>
+                  <div className="pl-[80px]">
+                     <div className="pl-3 border-l-2 border-slate-800 group-hover:border-slate-700 transition-colors py-1">
+                      <pre className="text-slate-300 whitespace-pre-wrap break-all overflow-hidden opacity-80 group-hover:opacity-100 transition-opacity">
+                        {JSON.stringify(log.response, null, 2)}
+                      </pre>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -237,6 +306,56 @@ export function WizardControl({ batch, onUpdate, onReset }: WizardControlProps) 
           </CardContent>
         )}
       </Card>
+
+      {/* Confirmation Dialog */}
+      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {pendingAction === 'release' && <AlertTriangle className="w-5 h-5 text-destructive" />}
+              {pendingAction === 'release' ? '确认开始发布/停机？' : '确认完成发布？'}
+            </DialogTitle>
+            <DialogDescription>
+              {pendingAction === 'release' 
+                ? '此操作将调用停机接口，系统将暂停对外服务。请确认已做好准备。'
+                : '此操作将调用完成接口，解除系统停机状态，恢复对外服务。'
+              }
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmOpen(false)}>取消</Button>
+            <Button 
+              variant={pendingAction === 'release' ? "destructive" : "default"}
+              onClick={() => pendingAction && executeAction(pendingAction)}
+              className={pendingAction === 'finish' ? "bg-green-600 hover:bg-green-700" : ""}
+            >
+              确认{pendingAction === 'release' ? '停机' : '完成'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
+  );
+}
+
+function RefreshCwIcon({ className }: { className?: string }) {
+  return (
+    <svg 
+      xmlns="http://www.w3.org/2000/svg" 
+      width="24" 
+      height="24" 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      stroke="currentColor" 
+      strokeWidth="2" 
+      strokeLinecap="round" 
+      strokeLinejoin="round" 
+      className={className}
+    >
+      <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+      <path d="M21 3v5h-5" />
+      <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+      <path d="M3 21v-5h5" />
+    </svg>
   );
 }

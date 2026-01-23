@@ -4,13 +4,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { CreateBatchForm } from './create-batch-form';
 
 interface CreateBatchDialogProps {
-  envId: string;
   open: boolean;
   onClose: () => void;
   onSuccess: (batch: { id: string; status: string; envId: string; batchName: string }) => void;
 }
 
-export function CreateBatchDialog({ envId, open, onClose, onSuccess }: CreateBatchDialogProps) {
+export function CreateBatchDialog({ open, onClose, onSuccess }: CreateBatchDialogProps) {
   const handleSuccess = (batch: { id: string; status: string; envId: string; batchName: string }) => {
     onSuccess(batch);
     onClose();
@@ -27,7 +26,7 @@ export function CreateBatchDialog({ envId, open, onClose, onSuccess }: CreateBat
         </DialogHeader>
         
         <div className="mt-4">
-          <CreateBatchForm envId={envId} onSuccess={handleSuccess} />
+          <CreateBatchForm onSuccess={handleSuccess} />
         </div>
       </DialogContent>
     </Dialog>

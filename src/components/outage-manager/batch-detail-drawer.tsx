@@ -45,7 +45,7 @@ export function BatchDetailDrawer({ batch, open, onClose, onBatchUpdate }: Batch
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
-      <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto">
+      <SheetContent side="right" className="w-full sm:max-w-4xl overflow-y-auto">
         <SheetHeader>
           <SheetTitle>批次详情</SheetTitle>
           <SheetDescription>

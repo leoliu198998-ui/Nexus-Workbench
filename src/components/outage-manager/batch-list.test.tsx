@@ -40,7 +40,7 @@ describe('BatchList', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Test Batch')).toBeInTheDocument();
-      expect(screen.getByText('Test Env')).toBeInTheDocument();
+      expect(screen.getByText(/Test Env/)).toBeInTheDocument();
       expect(screen.getByText('已创建')).toBeInTheDocument();
     });
   });
@@ -65,7 +65,7 @@ describe('BatchList', () => {
     render(<BatchList />);
 
     await waitFor(() => {
-      expect(screen.getByText('继续发布')).toBeInTheDocument();
+      expect(screen.getByText('继续')).toBeInTheDocument();
     });
   });
 
@@ -89,7 +89,7 @@ describe('BatchList', () => {
     render(<BatchList />);
 
     await waitFor(() => {
-      expect(screen.getByText('查看详情')).toBeInTheDocument();
+      expect(screen.getByText('查看')).toBeInTheDocument();
     });
   });
 
@@ -115,10 +115,10 @@ describe('BatchList', () => {
     render(<BatchList onBatchClick={onBatchClick} />);
 
     await waitFor(() => {
-      expect(screen.getByText('继续发布')).toBeInTheDocument();
+      expect(screen.getByText('继续')).toBeInTheDocument();
     });
 
-    await user.click(screen.getByText('继续发布'));
+    await user.click(screen.getByText('继续'));
     expect(onBatchClick).toHaveBeenCalledWith(mockBatches[0]);
   });
 });
