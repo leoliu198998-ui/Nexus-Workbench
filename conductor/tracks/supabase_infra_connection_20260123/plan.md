@@ -10,7 +10,7 @@
     - [x] 执行 `npx prisma migrate dev`
 - [x] Task: Conductor - User Manual Verification '环境配置与 Schema 定义' (Protocol in workflow.md) 6bfd0fc
 
-## 阶段 2: 数据库连接验证逻辑 (Database Connectivity & Verification)
+## 阶段 2: 数据库连接验证逻辑 (Database Connectivity & Verification) [checkpoint: 532f76a]
 
 - [x] Task: 编写数据库连接测试脚本的单元测试 (Red Phase) 489ae53
     - [x] 在 `src/lib/prisma.test.ts` 或新文件中编写测试，验证 `SystemLog` 的写入和读取功能
@@ -18,7 +18,7 @@
     - [x] 确保 `src/lib/prisma.ts` 正确初始化 Prisma Client
     - [x] 创建一个验证工具/脚本，能够在 `SystemLog` 中插入并读取测试数据
 - [x] Task: 运行验证并确认数据已同步至 Supabase 控制台 83b6146
-- [ ] Task: Conductor - User Manual Verification '数据库连接验证逻辑' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification '数据库连接验证逻辑' (Protocol in workflow.md) 532f76a
 
 ## 阶段 3: 最终整理与质量检查 (Finalization)
 
