@@ -23,3 +23,35 @@ model SystemLog {
   details   String?
   timestamp DateTime @default(now())
 }
+
+model ReleaseEnvironment {
+  id        String   @id @default(uuid())
+  name      String
+  baseUrl   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  batches   OutageBatch[]
+}
+
+enum OutageStatus {
+  CREATED
+  NOTIFIED
+  STARTED
+  COMPLETED
+}
+
+model OutageBatch {
+  id              String             @id @default(uuid())
+  envId           String
+  environment     ReleaseEnvironment @relation(fields: [envId], references: [id])
+  batchName       String
+  releaseDatetime DateTime
+  releaseTimeZone String
+  duration        Int
+  remoteBatchId   String?
+  status          OutageStatus       @default(CREATED)
+  token           String
+  logs            Json?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+}
