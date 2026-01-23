@@ -10,7 +10,7 @@
     - [x] 初始化常用环境域名数据到数据库
 - [x] Task: Conductor - User Manual Verification '数据库模型与基础设施' (Protocol in workflow.md) 7a60373
 
-## 阶段 2: 后端 API 开发与外部接口集成 (Backend API & Integration)
+## 阶段 2: 后端 API 开发与外部接口集成 (Backend API & Integration) [checkpoint: b694854]
 
 - [x] Task: 实现环境列表查询接口 8855a66
 - [x] Task: 实现“创建发布批次”后端接口 c13ca09
@@ -19,8 +19,8 @@
 - [x] Task: 实现“步骤流转”后端通用接口 (Publish, Release, Finish) e3789bf
     - [x] 动态根据环境域名转发请求
     - [x] 实时更新本地数据库状态和日志
-- [~] Task: 为 API 逻辑编写单元测试 (TDD - 模拟 Fetch 调用)
-- [ ] Task: Conductor - User Manual Verification '后端 API 开发与外部接口集成' (Protocol in workflow.md)
+- [x] Task: 为 API 逻辑编写单元测试 (TDD - 模拟 Fetch 调用)
+- [x] Task: Conductor - User Manual Verification '后端 API 开发与外部接口集成' (Protocol in workflow.md) b694854
 
 ## 阶段 3: 前端基础界面与环境选择 (Frontend UI - Basic & Selection)
 
