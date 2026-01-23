@@ -33,4 +33,12 @@ describe('Prisma Database Connection', () => {
       where: { id: log.id },
     });
   });
+
+  it('should have seeded environments', async () => {
+    const envs = await prisma.releaseEnvironment.findMany();
+    expect(envs.length).toBeGreaterThan(0);
+    const testEnv = envs.find(e => e.name === 'Test Environment');
+    expect(testEnv).toBeDefined();
+    expect(testEnv?.baseUrl).toBe('https://test-maintenance.bipocloud.com');
+  });
 });
