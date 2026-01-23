@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import Page from './page'
 import { describe, it, expect } from 'vitest'
 
-describe('Excel Export Page', () => {
+describe('Schedule Report Exporter Page', () => {
   it('renders authentication step by default', () => {
     render(<Page />)
     expect(screen.getByText(/X-DK-Token Required/i)).toBeInTheDocument()

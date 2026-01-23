@@ -3,8 +3,8 @@ import { FileSpreadsheet, Sparkles, Terminal, Database } from 'lucide-react';
 
 const tools = [
   {
-    title: 'Excel Export Wizard',
-    description: 'Transform API data into Excel reports with a guided step-by-step process. Features token handling and preview.',
+    title: 'Schedule Report Exporter',
+    description: 'Export schedule report data from the API and transform it into Excel format. Features token-based authentication and data transformation.',
     icon: FileSpreadsheet,
     href: '/apps/excel-export',
     status: 'active' as const,

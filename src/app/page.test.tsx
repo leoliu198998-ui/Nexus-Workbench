@@ -11,7 +11,7 @@ describe('Home Page (Dashboard)', () => {
 
   it('renders tool cards', () => {
     render(<Home />);
-    expect(screen.getByText('Excel Export Wizard')).toBeDefined();
-    expect(screen.getByText(/Transform API data into Excel reports/)).toBeDefined();
+    expect(screen.getByText('Schedule Report Exporter')).toBeDefined();
+    expect(screen.getByText(/Export schedule report data from the API/)).toBeDefined();
   });
 });

@@ -63,7 +63,7 @@ export default function Home() {
             )}
           </WizardStep>
 
-          <WizardStep title="Export" description="Generate and download your Schedule Report.">
+          <WizardStep title="Export Schedule Report" description="Generate and download your Schedule Report as Excel file.">
             {(next, prev) => (
               <div className="flex flex-col items-center justify-center py-8 text-center space-y-6">
                 <div className="w-24 h-24 bg-emerald-500/10 rounded-full flex items-center justify-center ring-8 ring-emerald-500/5 mb-2">
@@ -71,9 +71,9 @@ export default function Home() {
                 </div>
                 
                 <div className="max-w-md space-y-2">
-                  <h3 className="text-xl font-semibold">Ready to Export</h3>
+                  <h3 className="text-xl font-semibold">Ready to Export Schedule Report</h3>
                   <p className="text-muted-foreground">
-                    We will fetch 1500 records for the year 2026 and apply the standard transformation rules. The file will be generated in .xlsx format.
+                    We will fetch schedule report data (up to 1500 records for the year 2026) from the API and apply the standard transformation rules. The file will be generated in .xlsx format.
                   </p>
                 </div>
 
@@ -128,7 +128,7 @@ export default function Home() {
                     ) : (
                       <>
                         <Download className="mr-2 h-4 w-4" />
-                        Download Excel
+                        Download Schedule Report
                       </>
                     )}
                   </Button>

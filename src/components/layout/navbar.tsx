@@ -17,7 +17,7 @@ import { cn } from '@/lib/utils';
 
 const routeMap: Record<string, string> = {
   'apps': 'Tools',
-  'excel-export': 'Excel Export Wizard',
+  'excel-export': 'Schedule Report Exporter',
 };
 
 export function Navbar() {
