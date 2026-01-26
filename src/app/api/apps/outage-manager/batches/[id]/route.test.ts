@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { PATCH } from './route';
+import { PATCH, GET } from './route';
 import { prisma } from '@/lib/prisma';
 import { NextRequest } from 'next/server';
 
@@ -16,6 +16,52 @@ vi.mock('@/lib/prisma', () => ({
 
 // Mock fetch
 global.fetch = vi.fn();
+
+describe('GET /api/apps/outage-manager/batches/[id]', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  const mockBatch = {
+    id: 'local-123',
+    remoteBatchId: '202601191310437440',
+    token: 'test-token',
+    status: 'CREATED',
+    batchName: 'Test Batch',
+    environment: {
+      id: 'env-1',
+      name: 'Test Env',
+    },
+  };
+
+  it('should return batch details with remoteBatchId and token', async () => {
+    (prisma.outageBatch.findUnique as any).mockResolvedValue(mockBatch);
+
+    const req = new NextRequest('http://localhost/api/batches/local-123');
+    const response = await GET(req, { params: Promise.resolve({ id: 'local-123' }) });
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.id).toBe('local-123');
+    expect(data.remoteBatchId).toBe('202601191310437440');
+    expect(data.token).toBe('test-token');
+    expect(prisma.outageBatch.findUnique).toHaveBeenCalledWith({
+      where: { id: 'local-123' },
+      include: { environment: true },
+    });
+  });
+
+  it('should return 404 if batch not found', async () => {
+    (prisma.outageBatch.findUnique as any).mockResolvedValue(null);
+
+    const req = new NextRequest('http://localhost/api/batches/missing-id');
+    const response = await GET(req, { params: Promise.resolve({ id: 'missing-id' }) });
+    const data = await response.json();
+
+    expect(response.status).toBe(404);
+    expect(data.error).toBe('Batch not found');
+  });
+});
 
 describe('PATCH /api/apps/outage-manager/batches/[id]', () => {
   beforeEach(() => {

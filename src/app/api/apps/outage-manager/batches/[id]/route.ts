@@ -8,6 +8,29 @@ const ACTION_MAP: Record<string, { path: string; nextStatus: OutageStatus }> = {
   finish: { path: '/finish', nextStatus: OutageStatus.COMPLETED },
 };
 
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+
+    const batch = await prisma.outageBatch.findUnique({
+      where: { id },
+      include: { environment: true },
+    });
+
+    if (!batch) {
+      return NextResponse.json({ error: 'Batch not found' }, { status: 404 });
+    }
+
+    return NextResponse.json(batch);
+  } catch (error) {
+    console.error('Failed to fetch batch:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
+}
+
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
