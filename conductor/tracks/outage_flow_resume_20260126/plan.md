@@ -9,7 +9,7 @@
 - [x] Task: 更新种子数据脚本 44ab701
     - [ ] Sub-task: 修改 `prisma/seed.ts`，添加或更新 5 个标准环境（Test, UAT, EU, CN, Wise）及其对应的维护页面 URL。
     - [ ] Sub-task: 运行 `pnpm prisma db seed` 并验证数据库中的数据是否正确更新。
-- [ ] Task: 单元测试 - 模型关联
+- [x] Task: 单元测试 - 模型关联 68f2e4c
     - [ ] Sub-task: 编写或更新单元测试，验证 `SystemLog` 与 `OutageBatch` 之间的关联写入和读取是否正常工作。
 - [ ] Task: Conductor - User Manual Verification '数据库与模型重构' (Protocol in workflow.md)
 
