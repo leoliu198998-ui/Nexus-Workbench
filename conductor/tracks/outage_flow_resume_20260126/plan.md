@@ -6,7 +6,7 @@
 - [x] Task: 更新数据库 Schema 并生成迁移 dc88f86
     - [ ] Sub-task: 在 `prisma/schema.prisma` 中更新 `SystemLog` 模型，添加 `outageBatchId` 字段及与 `OutageBatch` 的外键关联。
     - [ ] Sub-task: 运行 `pnpm prisma migrate dev --name link_systemlog_outage` 生成并应用迁移文件。
-- [ ] Task: 更新种子数据脚本
+- [x] Task: 更新种子数据脚本 44ab701
     - [ ] Sub-task: 修改 `prisma/seed.ts`，添加或更新 5 个标准环境（Test, UAT, EU, CN, Wise）及其对应的维护页面 URL。
     - [ ] Sub-task: 运行 `pnpm prisma db seed` 并验证数据库中的数据是否正确更新。
 - [ ] Task: 单元测试 - 模型关联
