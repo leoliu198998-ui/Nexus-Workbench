@@ -1,50 +1,36 @@
-# 实施计划 - 任务: 系统停机管理流程重构与进度续传
+# 实施计划 (plan.md) - 停机流程优化与日志增强
 
-## 第 1 阶段：数据库与后端逻辑 (TDD) [checkpoint: 7a6ee16]
-- [x] 任务: 创建 `OutageBatch` 测试工厂和数据种子 83cfbc9
-    - [ ] 子任务: 创建测试辅助函数，用于生成包含 `remoteBatchId` 和 `token` 的模拟 `OutageBatch` 数据。
-- [x] 任务: 更新 `POST /api/apps/outage-manager/batches` 接口以存储 `remoteBatchId` ac30347
-    - [ ] 子任务: 编写失败测试，断言创建接口能够将外部服务返回的 `remoteBatchId` 保存到数据库。
-    - [ ] 子任务: 实现逻辑，从外部服务响应中提取并保存 `remoteBatchId`。
-    - [ ] 子任务: 验证测试通过。
-- [x] 任务: 增强 `GET /api/apps/outage-manager/batches/[id]` 接口 d92af25
-    - [ ] 子任务: 编写失败测试，确保接口返回 `remoteBatchId` 和 `token` 字段。
-    - [ ] 子任务: 更新 API 路由，在响应中包含这些必要字段。
-    - [ ] 子任务: 验证测试通过。
-- [x] 任务: 创建 `PATCH /api/apps/outage-manager/batches/[id]` 用于 Token 更新 c7f842e
-    - [ ] 子任务: 编写失败测试，验证可以通过 PATCH 请求更新 `token` 字段。
-    - [ ] 子任务: 实现 PATCH 路由，允许动态修改批次的 Token。
-    - [ ] 子任务: 验证测试通过。
-- [ ] 任务: Conductor - 用户手动验证 '数据库与后端逻辑 (TDD)' (遵循 workflow.md 协议)
+## Phase 1: 数据库与模型重构 (Backend) [checkpoint: e86525c]
+本阶段专注于基础设施的变更，确保数据模型支持新的关联需求，并预置最新的环境数据。
 
-## 第 2 阶段：前端状态管理与导航 (TDD) [checkpoint: 3bdc563]
-- [x] 任务: 实现批次列表跳转逻辑 9fd0d4e
-    - [ ] 子任务: 编写组件测试，验证点击列表项时的跳转行为。
-    - [ ] 子任务: 更新 `BatchList`，使“进行中”的批次跳转至 `/apps/outage-manager/wizard/[id]`。
-    - [ ] 子任务: 验证测试通过。
-- [x] 任务: 重构向导上下文 (Wizard Context) 以支持状态注入 2507a236
-    - [ ] 子任务: 编写上下文提供者测试，确保其能根据初始数据（hydrate）进行初始化。
-    - [ ] 子任务: 更新向导上下文，使其接受初始状态（remoteBatchId, token, currentStep）。
-    - [ ] 子任务: 验证测试通过。
-- [x] 任务: 实现向导页进度恢复逻辑 d3086155
-    - [ ] 子任务: 编写向导页面组件测试，模拟 URL 中包含 ID 时的加载情况。
-    - [ ] 子任务: 实现 `useEffect` 或数据获取钩子，在挂载时根据 ID 加载批次详情。
-    - [ ] 子任务: 将获取到的数据注入向导上下文。
-    - [ ] 子任务: 验证测试通过。
-- [ ] 任务: Conductor - 用户手动验证 '前端状态管理与导航 (TDD)' (遵循 workflow.md 协议)
+- [x] Task: 更新数据库 Schema 并生成迁移 dc88f86
+    - [x] Sub-task: 在 `prisma/schema.prisma` 中更新 `SystemLog` 模型，添加 `outageBatchId` 字段及与 `OutageBatch` 的外键关联。
+    - [x] Sub-task: 运行 `pnpm prisma migrate dev --name link_systemlog_outage` 生成并应用迁移文件。
+- [x] Task: 更新种子数据脚本 44ab701
+    - [x] Sub-task: 修改 `prisma/seed.ts`，添加或更新 5 个标准环境（Test, UAT, EU, CN, Wise）及其对应的维护页面 URL。
+    - [x] Sub-task: 运行 `pnpm prisma db seed` 并验证数据库中的数据是否正确更新。
+- [x] Task: 单元测试 - 模型关联 68f2e4c
+    - [x] Sub-task: 编写或更新单元测试，验证 `SystemLog` 与 `OutageBatch` 之间的关联写入和读取是否正常工作。
+- [x] Task: Conductor - User Manual Verification '数据库与模型重构' (Protocol in workflow.md) e86525c
 
-## 第 3 阶段：Token 管理 UI (TDD)
-- [x] 任务: 创建 `GlobalTokenInput` 组件 78e8f0db
-    - [ ] 子任务: 编写测试，验证新组件能正确显示值并允许编辑。
-    - [ ] 子任务: 实现组件，满足“明文显示”的要求。
-    - [ ] 子任务: 验证测试通过。
-- [x] 任务: 在向导布局中集成 Token 输入框 c1270e0b
-    - [ ] 子任务: 编写测试，确保 Token 输入框能更新全局向导上下文。
-    - [ ] 子任务: 在向导布局（顶部栏或侧边栏）中放置该组件。
-    - [ ] 子任务: 将输入变更连接到上下文更新函数，并实现 API 自动保存（防抖处理）。
-    - [ ] 子任务: 验证测试通过。
-- [x] 任务: 处理 API Token 失效场景 b378c826
-    - [ ] 子任务: 编写测试，模拟向导流程中出现 401 错误。
-    - [ ] 子任务: 确保 UI 允许通过新的全局输入框更新 Token 后重试操作。
-    - [ ] 子任务: 验证测试通过。
-- [ ] 任务: Conductor - 用户手动验证 'Token 管理 UI (TDD)' (遵循 workflow.md 协议)
+## Phase 2: 后端日志逻辑实现 (Backend)
+本阶段将业务逻辑与新的日志表进行集成。
+
+- [x] Task: 封装 SystemLog 记录服务 (Service Layer) 644a500
+    - [ ] Sub-task: 创建或更新 `src/lib/services/logger.ts` (如适用)，提供一个简化的函数用于记录与 OutageBatch 关联的系统日志。
+- [x] Task: 集成 API 路由日志记录 ec0fc63
+    - [ ] Sub-task: 修改 `src/app/api/apps/outage-manager/batches/[id]/route.ts`。
+    - [ ] Sub-task: 在 `publish`, `release`, `finish`, `fix-batch-id`, `token-update` 等分支中，添加调用 SystemLog 写入的代码。
+- [x] Task: 集成测试 - 日志流程 5499daf
+    - [ ] Sub-task: 编写集成测试，模拟 API 调用，验证操作后 `SystemLog` 中是否生成了带有正确 `outageBatchId` 的记录。
+- [ ] Task: Conductor - User Manual Verification '后端日志逻辑实现' (Protocol in workflow.md)
+
+## Phase 3: 前端界面增强 (Frontend) [checkpoint: 4f8d7a8]
+本阶段关注用户体验的微调。
+
+- [x] Task: 更新发布详情页 UI 4f8d7a8
+    - [x] Sub-task: 找到发布详情页组件。
+    - [x] Sub-task: 在页面头部区域增加显示 `batchName`。
+- [x] Task: 前端验证
+    - [x] Sub-task: 启动开发服务器，访问详情页，确认批次名称显示位置合理且数据加载正确。
+- [x] Task: Conductor - User Manual Verification '前端界面增强' (Protocol in workflow.md) 4f8d7a8
