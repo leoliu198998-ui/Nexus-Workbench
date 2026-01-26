@@ -21,7 +21,7 @@
 - [x] Task: 集成 API 路由日志记录 ec0fc63
     - [ ] Sub-task: 修改 `src/app/api/apps/outage-manager/batches/[id]/route.ts`。
     - [ ] Sub-task: 在 `publish`, `release`, `finish`, `fix-batch-id`, `token-update` 等分支中，添加调用 SystemLog 写入的代码。
-- [ ] Task: 集成测试 - 日志流程
+- [x] Task: 集成测试 - 日志流程 5499daf
     - [ ] Sub-task: 编写集成测试，模拟 API 调用，验证操作后 `SystemLog` 中是否生成了带有正确 `outageBatchId` 的记录。
 - [ ] Task: Conductor - User Manual Verification '后端日志逻辑实现' (Protocol in workflow.md)
 
