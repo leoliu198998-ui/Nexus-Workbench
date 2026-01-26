@@ -43,9 +43,20 @@ export async function POST(req: NextRequest) {
 
     // 2. Call external API
     const externalUrl = `${environment.baseUrl}/devops/release-batch`;
+    
+    // Format datetime for external API
+    // datetime-local input returns YYYY-MM-DDTHH:mm
+    // External API expects YYYY-MM-DD HH:mm (space separator, no seconds)
+    let formattedReleaseDatetime = releaseDatetime;
+    
+    if (releaseDatetime && releaseDatetime.length === 16 && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(releaseDatetime)) {
+      // Replace T with space to get YYYY-MM-DD HH:mm format
+      formattedReleaseDatetime = releaseDatetime.replace('T', ' ');
+    }
+    
     const externalPayload = {
       batchName,
-      releaseDatetime,
+      releaseDatetime: formattedReleaseDatetime,
       releaseTimeZone,
       duration,
     };
@@ -82,12 +93,12 @@ export async function POST(req: NextRequest) {
         throw new Error(responseData.errmsg || `接口返回错误码: ${responseData.errcode}`);
       }
 
-      // 验证必需的响应字段
-      if (!responseData.data || !Array.isArray(responseData.data) || responseData.data.length === 0) {
-        throw new Error('接口返回数据格式错误: 缺少data数组或数组为空');
+      // 验证必需的响应字段 - API返回对象而非数组
+      if (!responseData.data || typeof responseData.data !== 'object') {
+        throw new Error('接口返回数据格式错误: 缺少data对象');
       }
 
-      const batchData = responseData.data[0];
+      const batchData = responseData.data;
       
       // 验证批次数据的必需字段（检查是否存在，但不检查值）
       const requiredFields = ['batchId', 'batchName', 'originalDateTime', 'originalTimeZone', 'duration', 'releaseDatetime', 'releaseStatus', 'noticeStatus'];
