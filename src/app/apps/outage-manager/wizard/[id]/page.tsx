@@ -47,7 +47,8 @@ function WizardContent({ onReset }: { onReset: () => void }) {
             <BreadcrumbItem>
               <BreadcrumbPage>发布向导</BreadcrumbPage>
             </BreadcrumbItem>
-          </Breadcrumb>
+          </BreadcrumbList>
+        </Breadcrumb>
           
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
