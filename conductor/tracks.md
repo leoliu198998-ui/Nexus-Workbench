@@ -4,5 +4,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: 系统停机管理流程重构与进度续传**
+- [x] **Track: 系统停机管理流程重构与进度续传**
 *Link: [./tracks/outage_flow_resume_20260126/](./tracks/outage_flow_resume_20260126/)*
