@@ -117,4 +117,26 @@ describe('PATCH /api/apps/outage-manager/batches/[id]', () => {
     const response = await PATCH(req, { params: Promise.resolve({ id: 'local-123' }) });
     expect(response.status).toBe(400);
   });
+
+  it('should update only the token when provided without an action', async () => {
+    (prisma.outageBatch.update as any).mockResolvedValue({
+      ...mockBatch,
+      token: 'new-token-123',
+    });
+
+    const req = new NextRequest('http://localhost/api/batches/local-123', {
+      method: 'PATCH',
+      body: JSON.stringify({ token: 'new-token-123' }),
+    });
+
+    const response = await PATCH(req, { params: Promise.resolve({ id: 'local-123' }) });
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.token).toBe('new-token-123');
+    expect(prisma.outageBatch.update).toHaveBeenCalledWith({
+      where: { id: 'local-123' },
+      data: { token: 'new-token-123' },
+    });
+  });
 });

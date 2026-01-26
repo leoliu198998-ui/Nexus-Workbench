@@ -38,7 +38,16 @@ export async function PATCH(
   try {
     const { id } = await params;
     const body = await req.json();
-    const { action } = body;
+    const { action, token } = body;
+
+    // 1. 如果没有 action，但提供了 token，则执行单纯的 Token 更新
+    if (!action && token) {
+      const updatedBatch = await prisma.outageBatch.update({
+        where: { id },
+        data: { token },
+      });
+      return NextResponse.json(updatedBatch);
+    }
 
     const config = ACTION_MAP[action];
     if (!config) {
