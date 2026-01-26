@@ -1,6 +1,6 @@
 # 实施计划 - 修复发布通知 EntityNotFound 异常及流程控制 Bug
 
-## 阶段 1: 问题诊断与重现 (Diagnosis)
+## 阶段 1: 问题诊断与重现 (Diagnosis) [checkpoint: 9328fa1]
 - [x] Task: 审查代码以定位 `EntityNotFoundException` 的来源
     - [x] 在 `src/app/api/` 中搜索受影响的 API 路由和控制器
     - [x] 检查 `MysqlReleaseBatch` 模型的相关查询逻辑
@@ -9,7 +9,7 @@
     - [x] 确认 ID 是否在数据库中真实存在，以及是否存在格式或时区导致的 ID 匹配失败
     - [x] 检查是否存在数据库事务隔离级别导致的数据不可见问题
     - **诊断结果:** 确认是 JavaScript `Number` 类型精度丢失导致的问题。External API 返回的 `batchId` (18位) 超出 `MAX_SAFE_INTEGER`，`JSON.parse` 导致精度丢失（如 `...181` -> `...180`），导致后续调用 ID 不匹配。
-- [ ] Task: Conductor - User Manual Verification '阶段 1: 问题诊断与重现' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification '阶段 1: 问题诊断与重现' (Protocol in workflow.md)
 
 ## 阶段 2: 修复后端 Bug 与增强鲁棒性 (Core Fix)
 - [ ] Task: 修复 ID 查找失败的根本原因
