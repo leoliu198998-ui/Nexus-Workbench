@@ -7,11 +7,11 @@
     - [ ] 子任务: 编写失败测试，断言创建接口能够将外部服务返回的 `remoteBatchId` 保存到数据库。
     - [ ] 子任务: 实现逻辑，从外部服务响应中提取并保存 `remoteBatchId`。
     - [ ] 子任务: 验证测试通过。
-- [ ] 任务: 增强 `GET /api/apps/outage-manager/batches/[id]` 接口
+- [x] 任务: 增强 `GET /api/apps/outage-manager/batches/[id]` 接口 d92af25
     - [ ] 子任务: 编写失败测试，确保接口返回 `remoteBatchId` 和 `token` 字段。
     - [ ] 子任务: 更新 API 路由，在响应中包含这些必要字段。
     - [ ] 子任务: 验证测试通过。
-- [ ] 任务: 创建 `PATCH /api/apps/outage-manager/batches/[id]` 用于 Token 更新
+- [x] 任务: 创建 `PATCH /api/apps/outage-manager/batches/[id]` 用于 Token 更新 c7f842e
     - [ ] 子任务: 编写失败测试，验证可以通过 PATCH 请求更新 `token` 字段。
     - [ ] 子任务: 实现 PATCH 路由，允许动态修改批次的 Token。
     - [ ] 子任务: 验证测试通过。
