@@ -34,7 +34,7 @@
 - [ ] 任务: Conductor - 用户手动验证 '前端状态管理与导航 (TDD)' (遵循 workflow.md 协议)
 
 ## 第 3 阶段：Token 管理 UI (TDD)
-- [ ] 任务: 创建 `GlobalTokenInput` 组件
+- [x] 任务: 创建 `GlobalTokenInput` 组件 78e8f0db
     - [ ] 子任务: 编写测试，验证新组件能正确显示值并允许编辑。
     - [ ] 子任务: 实现组件，满足“明文显示”的要求。
     - [ ] 子任务: 验证测试通过。
