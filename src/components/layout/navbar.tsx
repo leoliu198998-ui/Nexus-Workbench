@@ -18,7 +18,12 @@ import { cn } from '@/lib/utils';
 const routeMap: Record<string, string> = {
   'apps': 'Tools',
   'excel-export': 'Schedule Report Exporter',
+  'outage-manager': 'Outage Manager',
+  'wizard': 'Release Wizard',
 };
+
+// Simple UUID regex check
+const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
 
 export function Navbar() {
   const pathname = usePathname();
@@ -26,42 +31,50 @@ export function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
-      <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
+      <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
         <div className="flex items-center gap-6 md:gap-8">
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="bg-primary/5 border border-primary/10 p-1.5 rounded-lg group-hover:bg-primary/10 transition-colors">
-              <Box className="w-5 h-5 text-primary" />
+            <div className="bg-primary/5 border border-primary/10 p-1 rounded-md group-hover:bg-primary/10 transition-colors">
+              <Box className="w-4 h-4 text-primary" />
             </div>
-            <span className="font-bold text-lg tracking-tight text-foreground/90 group-hover:text-foreground transition-colors">
+            <span className="font-bold text-base tracking-tight text-foreground/90 group-hover:text-foreground transition-colors">
               Nexus<span className="text-muted-foreground font-normal ml-1">Workbench</span>
             </span>
           </Link>
 
-          <div className="hidden md:block h-6 w-px bg-border/60" />
+          <div className="hidden md:block h-5 w-px bg-border/60" />
 
           <Breadcrumb className="hidden md:flex">
-            <BreadcrumbList className="text-sm">
+            <BreadcrumbList className="text-xs sm:text-sm">
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
                   <Link 
                     href="/" 
-                    className="flex items-center gap-1.5 hover:text-primary transition-colors"
+                    className="flex items-center gap-1.5 hover:text-primary transition-colors text-muted-foreground/70"
                   >
-                    <LayoutDashboard className="w-4 h-4" />
+                    <LayoutDashboard className="w-3.5 h-3.5" />
                     Dashboard
                   </Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               
               {pathSegments.map((segment, index) => {
+                // Hide breadcrumbs for wizard pages as they have their own internal navigation
+                if (pathname.includes('/wizard/')) return null;
+
                 const href = `/${pathSegments.slice(0, index + 1).join('/')}`;
                 const isLast = index === pathSegments.length - 1;
-                const label = routeMap[segment] || segment;
+                
+                // Handle label display
+                let label = routeMap[segment] || segment;
+                if (isUUID(segment)) {
+                   label = `ID: ${segment.slice(0, 8)}...`;
+                }
 
                 return (
                   <React.Fragment key={href}>
                     <BreadcrumbSeparator>
-                      <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/60" />
+                      <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/40" />
                     </BreadcrumbSeparator>
                     <BreadcrumbItem>
                       {isLast ? (
@@ -70,7 +83,7 @@ export function Navbar() {
                         </BreadcrumbPage>
                       ) : (
                         <BreadcrumbLink asChild>
-                          <Link href={href} className="hover:text-primary transition-colors">
+                          <Link href={href} className="hover:text-primary transition-colors text-muted-foreground/70">
                             {label}
                           </Link>
                         </BreadcrumbLink>

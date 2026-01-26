@@ -23,10 +23,15 @@ import {
   ChevronDown, 
   ChevronUp, 
   AlertTriangle,
-  Loader2
+  Loader2,
+  Clock,
+  Calendar,
+  MoreHorizontal
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { GlobalTokenInput } from './global-token-input';
 
+// ... (Existing Interfaces) ...
 interface LogEntry {
   timestamp: string;
   step: string;
@@ -48,6 +53,10 @@ interface WizardControlProps {
   batch: OutageBatch;
   onUpdate: (updatedBatch: OutageBatch) => void;
   onReset: () => void;
+  // Pass token props through
+  token: string;
+  onTokenChange: (token: string) => void;
+  isSavingToken: boolean;
 }
 
 const STEPS = [
@@ -57,20 +66,23 @@ const STEPS = [
   { id: 'COMPLETED', label: '完成发布', icon: Check, action: 'finish' },
 ] as const;
 
-export function WizardControl({ batch, onUpdate, onReset }: WizardControlProps) {
+export function WizardControl({ batch, onUpdate, onReset, token, onTokenChange, isSavingToken }: WizardControlProps) {
   const [loading, setLoading] = useState(false);
-  const [logsOpen, setLogsOpen] = useState(false);
+  const [logsOpen, setLogsOpen] = useState(true); // Default open in new layout
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<'publish' | 'release' | 'finish' | null>(null);
   
   const logsEndRef = useRef<HTMLDivElement>(null);
+  const lastLogsLength = useRef(batch.logs?.steps?.length || 0);
 
-  // Auto-scroll logs
+  // Auto-scroll logs only when new logs are added
   useEffect(() => {
-    if (logsOpen && logsEndRef.current) {
+    const currentLength = batch.logs?.steps?.length || 0;
+    if (logsOpen && logsEndRef.current && currentLength > lastLogsLength.current) {
       logsEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [batch.logs, logsOpen]);
+    lastLogsLength.current = currentLength;
+  }, [batch.logs?.steps?.length, logsOpen]);
 
   const initiateAction = (action: 'publish' | 'release' | 'finish') => {
     if (action === 'release' || action === 'finish') {
@@ -83,7 +95,7 @@ export function WizardControl({ batch, onUpdate, onReset }: WizardControlProps) 
 
   const executeAction = async (action: 'publish' | 'release' | 'finish') => {
     setLoading(true);
-    setConfirmOpen(false); // Ensure dialog is closed
+    setConfirmOpen(false);
 
     try {
       const res = await fetch(`/api/apps/outage-manager/batches/${batch.id}`, {
@@ -110,225 +122,257 @@ export function WizardControl({ batch, onUpdate, onReset }: WizardControlProps) 
   const nextStep = STEPS[currentStepIndex + 1];
 
   return (
-    <div className="space-y-6">
-      {/* Header & Status */}
-      <Card className="border-t-4 border-t-primary shadow-sm overflow-hidden">
-        <CardHeader className="bg-muted/10 pb-6">
-          <div className="flex justify-between items-start">
-            <div className="space-y-1">
-              <CardTitle className="text-2xl tracking-tight">{batch.batchName}</CardTitle>
-              <CardDescription className="flex items-center gap-3">
-                <span className="font-mono bg-muted px-2 py-0.5 rounded text-xs text-foreground/70 border">
-                  ID: {batch.id.slice(-8)}
-                </span>
-                <span className="text-muted-foreground">•</span>
-                <span className="font-medium text-foreground/80">
-                  环境: {batch.environment?.name || '未知'}
-                </span>
-              </CardDescription>
-            </div>
-            <Badge variant="outline" className={cn(
-              "px-3 py-1 text-sm font-medium shadow-sm",
-              batch.status === 'STARTED' ? "bg-red-50 text-red-700 border-red-200" :
-              batch.status === 'COMPLETED' ? "bg-green-50 text-green-700 border-green-200" :
-              "bg-blue-50 text-blue-700 border-blue-200"
-            )}>
-              {batch.status}
-            </Badge>
-          </div>
-        </CardHeader>
-        <CardContent className="pt-8 pb-10">
-          {/* Stepper */}
-          <div className="relative flex justify-between items-center w-full max-w-3xl mx-auto">
-            {/* Connecting Line Background */}
-            <div className="absolute top-1/2 left-0 w-full h-1 bg-muted -z-20 -translate-y-1/2 rounded-full" />
-            
-            {/* Active Progress Line */}
-            <div 
-              className="absolute top-1/2 left-0 h-1 bg-primary -z-10 -translate-y-1/2 rounded-full transition-all duration-500 ease-in-out" 
-              style={{ width: `${(currentStepIndex / (STEPS.length - 1)) * 100}%` }}
-            />
-            
-            {STEPS.map((step, index) => {
-              const isCompleted = index <= currentStepIndex;
-              const isCurrent = index === currentStepIndex;
-              const Icon = isCompleted ? CheckCircle2 : step.icon;
-
-              return (
-                <div key={step.id} className="relative flex flex-col items-center group">
-                  <div className={cn(
-                    "w-12 h-12 rounded-full flex items-center justify-center border-4 transition-all duration-300 z-10",
-                    isCompleted 
-                      ? "border-primary bg-primary text-primary-foreground shadow-md scale-110" 
-                      : "border-muted bg-background text-muted-foreground",
-                    isCurrent && "ring-4 ring-primary/20 ring-offset-2"
-                  )}>
-                    <Icon className="w-5 h-5" />
-                  </div>
-                  <span className={cn(
-                    "absolute -bottom-8 text-xs font-bold uppercase tracking-wider transition-colors duration-300 whitespace-nowrap",
-                    isCurrent ? "text-primary" : "text-muted-foreground/60"
-                  )}>
-                    {step.label}
-                  </span>
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-full">
+      {/* LEFT COLUMN: Main Action & Logs (8/12) */}
+      <div className="lg:col-span-8 space-y-6">
+        
+        {/* Main Action Card */}
+        <Card className="relative overflow-hidden border-0 shadow-2xl bg-gradient-to-br from-background via-background to-muted/20 min-h-[300px] flex flex-col justify-center">
+          <div className="absolute inset-0 bg-grid-white/5 [mask-image:radial-gradient(ellipse_80%_80%_at_50%_50%,black,transparent)]" />
+          
+          <CardContent className="relative py-12 px-8 flex flex-col items-center text-center space-y-8">
+             {batch.status === 'COMPLETED' ? (
+              <div className="space-y-6 animate-in fade-in zoom-in duration-700">
+                <div className="relative inline-flex items-center justify-center">
+                   <div className="absolute inset-0 bg-green-500/20 rounded-full blur-2xl animate-pulse" />
+                   <div className="relative p-8 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 text-green-600 dark:text-green-400 rounded-full shadow-xl">
+                     <Check className="w-16 h-16" strokeWidth={3} />
+                   </div>
                 </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Main Action Area */}
-      <Card className="shadow-lg border-2 border-muted/20 bg-gradient-to-b from-background to-muted/5">
-        <CardContent className="flex flex-col items-center justify-center py-12 space-y-6">
-          {batch.status === 'COMPLETED' ? (
-            <div className="text-center space-y-6 animate-in fade-in zoom-in duration-500">
-              <div className="inline-flex items-center justify-center p-6 bg-green-100 text-green-600 rounded-full shadow-inner">
-                <Check className="w-12 h-12" />
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-2xl font-semibold tracking-tight">发布流程已完成</h3>
-                <p className="text-muted-foreground max-w-md mx-auto">
-                  所有步骤已执行完毕。系统已恢复正常运行。
-                </p>
-              </div>
-              <Button onClick={onReset} variant="outline" size="lg" className="mt-4 gap-2">
-                <RefreshCwIcon className="w-4 h-4" />
-                创建新批次
-              </Button>
-            </div>
-          ) : nextStep ? (
-            <>
-              <div className="text-center space-y-2">
-                <h3 className="text-lg font-medium text-muted-foreground uppercase tracking-widest text-xs">下一步操作 / Next Step</h3>
-                <p className="text-3xl font-bold flex items-center gap-3 justify-center text-foreground">
-                  <nextStep.icon className={cn(
-                    "w-8 h-8",
-                    nextStep.action === 'release' ? "text-destructive" : "text-primary"
-                  )} />
-                  {nextStep.label}
-                </p>
-              </div>
-              
-              <div className="w-full max-w-md pt-4 space-y-4">
-                {nextStep.action === 'release' && (
-                  <div className="p-4 bg-destructive/5 border border-destructive/20 rounded-lg text-destructive flex gap-3 items-start shadow-sm">
-                    <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5 animate-pulse" />
-                    <div className="space-y-1">
-                      <p className="font-semibold">警告：即将进行系统停机</p>
-                      <p className="text-sm opacity-90">此操作将阻断用户访问，请确保已通过公告或其他方式通知相关人员。</p>
-                    </div>
-                  </div>
-                )}
-                
-                <Button 
-                  size="lg" 
-                  variant={nextStep.action === 'release' ? "destructive" : nextStep.action === 'finish' ? "default" : "secondary"}
-                  className={cn(
-                    "w-full text-lg h-16 shadow-lg transition-all hover:scale-[1.01] active:scale-[0.99]",
-                    nextStep.action === 'finish' && "bg-green-600 hover:bg-green-700 text-white"
-                  )}
-                  onClick={() => nextStep.action && initiateAction(nextStep.action)}
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      执行中...
-                    </>
-                  ) : (
-                    <>
-                      <Play className="mr-2 h-5 w-5 fill-current" />
-                      开始执行: {nextStep.label}
-                    </>
-                  )}
+                <div className="space-y-2">
+                  <h2 className="text-3xl font-bold tracking-tight text-foreground">发布已完成</h2>
+                  <p className="text-muted-foreground">系统已恢复服务，所有流程执行完毕。</p>
+                </div>
+                 <Button onClick={onReset} variant="outline" className="mt-4">
+                  返回列表
                 </Button>
               </div>
-            </>
-          ) : null}
-        </CardContent>
-      </Card>
+             ) : nextStep ? (
+               <>
+                 <div className="space-y-4">
+                   <Badge variant="secondary" className="px-3 py-1 text-xs tracking-widest uppercase bg-muted/50 text-muted-foreground">
+                     Next Action
+                   </Badge>
+                   <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight text-foreground flex items-center justify-center gap-4">
+                      {nextStep.label}
+                   </h2>
+                   {nextStep.action === 'release' && (
+                     <p className="text-red-500 font-medium animate-pulse flex items-center justify-center gap-2">
+                       <AlertTriangle className="w-4 h-4" />
+                       警告：执行此步骤将导致系统停机
+                     </p>
+                   )}
+                 </div>
 
-      {/* Logs Terminal */}
-      <Card className="bg-slate-950 border-slate-800 text-slate-200 overflow-hidden shadow-xl rounded-xl">
-        <CardHeader 
-          className="py-3 px-4 flex flex-row items-center justify-between cursor-pointer hover:bg-slate-900 transition-colors select-none"
-          onClick={() => setLogsOpen(!logsOpen)}
-        >
-          <div className="flex items-center gap-3">
-            <Terminal className="w-4 h-4 text-slate-400" />
-            <CardTitle className="text-sm font-mono tracking-wider text-slate-300">SYSTEM_LOGS</CardTitle>
-            <Badge variant="outline" className="bg-slate-900 text-slate-400 border-slate-700 h-5 px-1.5 text-[10px]">
-              {batch.logs?.steps?.length || 0} EVENTS
-            </Badge>
-          </div>
-          <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-slate-800 text-slate-400">
-            {logsOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-          </Button>
-        </CardHeader>
-        
-        {logsOpen && (
-          <CardContent className="p-0 border-t border-slate-800 font-mono text-xs">
-            <div className="max-h-[400px] overflow-auto p-4 space-y-4 bg-slate-950/50">
-              {(!batch.logs?.steps || batch.logs.steps.length === 0) && (
-                <div className="text-slate-600 italic px-2">No logs recorded yet.</div>
-              )}
-              
-              {batch.logs?.steps?.map((log, i) => (
-                <div key={i} className="flex flex-col gap-1 group animate-in slide-in-from-left-2 duration-300">
-                  <div className="flex items-center gap-3 text-slate-400">
-                    <span className="text-blue-400/80 w-[80px] shrink-0">[{new Date(log.timestamp).toLocaleTimeString()}]</span>
-                    <Badge variant="outline" className={cn(
-                      "font-bold border-0 px-1.5 py-0 rounded text-[10px]",
-                      log.status >= 200 && log.status < 300 
-                        ? "text-green-400 bg-green-950/30" 
-                        : "text-red-400 bg-red-950/30"
-                    )}>
-                      {log.step}
-                    </Badge>
-                    <span className={cn(
-                      "text-[10px]",
-                      log.status >= 200 && log.status < 300 ? "text-slate-500" : "text-red-500"
-                    )}>
-                      HTTP {log.status}
-                    </span>
+                 <Button 
+                    size="lg" 
+                    className={cn(
+                      "h-16 px-12 text-lg font-bold rounded-full shadow-2xl hover:scale-105 active:scale-95 transition-all",
+                      nextStep.action === 'release' ? "bg-red-600 hover:bg-red-700 text-white shadow-red-500/30" :
+                      nextStep.action === 'finish' ? "bg-green-600 hover:bg-green-700 text-white shadow-green-500/30" :
+                      "bg-primary hover:bg-primary/90 text-primary-foreground shadow-primary/30"
+                    )}
+                    onClick={() => nextStep.action && initiateAction(nextStep.action)}
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="mr-3 h-6 w-6 animate-spin" />
+                        执行中...
+                      </>
+                    ) : (
+                      <>
+                        <Play className="mr-3 h-6 w-6 fill-current" />
+                        立即执行
+                      </>
+                    )}
+                  </Button>
+               </>
+             ) : null}
+          </CardContent>
+        </Card>
+
+        {/* Terminal Logs */}
+        <Card className="flex flex-col overflow-hidden bg-slate-950 border-slate-800 shadow-xl rounded-xl">
+           <div 
+             className="flex items-center justify-between px-4 py-3 border-b border-slate-800 bg-slate-900/50 cursor-pointer hover:bg-slate-900 transition-colors"
+             onClick={() => setLogsOpen(!logsOpen)}
+           >
+             <div className="flex items-center gap-2 text-slate-400">
+               <Terminal className="w-4 h-4" />
+               <span className="text-xs font-mono font-medium tracking-wide">EXECUTION_LOGS</span>
+             </div>
+             <ChevronDown className={cn("w-4 h-4 text-slate-500 transition-transform", logsOpen && "rotate-180")} />
+           </div>
+           
+           {logsOpen && (
+             <div className="p-4 font-mono text-xs text-slate-300 max-h-[500px] overflow-y-auto space-y-4 bg-slate-950/50">
+                {(!batch.logs?.steps || batch.logs.steps.length === 0) && (
+                  <div className="text-slate-600 italic px-2">等待操作开始...</div>
+                )}
+                {batch.logs?.steps?.map((log, i) => (
+                  <div key={i} className="flex flex-col gap-2 p-3 rounded-lg bg-slate-900/30 border border-slate-800/50 hover:border-slate-700/80 transition-all group selection:bg-indigo-500/30 selection:text-white">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <span className="text-slate-500 text-[10px] font-medium font-mono bg-slate-950/50 px-1.5 py-0.5 rounded">
+                          {new Date(log.timestamp).toLocaleTimeString()}
+                        </span>
+                        <span className={cn(
+                          "font-bold text-[10px] tracking-wider px-2 py-0.5 rounded-full border",
+                           log.status >= 200 && log.status < 300 
+                            ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20" 
+                            : "text-red-400 bg-red-500/10 border-red-500/20"
+                        )}>
+                          {log.step}
+                        </span>
+                      </div>
+                      <span className={cn(
+                        "text-[10px] font-bold",
+                        log.status >= 200 && log.status < 300 ? "text-emerald-500/50" : "text-red-500/50"
+                      )}>
+                        HTTP {log.status}
+                      </span>
+                    </div>
+                    
+                    {log.response && (
+                      <div className="relative mt-1">
+                        <pre className="font-mono text-[11px] leading-relaxed text-slate-300 bg-slate-950/80 p-3 rounded-md border border-slate-800 overflow-x-auto select-text cursor-text selection:bg-indigo-500/30 selection:text-white">
+                          {(() => {
+                            try {
+                              const content = typeof log.response === 'string' ? JSON.parse(log.response) : log.response;
+                              return JSON.stringify(content, null, 2);
+                            } catch {
+                              return String(log.response);
+                            }
+                          })()}
+                        </pre>
+                      </div>
+                    )}
                   </div>
-                  <div className="pl-[80px]">
-                     <div className="pl-3 border-l-2 border-slate-800 group-hover:border-slate-700 transition-colors py-1">
-                      <pre className="text-slate-300 whitespace-pre-wrap break-all overflow-hidden opacity-80 group-hover:opacity-100 transition-opacity">
-                        {JSON.stringify(log.response, null, 2)}
-                      </pre>
+                ))}
+                <div ref={logsEndRef} />
+             </div>
+           )}
+        </Card>
+      </div>
+
+      {/* RIGHT COLUMN: Sidebar (4/12) */}
+      <div className="lg:col-span-4 space-y-6">
+        
+        {/* Token Configuration */}
+        <Card className="border-l-4 border-l-amber-500 bg-gradient-to-br from-amber-50/50 to-background dark:from-amber-950/10">
+          <CardContent className="pt-6">
+            <GlobalTokenInput 
+              value={token} 
+              onChange={onTokenChange} 
+              isSaving={isSavingToken}
+              className="space-y-4"
+            />
+          </CardContent>
+        </Card>
+
+        {/* Vertical Timeline */}
+        <Card className="overflow-hidden border-0 shadow-lg bg-card/50 backdrop-blur-sm">
+          <CardHeader className="pb-4 border-b bg-muted/20">
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <Clock className="w-4 h-4 text-muted-foreground" />
+              发布进度
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-6 px-6">
+            <div className="relative space-y-8 before:absolute before:inset-0 before:ml-5 before:h-full before:w-0.5 before:-translate-x-1/2 before:bg-gradient-to-b before:from-border before:via-border before:to-transparent before:z-0">
+              {STEPS.map((step, index) => {
+                const isCompleted = index <= currentStepIndex;
+                const isCurrent = index === currentStepIndex;
+                const isUpcoming = index > currentStepIndex;
+                
+                return (
+                  <div key={step.id} className="relative flex items-start gap-4 z-10 group">
+                    <div className={cn(
+                      "flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 transition-all duration-300 shadow-sm",
+                      isCompleted ? "bg-primary border-primary text-primary-foreground" : 
+                      isCurrent ? "bg-background border-primary ring-4 ring-primary/10 animate-pulse" : 
+                      "bg-muted border-transparent text-muted-foreground"
+                    )}>
+                      {isCompleted ? <Check className="w-5 h-5" /> : <step.icon className="w-5 h-5" />}
+                    </div>
+                    <div className="flex flex-col pt-1.5 space-y-1">
+                      <span className={cn(
+                        "text-sm font-bold leading-none transition-colors",
+                        isCompleted || isCurrent ? "text-foreground" : "text-muted-foreground"
+                      )}>
+                        {step.label}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {isCompleted ? '已完成' : isCurrent ? '进行中' : '等待中'}
+                      </span>
                     </div>
                   </div>
-                </div>
-              ))}
-              <div ref={logsEndRef} />
+                );
+              })}
             </div>
           </CardContent>
-        )}
-      </Card>
+        </Card>
+
+        {/* Batch Info */}
+        <Card className="bg-muted/10 border-dashed">
+          <CardContent className="py-4 space-y-3 text-sm">
+            <div className="flex justify-between items-center">
+              <span className="text-muted-foreground">发布环境</span>
+              <Badge variant="outline">{batch.environment?.name}</Badge>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-muted-foreground">批次 ID</span>
+              <span className="font-mono text-xs">{batch.id.slice(-8)}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-muted-foreground">创建时间</span>
+              <span className="text-xs tabular-nums text-muted-foreground">
+                {new Date().toLocaleDateString()}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+
+      </div>
 
       {/* Confirmation Dialog */}
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              {pendingAction === 'release' && <AlertTriangle className="w-5 h-5 text-destructive" />}
-              {pendingAction === 'release' ? '确认开始发布/停机？' : '确认完成发布？'}
+            <DialogTitle className="flex items-center gap-2 text-xl">
+              {pendingAction === 'release' ? (
+                <>
+                   <div className="p-2 bg-red-100 rounded-full text-red-600">
+                     <AlertTriangle className="w-5 h-5" />
+                   </div>
+                   确认开始停机发布？
+                </>
+              ) : (
+                <>
+                  <div className="p-2 bg-green-100 rounded-full text-green-600">
+                    <CheckCircle2 className="w-5 h-5" />
+                  </div>
+                  确认完成发布？
+                </>
+              )}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="pt-2 text-base">
               {pendingAction === 'release' 
-                ? '此操作将调用停机接口，系统将暂停对外服务。请确认已做好准备。'
+                ? '此操作将调用停机接口，系统将暂停对外服务。请确保相关人员已就位。'
                 : '此操作将调用完成接口，解除系统停机状态，恢复对外服务。'
               }
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
+          <DialogFooter className="gap-2 sm:gap-0 mt-4">
             <Button variant="outline" onClick={() => setConfirmOpen(false)}>取消</Button>
             <Button 
               variant={pendingAction === 'release' ? "destructive" : "default"}
               onClick={() => pendingAction && executeAction(pendingAction)}
-              className={pendingAction === 'finish' ? "bg-green-600 hover:bg-green-700" : ""}
+              className={cn(
+                "w-full sm:w-auto",
+                pendingAction === 'finish' && "bg-green-600 hover:bg-green-700"
+              )}
             >
               确认{pendingAction === 'release' ? '停机' : '完成'}
             </Button>

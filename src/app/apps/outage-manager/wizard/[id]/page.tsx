@@ -4,11 +4,13 @@ import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, ArrowLeft } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Loader2, ArrowLeft, ChevronRight, Zap, Clock } from 'lucide-react';
 import { OutageWizardProvider, useOutageWizard } from '@/components/outage-manager/outage-wizard-context';
 import { WizardControl } from '@/components/outage-manager/wizard-control';
 import { GlobalTokenInput } from '@/components/outage-manager/global-token-input';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import { cn } from '@/lib/utils';
 
 // Inner component to consume context
 function WizardContent({ onReset }: { onReset: () => void }) {
@@ -36,52 +38,33 @@ function WizardContent({ onReset }: { onReset: () => void }) {
   };
 
   return (
-    <>
-      <div className="space-y-4">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/apps/outage-manager">停机管理</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>发布向导</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-          
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={onReset}
-                className="rounded-full"
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-              <h1 className="text-3xl font-bold">发布执行向导</h1>
-            </div>
-          </div>
+    <div className="space-y-6 animate-in fade-in slide-in-from-top-4 duration-500 h-[calc(100vh-100px)]">
+      {/* Header / Nav Area */}
+      <div className="flex items-center justify-between mb-2">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={onReset}
+          className="gap-2 text-muted-foreground hover:text-foreground pl-0 hover:bg-transparent transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          返回列表
+        </Button>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+           <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+           发布向导运行中
         </div>
+      </div>
 
-        {/* Global Token Input - Prominently placed */}
-        <Card className="border-l-4 border-l-amber-500 shadow-md bg-amber-50/10">
-          <CardContent className="py-4">
-            <GlobalTokenInput 
-              value={token} 
-              onChange={handleTokenChange} 
-              isSaving={isSavingToken}
-            />
-          </CardContent>
-        </Card>
-
-        <WizardControl 
-          batch={batch} 
-          onUpdate={updateBatch}
-          onReset={onReset}
-        />
-      </>
+      <WizardControl 
+        batch={batch} 
+        onUpdate={updateBatch}
+        onReset={onReset}
+        token={token}
+        onTokenChange={handleTokenChange}
+        isSavingToken={isSavingToken}
+      />
+    </div>
   );
 }
 
