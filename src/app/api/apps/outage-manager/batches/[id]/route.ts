@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { OutageStatus, Prisma } from '@/generated/client';
+import { logOutageAction } from '@/lib/services/logger';
 
 /**
  * 生成 curl 命令字符串，用于调试和记录 API 调用
@@ -64,6 +65,8 @@ export async function PATCH(
         where: { id },
         data: { token },
       });
+      // 记录日志
+      await logOutageAction(id, 'OUTAGE_BATCH_TOKEN_UPDATE', '更新了鉴权 Token');
       return NextResponse.json(updatedBatch);
     }
 
@@ -104,6 +107,9 @@ export async function PATCH(
         where: { id },
         data: { remoteBatchId: correctBatchId },
       });
+
+      // 记录日志
+      await logOutageAction(id, 'OUTAGE_BATCH_FIX_ID', `修复了批次 ID: ${batch.remoteBatchId} -> ${correctBatchId}`);
 
       return NextResponse.json({
         ...updatedBatch,
@@ -192,12 +198,18 @@ export async function PATCH(
       });
 
       if (!response.ok) {
-        throw new Error((responseData.errmsg as string) || (responseData.message as string) || `External API failed for ${action}`);
+        const errorMsg = (responseData.errmsg as string) || (responseData.message as string) || `External API failed for ${action}`;
+        // 记录失败日志
+        await logOutageAction(id, `OUTAGE_BATCH_${action.toUpperCase()}_FAILED`, `外部 API 调用失败: ${errorMsg}`);
+        throw new Error(errorMsg);
       }
 
       // 验证逻辑错误码 (errcode)
       if (responseData.errcode !== undefined && String(responseData.errcode) !== '0') {
         const errmsg = responseData.errmsg as string;
+        // 记录失败日志
+        await logOutageAction(id, `OUTAGE_BATCH_${action.toUpperCase()}_FAILED`, `接口返回错误码: ${responseData.errcode}, 错误信息: ${errmsg}`);
+        
         // 检查是否是 EntityNotFoundException
         if (errmsg && errmsg.includes('EntityNotFoundException') && errmsg.includes('Unable to find')) {
           throw new Error(`外部系统中找不到对应的批次记录 (ID: ${batch.remoteBatchId})。这可能是因为：1) 创建批次时外部系统未成功保存记录；2) 外部系统中的记录已被删除；3) 批次 ID 不匹配。请检查外部系统或重新创建批次。原始错误: ${errmsg}`);
@@ -243,6 +255,9 @@ export async function PATCH(
         logs: logs as unknown as Prisma.InputJsonValue,
       },
     });
+
+    // 记录成功日志
+    await logOutageAction(id, `OUTAGE_BATCH_${action.toUpperCase()}_SUCCESS`, `成功执行操作: ${action}`);
 
     // 返回成功响应，包含 curl 命令和完整的请求/响应信息
     return NextResponse.json({
