@@ -1,0 +1,21 @@
+# Generated files
+src/generated/
+
+# Build output
+dist/
+build/
+.next/
+out/
+
+# Dependencies
+node_modules/
+
+# Coverage
+coverage/
+
+# Skills and tools
+.agents/
+.cursor/
+
+# Test snapshots
+**/__snapshots__/

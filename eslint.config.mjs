@@ -12,6 +12,13 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Generated code
+    "src/generated/**",
+    // Skills and tools
+    ".agents/**",
+    ".cursor/**",
+    // Coverage
+    "coverage/**",
   ]),
 ]);
 

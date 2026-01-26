@@ -1,27 +1,36 @@
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { WizardControl } from './wizard-control';
 import { OutageWizardProvider, useOutageWizard } from './outage-wizard-context';
-import { GlobalTokenInput } from './global-token-input';
+
+interface MockBatch {
+  id: string;
+  token: string;
+  remoteBatchId: string;
+  status: string;
+  batchName: string;
+  envId: string;
+  environment?: { name: string };
+}
 
 // Test wrapper that mimics the page structure
-function TestWizardPage({ batch }: { batch: any }) {
+function TestWizardPage({ batch }: { batch: MockBatch }) {
   const { token } = useOutageWizard();
   return (
     <div>
-      <GlobalTokenInput value={token} onChange={() => {}} />
-      <WizardControl batch={batch} onUpdate={() => {}} onReset={() => {}} />
+      <WizardControl batch={batch} onUpdate={() => {}} onReset={() => {}} token={token} onTokenChange={() => {}} isSavingToken={false} />
     </div>
   );
 }
 
 // Mock child components if needed, but here we want to see integration
 describe('WizardControl Integration with Context', () => {
-  const mockBatch: any = {
+  const mockBatch: MockBatch = {
     id: 'batch-1',
     token: 'initial-token',
     remoteBatchId: 'remote-1',
     status: 'CREATED',
+    envId: 'env-1',
     batchName: 'Test Batch',
     environment: { name: 'Test Env' }
   };

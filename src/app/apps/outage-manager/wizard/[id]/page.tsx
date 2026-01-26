@@ -3,14 +3,20 @@
 import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, ArrowLeft, ChevronRight, Zap, Clock } from 'lucide-react';
+import { Loader2, ArrowLeft } from 'lucide-react';
 import { OutageWizardProvider, useOutageWizard } from '@/components/outage-manager/outage-wizard-context';
 import { WizardControl } from '@/components/outage-manager/wizard-control';
-import { GlobalTokenInput } from '@/components/outage-manager/global-token-input';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
-import { cn } from '@/lib/utils';
+
+interface OutageBatch {
+  id: string;
+  envId: string;
+  batchName: string;
+  status: string;
+  token: string;
+  environment?: { name: string };
+  logs?: { steps: unknown[] };
+}
 
 // Inner component to consume context
 function WizardContent({ onReset }: { onReset: () => void }) {
@@ -80,7 +86,7 @@ function WizardContent({ onReset }: { onReset: () => void }) {
 export default function OutageWizardPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const { id } = use(params);
-  const [batch, setBatch] = useState<any>(null);
+  const [batch, setBatch] = useState<OutageBatch | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -94,8 +100,8 @@ export default function OutageWizardPage({ params }: { params: Promise<{ id: str
         }
         const data = await res.json();
         setBatch(data);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : '发生未知错误');
       } finally {
         setLoading(false);
       }
