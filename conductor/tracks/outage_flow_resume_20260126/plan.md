@@ -3,7 +3,7 @@
 ## 第 1 阶段：数据库与后端逻辑 (TDD)
 - [x] 任务: 创建 `OutageBatch` 测试工厂和数据种子 83cfbc9
     - [ ] 子任务: 创建测试辅助函数，用于生成包含 `remoteBatchId` 和 `token` 的模拟 `OutageBatch` 数据。
-- [ ] 任务: 更新 `POST /api/apps/outage-manager/batches` 接口以存储 `remoteBatchId`
+- [x] 任务: 更新 `POST /api/apps/outage-manager/batches` 接口以存储 `remoteBatchId` ac30347
     - [ ] 子任务: 编写失败测试，断言创建接口能够将外部服务返回的 `remoteBatchId` 保存到数据库。
     - [ ] 子任务: 实现逻辑，从外部服务响应中提取并保存 `remoteBatchId`。
     - [ ] 子任务: 验证测试通过。
