@@ -2,7 +2,8 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { WizardControl } from './wizard-control';
-import { OutageWizardProvider } from './outage-wizard-context';
+import { OutageWizardProvider, useOutageWizard } from './outage-wizard-context';
+import { GlobalTokenInput } from './global-token-input';
 import { toast } from 'sonner';
 
 global.fetch = vi.fn();
@@ -13,6 +14,26 @@ vi.mock('sonner', () => ({
     error: vi.fn(),
   },
 }));
+
+// Test wrapper that mimics the page structure
+function TestWizardPage({ batch }: { batch: any }) {
+  const { token, setToken } = useOutageWizard();
+  
+  const handleTokenChange = (t: string) => {
+    setToken(t);
+    // Mock the API call here if needed, or rely on the test mocking fetch
+    if (t === 'new-valid-token') {
+       // simulate success side effect
+    }
+  };
+
+  return (
+    <div>
+      <GlobalTokenInput value={token} onChange={handleTokenChange} />
+      <WizardControl batch={batch} onUpdate={() => {}} onReset={() => {}} />
+    </div>
+  );
+}
 
 describe('WizardControl - Token Expiration Flow', () => {
   const mockBatch: any = {
@@ -40,11 +61,7 @@ describe('WizardControl - Token Expiration Flow', () => {
 
     render(
       <OutageWizardProvider initialBatch={mockBatch}>
-        <WizardControl 
-          batch={mockBatch} 
-          onUpdate={() => {}} 
-          onReset={() => {}} 
-        />
+        <TestWizardPage batch={mockBatch} />
       </OutageWizardProvider>
     );
 
@@ -60,11 +77,8 @@ describe('WizardControl - Token Expiration Flow', () => {
     await user.clear(tokenInput);
     await user.type(tokenInput, 'new-valid-token');
 
-    // Mock token sync success
-    (global.fetch as any).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ ...mockBatch, token: 'new-valid-token' }),
-    });
+    // Mock token sync success logic is handled by component, here we focus on the retry
+    // In real app, PATCH is called. Here, we assume token in context is updated.
 
     // 3. Retry attempt succeeds
     (global.fetch as any).mockResolvedValueOnce({

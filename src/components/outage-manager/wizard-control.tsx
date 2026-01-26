@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
@@ -26,8 +26,6 @@ import {
   Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useOutageWizard } from './outage-wizard-context';
-import { GlobalTokenInput } from './global-token-input';
 
 interface LogEntry {
   timestamp: string;
@@ -59,19 +57,13 @@ const STEPS = [
   { id: 'COMPLETED', label: '完成发布', icon: Check, action: 'finish' },
 ] as const;
 
-export function WizardControl({ batch: initialBatch, onUpdate, onReset }: WizardControlProps) {
-  const { token, setToken, updateBatch } = useOutageWizard();
+export function WizardControl({ batch, onUpdate, onReset }: WizardControlProps) {
   const [loading, setLoading] = useState(false);
-  const [isSavingToken, setIsSavingToken] = useState(false);
   const [logsOpen, setLogsOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<'publish' | 'release' | 'finish' | null>(null);
   
   const logsEndRef = useRef<HTMLDivElement>(null);
-
-  // Sync initial batch to context if needed (handled by provider usually)
-  // But here we use context values for token
-  const batch = initialBatch;
 
   // Auto-scroll logs
   useEffect(() => {
@@ -79,26 +71,6 @@ export function WizardControl({ batch: initialBatch, onUpdate, onReset }: Wizard
       logsEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [batch.logs, logsOpen]);
-
-  const handleTokenChange = async (newToken: string) => {
-    setToken(newToken);
-    setIsSavingToken(true);
-    try {
-      const res = await fetch(`/api/apps/outage-manager/batches/${batch.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: newToken }),
-      });
-      if (!res.ok) throw new Error('Token 同步失败');
-      const updated = await res.json();
-      onUpdate(updated);
-    } catch (err) {
-      console.error(err);
-      // No toast here to avoid noise, but indicator shows state
-    } finally {
-      setIsSavingToken(false);
-    }
-  };
 
   const initiateAction = (action: 'publish' | 'release' | 'finish') => {
     if (action === 'release' || action === 'finish') {
@@ -139,17 +111,6 @@ export function WizardControl({ batch: initialBatch, onUpdate, onReset }: Wizard
 
   return (
     <div className="space-y-6">
-      {/* Token Management Card */}
-      <Card className="border-l-4 border-l-amber-500 shadow-md">
-        <CardContent className="py-4">
-          <GlobalTokenInput 
-            value={token} 
-            onChange={handleTokenChange} 
-            isSaving={isSavingToken}
-          />
-        </CardContent>
-      </Card>
-
       {/* Header & Status */}
       <Card className="border-t-4 border-t-primary shadow-sm overflow-hidden">
         <CardHeader className="bg-muted/10 pb-6">

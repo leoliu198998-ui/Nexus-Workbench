@@ -1,7 +1,19 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { WizardControl } from './wizard-control';
-import { OutageWizardProvider } from './outage-wizard-context';
+import { OutageWizardProvider, useOutageWizard } from './outage-wizard-context';
+import { GlobalTokenInput } from './global-token-input';
+
+// Test wrapper that mimics the page structure
+function TestWizardPage({ batch }: { batch: any }) {
+  const { token } = useOutageWizard();
+  return (
+    <div>
+      <GlobalTokenInput value={token} onChange={() => {}} />
+      <WizardControl batch={batch} onUpdate={() => {}} onReset={() => {}} />
+    </div>
+  );
+}
 
 // Mock child components if needed, but here we want to see integration
 describe('WizardControl Integration with Context', () => {
@@ -17,11 +29,7 @@ describe('WizardControl Integration with Context', () => {
   it('renders GlobalTokenInput with token from context', () => {
     render(
       <OutageWizardProvider initialBatch={mockBatch}>
-        <WizardControl 
-          batch={mockBatch} 
-          onUpdate={() => {}} 
-          onReset={() => {}} 
-        />
+        <TestWizardPage batch={mockBatch} />
       </OutageWizardProvider>
     );
 
