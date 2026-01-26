@@ -3,6 +3,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import userEvent from '@testing-library/user-event';
 import OutageManagerPage from './page';
 
+// Mock useRouter
+const mockPush = vi.fn();
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: mockPush,
+  }),
+}));
+
 // Mock child components to simplify integration testing
 vi.mock('@/components/outage-manager/batch-list', () => ({
   BatchList: ({ onBatchClick }: { onBatchClick?: (batch: unknown) => void }) => (
@@ -58,13 +66,12 @@ describe('OutageManagerPage', () => {
     expect(screen.getByTestId('create-batch-dialog')).toBeInTheDocument();
   });
 
-  it('opens batch detail drawer when batch is clicked', async () => {
+  it('navigates to wizard page when batch is clicked', async () => {
     const user = userEvent.setup();
     render(<OutageManagerPage />);
 
     await user.click(screen.getByText('View Batch'));
 
-    expect(screen.getByTestId('batch-detail-drawer')).toBeInTheDocument();
-    expect(screen.getByText('Drawer for batch-1')).toBeInTheDocument();
+    expect(mockPush).toHaveBeenCalledWith('/apps/outage-manager/wizard/batch-1');
   });
 });

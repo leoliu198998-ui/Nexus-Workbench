@@ -1,98 +1,159 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
+
+import { useRouter } from 'next/navigation';
+
+
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+
 import { Button } from '@/components/ui/button';
+
 import { BatchList } from '@/components/outage-manager/batch-list';
+
 import { CreateBatchDialog } from '@/components/outage-manager/create-batch-dialog';
-import { BatchDetailDrawer } from '@/components/outage-manager/batch-detail-drawer';
+
 import { Plus } from 'lucide-react';
 
+
+
 interface LogEntry {
+
   timestamp: string;
+
   step: string;
+
   status: number;
+
   response: unknown;
+
 }
+
+
 
 interface OutageBatch {
+
   id: string;
+
   envId: string;
+
   status: string;
+
   batchName: string;
+
   releaseDatetime: string;
+
   releaseTimeZone: string;
+
   duration: number;
+
   environment?: { name: string };
+
   logs?: { steps: LogEntry[] };
+
 }
 
+
+
 export default function OutageManagerPage() {
+
+  const router = useRouter();
+
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [selectedBatch, setSelectedBatch] = useState<OutageBatch | null>(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
+
   const [refreshKey, setRefreshKey] = useState(0);
 
+
+
   const handleCreateSuccess = () => {
+
     setRefreshKey((prev) => prev + 1);
+
   };
+
+
 
   const handleBatchClick = (batch: OutageBatch) => {
-    setSelectedBatch(batch);
-    setDrawerOpen(true);
+
+    router.push(`/apps/outage-manager/wizard/${batch.id}`);
+
   };
 
-  const handleDrawerClose = () => {
-    setDrawerOpen(false);
-    setSelectedBatch(null);
-  };
 
-  const handleBatchUpdate = useCallback(() => {
-    setRefreshKey((prev) => prev + 1);
-  }, []);
 
   return (
+
     <div className="container mx-auto py-6 space-y-6">
+
       <div className="flex justify-between items-center">
+
         <h1 className="text-3xl font-bold">系统停机发布管理</h1>
+
       </div>
 
+
+
       <Card>
+
         <CardHeader>
+
           <div className="flex items-center justify-between">
+
             <div>
+
               <CardTitle>发布批次管理</CardTitle>
+
               <CardDescription>创建和管理系统发布批次，跟踪发布流程</CardDescription>
+
             </div>
+
             <Button 
+
               onClick={() => setCreateDialogOpen(true)}
+
               className="gap-2"
+
             >
+
               <Plus className="h-4 w-4" />
+
               创建新批次
+
             </Button>
+
           </div>
+
         </CardHeader>
+
         <CardContent>
+
           <BatchList 
+
             key={refreshKey}
+
             onBatchClick={handleBatchClick}
+
           />
+
         </CardContent>
+
       </Card>
 
+
+
       <CreateBatchDialog
+
         open={createDialogOpen}
+
         onClose={() => setCreateDialogOpen(false)}
+
         onSuccess={handleCreateSuccess}
+
       />
 
-      <BatchDetailDrawer
-        batch={selectedBatch}
-        open={drawerOpen}
-        onClose={handleDrawerClose}
-        onBatchUpdate={handleBatchUpdate}
-      />
     </div>
+
   );
+
 }
