@@ -16,7 +16,7 @@
 ## Phase 2: 后端日志逻辑实现 (Backend)
 本阶段将业务逻辑与新的日志表进行集成。
 
-- [ ] Task: 封装 SystemLog 记录服务 (Service Layer)
+- [x] Task: 封装 SystemLog 记录服务 (Service Layer) 644a500
     - [ ] Sub-task: 创建或更新 `src/lib/services/logger.ts` (如适用)，提供一个简化的函数用于记录与 OutageBatch 关联的系统日志。
 - [ ] Task: 集成 API 路由日志记录
     - [ ] Sub-task: 修改 `src/app/api/apps/outage-manager/batches/[id]/route.ts`。
