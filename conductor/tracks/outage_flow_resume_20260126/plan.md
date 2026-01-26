@@ -1,6 +1,6 @@
 # 实施计划 - 任务: 系统停机管理流程重构与进度续传
 
-## 第 1 阶段：数据库与后端逻辑 (TDD)
+## 第 1 阶段：数据库与后端逻辑 (TDD) [checkpoint: 7a6ee16]
 - [x] 任务: 创建 `OutageBatch` 测试工厂和数据种子 83cfbc9
     - [ ] 子任务: 创建测试辅助函数，用于生成包含 `remoteBatchId` 和 `token` 的模拟 `OutageBatch` 数据。
 - [x] 任务: 更新 `POST /api/apps/outage-manager/batches` 接口以存储 `remoteBatchId` ac30347
