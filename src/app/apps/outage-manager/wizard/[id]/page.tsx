@@ -41,15 +41,24 @@ function WizardContent({ onReset }: { onReset: () => void }) {
     <div className="space-y-6 animate-in fade-in slide-in-from-top-4 duration-500 h-[calc(100vh-100px)]">
       {/* Header / Nav Area */}
       <div className="flex items-center justify-between mb-2">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={onReset}
-          className="gap-2 text-muted-foreground hover:text-foreground pl-0 hover:bg-transparent transition-colors"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          返回列表
-        </Button>
+        <div className="flex items-center gap-4">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={onReset}
+            className="gap-2 text-muted-foreground hover:text-foreground pl-0 hover:bg-transparent transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            返回列表
+          </Button>
+          <div className="h-4 w-px bg-border" />
+          <h1 className="text-lg font-semibold tracking-tight flex items-center gap-2">
+            {batch.batchName}
+            <Badge variant="outline" className="font-normal text-xs px-1.5 py-0 h-5">
+              {batch.environment?.name}
+            </Badge>
+          </h1>
+        </div>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
            发布向导运行中
