@@ -1,26 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { WizardControl } from './wizard-control';
-
-interface LogEntry {
-  timestamp: string;
-  step: string;
-  status: number;
-  response: unknown;
-}
-
-interface OutageBatch {
-  id: string;
-  envId: string;
-  status: string;
-  batchName: string;
-  releaseDatetime: string;
-  releaseTimeZone: string;
-  duration: number;
-  environment?: { name: string };
-  logs?: { steps: LogEntry[] };
-}
+import type { OutageBatch } from '@/types/outage';
 
 interface BatchDetailDrawerProps {
   batch: OutageBatch | null;
@@ -30,6 +13,8 @@ interface BatchDetailDrawerProps {
 }
 
 export function BatchDetailDrawer({ batch, open, onClose, onBatchUpdate }: BatchDetailDrawerProps) {
+  const [isSavingToken, setIsSavingToken] = useState(false);
+  
   if (!batch) {
     return null;
   }
@@ -41,6 +26,20 @@ export function BatchDetailDrawer({ batch, open, onClose, onBatchUpdate }: Batch
   const handleReset = () => {
     onClose();
     onBatchUpdate();
+  };
+
+  const handleTokenChange = async (newToken: string) => {
+    setIsSavingToken(true);
+    try {
+      await fetch(`/api/apps/outage-manager/batches/${batch.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: newToken }),
+      });
+      onBatchUpdate();
+    } finally {
+      setIsSavingToken(false);
+    }
   };
 
   return (
@@ -58,6 +57,9 @@ export function BatchDetailDrawer({ batch, open, onClose, onBatchUpdate }: Batch
             batch={batch}
             onUpdate={handleWizardUpdate}
             onReset={handleReset}
+            token={batch.token}
+            onTokenChange={handleTokenChange}
+            isSavingToken={isSavingToken}
           />
         </div>
       </SheetContent>

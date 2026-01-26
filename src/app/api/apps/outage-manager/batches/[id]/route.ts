@@ -85,9 +85,11 @@ export async function PATCH(
         return NextResponse.json({ error: 'Batch not found' }, { status: 404 });
       }
 
-      const logs = batch.logs as { steps: Record<string, unknown>[] } | null;
-      const createStep = logs?.steps?.find((s: any) => s.step === 'CREATE_BATCH');
-      
+      type StepLog = { step: string; response?: { raw?: string } };
+      type LogsData = { steps: StepLog[] } | null;
+      const logs = batch.logs as LogsData;
+      const createStep = logs?.steps?.find((s: StepLog) => s.step === 'CREATE_BATCH');
+
       if (!createStep || !createStep.response) {
         return NextResponse.json({ error: '无法找到创建批次的日志' }, { status: 400 });
       }

@@ -15,6 +15,7 @@ describe('BatchDetailDrawer', () => {
     envId: 'env-456',
     status: 'CREATED',
     batchName: 'Test Batch',
+    token: 'test-token',
     releaseDatetime: '2026-01-23T10:00:00Z',
     releaseTimeZone: 'Asia/Shanghai',
     duration: 60,

@@ -5,6 +5,7 @@ import { WizardControl } from './wizard-control';
 import { OutageWizardProvider, useOutageWizard } from './outage-wizard-context';
 import { GlobalTokenInput } from './global-token-input';
 import { toast } from 'sonner';
+import type { OutageBatch } from '@/types/outage';
 
 global.fetch = vi.fn();
 
@@ -16,7 +17,7 @@ vi.mock('sonner', () => ({
 }));
 
 // Test wrapper that mimics the page structure
-function TestWizardPage({ batch }: { batch: any }) {
+function TestWizardPage({ batch }: { batch: OutageBatch }) {
   const { token, setToken } = useOutageWizard();
   
   const handleTokenChange = (t: string) => {
@@ -43,10 +44,11 @@ function TestWizardPage({ batch }: { batch: any }) {
 }
 
 describe('WizardControl - Token Expiration Flow', () => {
-  const mockBatch: any = {
+  const mockBatch: OutageBatch = {
     id: 'batch-1',
     token: 'expired-token',
     remoteBatchId: 'remote-1',
+    envId: 'env-1',
     status: 'CREATED',
     batchName: 'Test Batch',
     environment: { name: 'Test Env' }
@@ -60,7 +62,8 @@ describe('WizardControl - Token Expiration Flow', () => {
     const user = userEvent.setup();
     
     // 1. First attempt fails with 502/Unauthorized
-    (global.fetch as any).mockResolvedValueOnce({
+    const mockFetch = global.fetch as unknown as ReturnType<typeof vi.fn>;
+    mockFetch.mockResolvedValueOnce({
       ok: false,
       status: 502,
       json: async () => ({ error: 'External API Error', details: 'Unauthorized' }),
@@ -88,7 +91,7 @@ describe('WizardControl - Token Expiration Flow', () => {
     // In real app, PATCH is called. Here, we assume token in context is updated.
 
     // 3. Retry attempt succeeds
-    (global.fetch as any).mockResolvedValueOnce({
+    mockFetch.mockResolvedValueOnce({
       ok: true,
       status: 200,
       json: async () => ({ ...mockBatch, status: 'NOTIFIED' }),

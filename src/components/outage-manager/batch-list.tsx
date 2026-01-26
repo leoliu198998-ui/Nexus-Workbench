@@ -21,24 +21,14 @@ import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { RefreshCw, RotateCw, Eye, Play, ArrowRight, Clock, Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-interface Batch {
-  id: string;
-  batchName: string;
-  status: string;
-  releaseDatetime: string;
-  duration: number;
-  environment: {
-    name: string;
-  };
-}
+import type { OutageBatch } from '@/types/outage';
 
 interface BatchListProps {
-  onBatchClick?: (batch: Batch) => void;
+  onBatchClick?: (batch: OutageBatch) => void;
 }
 
 export function BatchList({ onBatchClick }: BatchListProps) {
-  const [batches, setBatches] = useState<Batch[]>([]);
+  const [batches, setBatches] = useState<OutageBatch[]>([]);
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -147,17 +137,17 @@ export function BatchList({ onBatchClick }: BatchListProps) {
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline" className="font-normal bg-background/50">
-                      {batch.environment.name}
+                      {batch.environment?.name || 'Unknown'}
                     </Badge>
                   </TableCell>
                   <TableCell>
                     <StatusBadge status={batch.status} />
                   </TableCell>
                   <TableCell className="text-muted-foreground text-sm">
-                    {batch.duration} 分钟
+                    {batch.duration || 0} 分钟
                   </TableCell>
                   <TableCell className="text-muted-foreground text-sm">
-                    {format(new Date(batch.releaseDatetime), 'MM-dd HH:mm')}
+                    {batch.releaseDatetime ? format(new Date(batch.releaseDatetime), 'MM-dd HH:mm') : '-'}
                   </TableCell>
                   <TableCell className="text-right">
                     <Button

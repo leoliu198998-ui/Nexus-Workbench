@@ -7,16 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import { OutageWizardProvider, useOutageWizard } from '@/components/outage-manager/outage-wizard-context';
 import { WizardControl } from '@/components/outage-manager/wizard-control';
-
-interface OutageBatch {
-  id: string;
-  envId: string;
-  batchName: string;
-  status: string;
-  token: string;
-  environment?: { name: string };
-  logs?: { steps: unknown[] };
-}
+import type { OutageBatch } from '@/types/outage';
 
 // Inner component to consume context
 function WizardContent({ onReset }: { onReset: () => void }) {

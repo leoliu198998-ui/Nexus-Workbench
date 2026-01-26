@@ -2,19 +2,10 @@ import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import { WizardControl } from './wizard-control';
 import { OutageWizardProvider, useOutageWizard } from './outage-wizard-context';
-
-interface MockBatch {
-  id: string;
-  token: string;
-  remoteBatchId: string;
-  status: string;
-  batchName: string;
-  envId: string;
-  environment?: { name: string };
-}
+import type { OutageBatch } from '@/types/outage';
 
 // Test wrapper that mimics the page structure
-function TestWizardPage({ batch }: { batch: MockBatch }) {
+function TestWizardPage({ batch }: { batch: OutageBatch }) {
   const { token } = useOutageWizard();
   return (
     <div>
@@ -25,7 +16,7 @@ function TestWizardPage({ batch }: { batch: MockBatch }) {
 
 // Mock child components if needed, but here we want to see integration
 describe('WizardControl Integration with Context', () => {
-  const mockBatch: MockBatch = {
+  const mockBatch: OutageBatch = {
     id: 'batch-1',
     token: 'initial-token',
     remoteBatchId: 'remote-1',

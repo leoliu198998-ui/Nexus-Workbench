@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { transformScheduleData } from '@/lib/schedule-transformer';
 import { generateExcel, ExcelColumn } from '@/lib/excel-utils';
+import type { ScheduleApiItem } from '@/lib/types/schedule';
 
 export async function POST(req: NextRequest) {
   try {
@@ -77,15 +78,15 @@ export async function POST(req: NextRequest) {
     const rawData = await response.json();
     
     // 从 data.content 中提取数组 (支持分页结构)
-    let dataList: any[] = [];
+    let dataList: ScheduleApiItem[] = [];
     if (rawData.data && Array.isArray(rawData.data.content)) {
-      dataList = rawData.data.content;
+      dataList = rawData.data.content as ScheduleApiItem[];
     } else if (Array.isArray(rawData.content)) {
-      dataList = rawData.content;
+      dataList = rawData.content as ScheduleApiItem[];
     } else if (Array.isArray(rawData.data)) {
-      dataList = rawData.data;
+      dataList = rawData.data as ScheduleApiItem[];
     } else if (Array.isArray(rawData)) {
-      dataList = rawData;
+      dataList = rawData as ScheduleApiItem[];
     }
 
     if (dataList.length === 0) {
@@ -112,7 +113,7 @@ export async function POST(req: NextRequest) {
     ];
 
     // 4. Generate Excel Buffer
-    const buffer = await generateExcel(transformedData, columns);
+    const buffer = await generateExcel(transformedData as unknown as Record<string, unknown>[], columns);
 
     // 5. Return as stream
     return new NextResponse(new Uint8Array(buffer), {

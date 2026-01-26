@@ -1,24 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useCallback } from 'react';
-
-interface LogEntry {
-  timestamp: string;
-  step: string;
-  status: number;
-  response: unknown;
-}
-
-interface OutageBatch {
-  id: string;
-  envId: string;
-  batchName: string;
-  status: string;
-  token: string;
-  remoteBatchId: string | null;
-  environment?: { name: string };
-  logs?: { steps: LogEntry[] };
-}
+import type { OutageBatch } from '@/types/outage';
 
 interface OutageWizardContextType {
   batch: OutageBatch | null;

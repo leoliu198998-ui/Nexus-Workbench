@@ -1,29 +1,29 @@
-import { useRef, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Terminal, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-interface LogEntry {
-  timestamp: string;
-  step: string;
-  status: number;
-  url?: string;
-  method?: string;
-  request?: {
-    headers?: Record<string, string>;
-    body?: unknown;
-    curl?: string;
-  };
-  response?: {
-    raw?: string;
-    parsed?: unknown;
-  } | unknown;
-}
+import type { LogEntry } from '@/types/outage';
 
 interface WizardLogsProps {
   logs?: { steps: LogEntry[] };
   isOpen: boolean;
   onToggle: () => void;
+}
+
+function CurlCommand({ request }: { request?: { headers?: Record<string, string>; body?: unknown; curl?: string } }) {
+  if (!request || !request.curl) return null;
+  
+  return (
+    <div className="relative mt-1">
+      <div className="text-xs text-slate-500 mb-1 flex items-center gap-2">
+        <Terminal className="w-3 h-3" />
+        <span>Curl 命令:</span>
+      </div>
+      <pre className="font-mono text-[10px] leading-relaxed text-emerald-300 bg-slate-950/80 p-3 rounded-md border border-emerald-500/20 overflow-x-auto select-text cursor-text selection:bg-indigo-500/30 selection:text-white">
+        {request.curl}
+      </pre>
+    </div>
+  );
 }
 
 export function WizardLogs({ logs, isOpen, onToggle }: WizardLogsProps) {
@@ -100,17 +100,7 @@ export function WizardLogs({ logs, isOpen, onToggle }: WizardLogsProps) {
               )}
 
               {/* Curl 命令 */}
-              {log.request && 'curl' in log.request && typeof log.request.curl === 'string' && log.request.curl ? (
-                <div className="relative mt-1">
-                  <div className="text-xs text-slate-500 mb-1 flex items-center gap-2">
-                    <Terminal className="w-3 h-3" />
-                    <span>Curl 命令:</span>
-                  </div>
-                  <pre className="font-mono text-[10px] leading-relaxed text-emerald-300 bg-slate-950/80 p-3 rounded-md border border-emerald-500/20 overflow-x-auto select-text cursor-text selection:bg-indigo-500/30 selection:text-white">
-                    {log.request.curl}
-                  </pre>
-                </div>
-              ) : null}
+              {log.request ? <CurlCommand request={log.request} /> : null}
 
               {/* 请求信息 */}
               {log.request && (

@@ -19,34 +19,7 @@ import { ActionConfirmationDialog } from './action-confirmation-dialog';
 import { WizardTimeline } from './wizard-timeline';
 import { WizardLogs } from './wizard-logs';
 import { useWizardActions } from './hooks/use-wizard-actions';
-
-// ... (Existing Interfaces) ...
-interface LogEntry {
-  timestamp: string;
-  step: string;
-  status: number;
-  url?: string;
-  method?: string;
-  request?: {
-    headers?: Record<string, string>;
-    body?: unknown;
-    curl?: string;
-  };
-  response?: {
-    raw?: string;
-    parsed?: unknown;
-  } | unknown;
-}
-
-interface OutageBatch {
-  id: string;
-  envId: string;
-  batchName: string;
-  status: string;
-  token: string;
-  environment?: { name: string };
-  logs?: { steps: LogEntry[] };
-}
+import type { OutageBatch } from '@/types/outage';
 
 interface WizardControlProps {
   batch: OutageBatch;

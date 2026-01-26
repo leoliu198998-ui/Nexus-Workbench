@@ -1,10 +1,6 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-
-interface OutageBatch {
-  id: string;
-  environment?: { name: string };
-}
+import type { OutageBatch } from '@/types/outage';
 
 interface BatchInfoCardProps {
   batch: OutageBatch;

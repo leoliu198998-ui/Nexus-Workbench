@@ -4,6 +4,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { WizardControl } from './wizard-control';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
+import type { OutageBatch } from '@/types/outage';
 
 global.fetch = vi.fn();
 
@@ -12,18 +13,20 @@ describe('WizardControl', () => {
     vi.clearAllMocks();
   });
 
-  const mockBatch = {
+  const mockBatch: OutageBatch = {
     id: 'batch-1',
     envId: 'env-1',
     batchName: 'Test Batch',
     status: 'CREATED',
+    token: 'test-token',
     logs: { steps: [] },
     environment: { name: 'Production' },
   };
 
   it('renders correctly and handles publish action', async () => {
     const mockOnUpdate = vi.fn();
-    (global.fetch as any).mockResolvedValue({
+    const mockFetch = global.fetch as unknown as ReturnType<typeof vi.fn>;
+    mockFetch.mockResolvedValue({
       ok: true,
       json: async () => ({ ...mockBatch, status: 'NOTIFIED' }),
     });

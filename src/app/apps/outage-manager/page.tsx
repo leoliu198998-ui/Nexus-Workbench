@@ -15,46 +15,7 @@ import { BatchList } from '@/components/outage-manager/batch-list';
 import { CreateBatchDialog } from '@/components/outage-manager/create-batch-dialog';
 
 import { Plus } from 'lucide-react';
-
-
-
-interface LogEntry {
-
-  timestamp: string;
-
-  step: string;
-
-  status: number;
-
-  response: unknown;
-
-}
-
-
-
-interface OutageBatch {
-
-  id: string;
-
-  envId: string;
-
-  status: string;
-
-  batchName: string;
-
-  releaseDatetime: string;
-
-  releaseTimeZone: string;
-
-  duration: number;
-
-  environment?: { name: string };
-
-  logs?: { steps: LogEntry[] };
-
-}
-
-
+import type { OutageBatch } from '@/types/outage';
 
 export default function OutageManagerPage() {
 

@@ -43,7 +43,7 @@ describe('Schedule Transformer', () => {
       failureReason: ['PUBLIC_HOLIDAY_ERROR', 'OTHER_ERROR'],
       missingHolidayLocations: [{ name: 'Beijing' }, { name: 'Shenzhen' }],
       // ... other required fields empty/minimal
-    } as any];
+    } as Partial<ScheduleApiItem> as ScheduleApiItem];
 
     const result = transformScheduleData(input);
 
@@ -57,7 +57,7 @@ describe('Schedule Transformer', () => {
       name: 'Error Schedule',
       failureReason: ['PUBLIC_HOLIDAY_ERROR'],
       missingHolidayLocations: [],
-    } as any];
+    } as Partial<ScheduleApiItem> as ScheduleApiItem];
 
     const result = transformScheduleData(input);
 
@@ -70,7 +70,7 @@ describe('Schedule Transformer', () => {
       name: 'Contact Schedule',
       serviceDeliverContacts: [{ name: 'Alice' }, { name: 'Bob' }],
       serviceDeliverLocalProcessContacts: [{ name: 'Charlie' }],
-    } as any];
+    } as Partial<ScheduleApiItem> as ScheduleApiItem];
 
     const result = transformScheduleData(input);
 

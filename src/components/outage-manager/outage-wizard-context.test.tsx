@@ -2,14 +2,7 @@ import { render, screen, act } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import { OutageWizardProvider, useOutageWizard } from './outage-wizard-context';
 import React from 'react';
-
-interface MockBatch {
-  id: string;
-  token: string;
-  remoteBatchId: string;
-  status: string;
-  batchName: string;
-}
+import type { OutageBatch } from '@/types/outage';
 
 // Consumer component for testing
 const TestConsumer = () => {
@@ -24,10 +17,11 @@ const TestConsumer = () => {
 };
 
 describe('OutageWizardContext', () => {
-  const mockBatch: MockBatch = {
+  const mockBatch: OutageBatch = {
     id: 'batch-1',
     token: 'initial-token',
     remoteBatchId: 'remote-1',
+    envId: 'env-1',
     status: 'CREATED',
     batchName: 'Test'
   };

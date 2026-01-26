@@ -13,7 +13,7 @@ export interface ExcelColumn {
  * @param columns Optional array of column definitions. If not provided, defaults to ID, Name, Email.
  * @returns Promise resolving to a Buffer containing the Excel file
  */
-export async function generateExcel(data: any[], columns?: ExcelColumn[]): Promise<Buffer> {
+export async function generateExcel<T extends Record<string, unknown>>(data: T[], columns?: ExcelColumn[]): Promise<Buffer> {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('Data');
 

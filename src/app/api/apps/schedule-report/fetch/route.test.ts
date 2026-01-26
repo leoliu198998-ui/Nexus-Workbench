@@ -23,7 +23,8 @@ describe('Schedule Report Fetch API', () => {
   });
 
   it('should call external API with correct headers and body', async () => {
-    (global.fetch as any).mockResolvedValue({
+    const mockFetch = global.fetch as unknown as ReturnType<typeof vi.fn>;
+    mockFetch.mockResolvedValue({
       ok: true,
       json: async () => [{ id: '1' }],
     });
@@ -61,7 +62,8 @@ describe('Schedule Report Fetch API', () => {
   });
 
   it('should handle external API error', async () => {
-    (global.fetch as any).mockResolvedValue({
+    const mockFetch = global.fetch as unknown as ReturnType<typeof vi.fn>;
+    mockFetch.mockResolvedValue({
       ok: false,
       status: 502,
     });

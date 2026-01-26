@@ -1,12 +1,8 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
+import type { OutageBatch } from '@/types/outage';
 
 type ActionType = 'publish' | 'release' | 'finish';
-
-interface OutageBatch {
-  id: string;
-  status: string;
-}
 
 interface UseWizardActionsProps {
   batch: OutageBatch;

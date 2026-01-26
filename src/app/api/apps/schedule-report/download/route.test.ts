@@ -19,7 +19,8 @@ describe('Schedule Report Download API', () => {
   });
 
   it('should fetch, transform and return excel stream', async () => {
-    (global.fetch as any).mockResolvedValue({
+    const mockFetch = global.fetch as unknown as ReturnType<typeof vi.fn>;
+    mockFetch.mockResolvedValue({
       ok: true,
       json: async () => ({ data: { content: [{ raw: true }] } }),
     });
@@ -40,7 +41,8 @@ describe('Schedule Report Download API', () => {
   });
 
   it('should handle fetch errors', async () => {
-    (global.fetch as any).mockResolvedValue({
+    const mockFetch = global.fetch as unknown as ReturnType<typeof vi.fn>;
+    mockFetch.mockResolvedValue({
       ok: false,
       status: 401,
       text: async () => 'Unauthorized',
