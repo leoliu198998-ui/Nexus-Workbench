@@ -18,7 +18,7 @@
 
 - [x] Task: 封装 SystemLog 记录服务 (Service Layer) 644a500
     - [ ] Sub-task: 创建或更新 `src/lib/services/logger.ts` (如适用)，提供一个简化的函数用于记录与 OutageBatch 关联的系统日志。
-- [ ] Task: 集成 API 路由日志记录
+- [x] Task: 集成 API 路由日志记录 ec0fc63
     - [ ] Sub-task: 修改 `src/app/api/apps/outage-manager/batches/[id]/route.ts`。
     - [ ] Sub-task: 在 `publish`, `release`, `finish`, `fix-batch-id`, `token-update` 等分支中，添加调用 SystemLog 写入的代码。
 - [ ] Task: 集成测试 - 日志流程
