@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { Prisma } from '@/generated/client';
+import { logOutageAction } from '@/lib/services/logger';
 
 /**
  * 生成 curl 命令字符串，用于调试和记录 API 调用
@@ -219,6 +220,16 @@ export async function POST(req: NextRequest) {
         logs: logs as unknown as Prisma.InputJsonValue,
       },
     });
+
+    // 记录创建日志
+    try {
+      console.log(`[LOGGING] Attempting to log creation for batch: ${batch.id}`);
+      const logResult = await logOutageAction(batch.id, 'OUTAGE_BATCH_CREATE', `成功创建停机批次: ${batchName}`);
+      console.log(`[LOGGING] SystemLog created successfully: ${logResult.id}`);
+    } catch (logError) {
+      console.error('[LOGGING] Failed to record system log:', logError);
+      // 日志记录失败不应阻断业务流程
+    }
 
     // 返回成功响应，包含 curl 命令和完整的请求/响应信息
     return NextResponse.json({

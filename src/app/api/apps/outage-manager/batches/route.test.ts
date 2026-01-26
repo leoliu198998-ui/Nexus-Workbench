@@ -19,6 +19,11 @@ vi.mock('@/lib/prisma', () => ({
 // Mock fetch
 global.fetch = vi.fn();
 
+// Mock logger service
+vi.mock('@/lib/services/logger', () => ({
+  logOutageAction: vi.fn().mockResolvedValue({ id: 'log-123' }),
+}));
+
 describe('POST /api/apps/outage-manager/batches', () => {
   beforeEach(() => {
     vi.clearAllMocks();

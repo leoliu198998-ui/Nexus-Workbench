@@ -66,7 +66,11 @@ export async function PATCH(
         data: { token },
       });
       // 记录日志
-      await logOutageAction(id, 'OUTAGE_BATCH_TOKEN_UPDATE', '更新了鉴权 Token');
+      try {
+        await logOutageAction(id, 'OUTAGE_BATCH_TOKEN_UPDATE', '更新了鉴权 Token');
+      } catch (e) {
+        console.error('[LOGGING] Failed to log token update:', e);
+      }
       return NextResponse.json(updatedBatch);
     }
 
@@ -109,7 +113,11 @@ export async function PATCH(
       });
 
       // 记录日志
-      await logOutageAction(id, 'OUTAGE_BATCH_FIX_ID', `修复了批次 ID: ${batch.remoteBatchId} -> ${correctBatchId}`);
+      try {
+        await logOutageAction(id, 'OUTAGE_BATCH_FIX_ID', `修复了批次 ID: ${batch.remoteBatchId} -> ${correctBatchId}`);
+      } catch (e) {
+        console.error('[LOGGING] Failed to log fix-batch-id:', e);
+      }
 
       return NextResponse.json({
         ...updatedBatch,
@@ -200,15 +208,23 @@ export async function PATCH(
       if (!response.ok) {
         const errorMsg = (responseData.errmsg as string) || (responseData.message as string) || `External API failed for ${action}`;
         // 记录失败日志
-        await logOutageAction(id, `OUTAGE_BATCH_${action.toUpperCase()}_FAILED`, `外部 API 调用失败: ${errorMsg}`);
+        try {
+          await logOutageAction(id, `OUTAGE_BATCH_${action.toUpperCase()}_FAILED`, `外部 API 调用失败: ${errorMsg}`);
+        } catch (e) {
+          console.error('[LOGGING] Failed to log action failure (HTTP):', e);
+        }
         throw new Error(errorMsg);
       }
 
       // 验证逻辑错误码 (errcode)
       if (responseData.errcode !== undefined && String(responseData.errcode) !== '0') {
-        const errmsg = responseData.errmsg as string;
+        const errmsg = responseData.errcode !== undefined ? (responseData.errmsg as string) : '';
         // 记录失败日志
-        await logOutageAction(id, `OUTAGE_BATCH_${action.toUpperCase()}_FAILED`, `接口返回错误码: ${responseData.errcode}, 错误信息: ${errmsg}`);
+        try {
+          await logOutageAction(id, `OUTAGE_BATCH_${action.toUpperCase()}_FAILED`, `接口返回错误码: ${responseData.errcode}, 错误信息: ${errmsg}`);
+        } catch (e) {
+          console.error('[LOGGING] Failed to log action failure (Logic):', e);
+        }
         
         // 检查是否是 EntityNotFoundException
         if (errmsg && errmsg.includes('EntityNotFoundException') && errmsg.includes('Unable to find')) {
@@ -257,7 +273,11 @@ export async function PATCH(
     });
 
     // 记录成功日志
-    await logOutageAction(id, `OUTAGE_BATCH_${action.toUpperCase()}_SUCCESS`, `成功执行操作: ${action}`);
+    try {
+      await logOutageAction(id, `OUTAGE_BATCH_${action.toUpperCase()}_SUCCESS`, `成功执行操作: ${action}`);
+    } catch (e) {
+      console.error('[LOGGING] Failed to log action success:', e);
+    }
 
     // 返回成功响应，包含 curl 命令和完整的请求/响应信息
     return NextResponse.json({
