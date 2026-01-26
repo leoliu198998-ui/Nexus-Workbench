@@ -22,7 +22,7 @@
     - [ ] 子任务: 编写组件测试，验证点击列表项时的跳转行为。
     - [ ] 子任务: 更新 `BatchList`，使“进行中”的批次跳转至 `/apps/outage-manager/wizard/[id]`。
     - [ ] 子任务: 验证测试通过。
-- [ ] 任务: 重构向导上下文 (Wizard Context) 以支持状态注入
+- [x] 任务: 重构向导上下文 (Wizard Context) 以支持状态注入 2507a236
     - [ ] 子任务: 编写上下文提供者测试，确保其能根据初始数据（hydrate）进行初始化。
     - [ ] 子任务: 更新向导上下文，使其接受初始状态（remoteBatchId, token, currentStep）。
     - [ ] 子任务: 验证测试通过。
