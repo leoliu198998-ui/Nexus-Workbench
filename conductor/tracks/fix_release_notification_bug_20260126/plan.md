@@ -11,7 +11,7 @@
     - **诊断结果:** 确认是 JavaScript `Number` 类型精度丢失导致的问题。External API 返回的 `batchId` (18位) 超出 `MAX_SAFE_INTEGER`，`JSON.parse` 导致精度丢失（如 `...181` -> `...180`），导致后续调用 ID 不匹配。
 - [x] Task: Conductor - User Manual Verification '阶段 1: 问题诊断与重现' (Protocol in workflow.md)
 
-## 阶段 2: 修复后端 Bug 与增强鲁棒性 (Core Fix)
+## 阶段 2: 修复后端 Bug 与增强鲁棒性 (Core Fix) [checkpoint: 876bc07]
 - [x] Task: 修复 ID 查找失败的根本原因
     - [x] 确保查询前数据已正确持久化
     - [x] 修复任何 ID 格式转换或参数传递中的 Bug
