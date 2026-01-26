@@ -40,25 +40,26 @@ describe('POST /api/apps/outage-manager/batches', () => {
       baseUrl: 'https://test-api.com',
     });
 
-    // 2. Mock External API Success with correct format
+    const successResponse = {
+      errcode: '0',
+      errmsg: '',
+      errParams: {},
+      data: {
+        batchId: 1234567890,
+        batchName: 'Test Batch',
+        originalDateTime: '2023-09-08T10:30',
+        originalTimeZone: 'Asia/Shanghai',
+        duration: 5,
+        releaseDatetime: 1694140200000,
+        releaseStatus: 'RELEASED',
+        noticeStatus: 'STOPPED',
+      },
+    };
     (global.fetch as any).mockResolvedValue({
       ok: true,
       status: 200,
-      json: async () => ({
-        errcode: '0',
-        errmsg: '',
-        errParams: {},
-        data: {
-          batchId: 1234567890,
-          batchName: 'Test Batch',
-          originalDateTime: '2023-09-08T10:30',
-          originalTimeZone: 'Asia/Shanghai',
-          duration: 5,
-          releaseDatetime: 1694140200000,
-          releaseStatus: 'RELEASED',
-          noticeStatus: 'STOPPED',
-        },
-      }),
+      text: async () => JSON.stringify(successResponse),
+      json: async () => successResponse,
     });
 
     // 3. Mock Prisma Create
@@ -111,6 +112,7 @@ describe('POST /api/apps/outage-manager/batches', () => {
     (global.fetch as any).mockResolvedValue({
       ok: false,
       status: 400,
+      text: async () => JSON.stringify({ message: 'Bad Request' }),
       json: async () => ({ message: 'Bad Request' }),
     });
 
@@ -132,15 +134,17 @@ describe('POST /api/apps/outage-manager/batches', () => {
       baseUrl: 'https://test-api.com',
     });
 
+    const errResponse = {
+      errcode: '500',
+      errmsg: '服务器内部错误',
+      errParams: {},
+      data: [],
+    };
     (global.fetch as any).mockResolvedValue({
       ok: true,
       status: 200,
-      json: async () => ({
-        errcode: '500',
-        errmsg: '服务器内部错误',
-        errParams: {},
-        data: [],
-      }),
+      text: async () => JSON.stringify(errResponse),
+      json: async () => errResponse,
     });
 
     const req = new NextRequest('http://localhost/api/batches', {
@@ -162,14 +166,16 @@ describe('POST /api/apps/outage-manager/batches', () => {
       baseUrl: 'https://test-api.com',
     });
 
+    const missingDataResponse = {
+      errcode: '0',
+      errmsg: '',
+      errParams: {},
+    };
     (global.fetch as any).mockResolvedValue({
       ok: true,
       status: 200,
-      json: async () => ({
-        errcode: '0',
-        errmsg: '',
-        errParams: {},
-      }),
+      text: async () => JSON.stringify(missingDataResponse),
+      json: async () => missingDataResponse,
     });
 
     const req = new NextRequest('http://localhost/api/batches', {
@@ -191,19 +197,21 @@ describe('POST /api/apps/outage-manager/batches', () => {
       baseUrl: 'https://test-api.com',
     });
 
+    const missingFieldsResponse = {
+      errcode: '0',
+      errmsg: '',
+      errParams: {},
+      data: {
+        batchId: 1234567890,
+        batchName: 'Test Batch',
+        // Missing required fields
+      },
+    };
     (global.fetch as any).mockResolvedValue({
       ok: true,
       status: 200,
-      json: async () => ({
-        errcode: '0',
-        errmsg: '',
-        errParams: {},
-        data: {
-          batchId: 1234567890,
-          batchName: 'Test Batch',
-          // Missing required fields
-        },
-      }),
+      text: async () => JSON.stringify(missingFieldsResponse),
+      json: async () => missingFieldsResponse,
     });
 
     const req = new NextRequest('http://localhost/api/batches', {
@@ -225,24 +233,26 @@ describe('POST /api/apps/outage-manager/batches', () => {
       baseUrl: 'https://test-api.com',
     });
 
+    const invalidIdResponse = {
+      errcode: '0',
+      errmsg: '',
+      errParams: {},
+      data: {
+        batchId: null,
+        batchName: 'Test Batch',
+        originalDateTime: '2023-09-08T10:30',
+        originalTimeZone: 'Asia/Shanghai',
+        duration: 5,
+        releaseDatetime: 1694140200000,
+        releaseStatus: 'RELEASED',
+        noticeStatus: 'STOPPED',
+      },
+    };
     (global.fetch as any).mockResolvedValue({
       ok: true,
       status: 200,
-      json: async () => ({
-        errcode: '0',
-        errmsg: '',
-        errParams: {},
-        data: {
-          batchId: null,
-          batchName: 'Test Batch',
-          originalDateTime: '2023-09-08T10:30',
-          originalTimeZone: 'Asia/Shanghai',
-          duration: 5,
-          releaseDatetime: 1694140200000,
-          releaseStatus: 'RELEASED',
-          noticeStatus: 'STOPPED',
-        },
-      }),
+      text: async () => JSON.stringify(invalidIdResponse),
+      json: async () => invalidIdResponse,
     });
 
     const req = new NextRequest('http://localhost/api/batches', {
@@ -256,5 +266,53 @@ describe('POST /api/apps/outage-manager/batches', () => {
     expect(response.status).toBe(502);
     expect(data.error).toBe('External API Error');
     expect(data.details).toContain('batchId无效');
+  });
+
+  it('should handle large batchId without precision loss', async () => {
+    const largeId = '202601261025401181';
+    
+    (prisma.releaseEnvironment.findUnique as any).mockResolvedValue({
+      id: 'env-123',
+      baseUrl: 'https://test-api.com',
+    });
+
+    // Use a raw string for text() to simulate external API response without JS stringify corruption
+    const rawResponse = `{
+      "errcode": "0",
+      "errmsg": "",
+      "errParams": {},
+      "data": {
+        "batchId": 202601261025401181,
+        "batchName": "Test Batch",
+        "originalDateTime": "2023-09-08T10:30",
+        "originalTimeZone": "Asia/Shanghai",
+        "duration": 5,
+        "releaseDatetime": 1694140200000,
+        "releaseStatus": "RELEASED",
+        "noticeStatus": "STOPPED"
+      }
+    }`;
+
+    (global.fetch as any).mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: async () => rawResponse,
+    });
+
+    (prisma.outageBatch.create as any).mockImplementation(({ data }: any) => Promise.resolve({
+      id: 'local-uuid',
+      ...data
+    }));
+
+    const req = new NextRequest('http://localhost/api/batches', {
+      method: 'POST',
+      body: JSON.stringify(validBody),
+    });
+
+    const response = await POST(req);
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.remoteBatchId).toBe(largeId); // Should be exactly '...181'
   });
 });

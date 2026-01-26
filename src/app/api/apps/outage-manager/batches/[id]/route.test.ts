@@ -83,7 +83,8 @@ describe('PATCH /api/apps/outage-manager/batches/[id]', () => {
     (global.fetch as any).mockResolvedValue({
       ok: true,
       status: 200,
-      json: async () => ({ success: true }),
+      text: async () => JSON.stringify({ success: true, errcode: '0' }),
+      json: async () => ({ success: true, errcode: '0' }),
     });
     (prisma.outageBatch.update as any).mockResolvedValue({
       ...mockBatch,
@@ -138,5 +139,37 @@ describe('PATCH /api/apps/outage-manager/batches/[id]', () => {
       where: { id: 'local-123' },
       data: { token: 'new-token-123' },
     });
+  });
+
+  it('should return 502 and NOT update status if API returns errcode 1', async () => {
+    (prisma.outageBatch.findUnique as any).mockResolvedValue(mockBatch);
+    const errorResponse = {
+      errcode: '1',
+      errmsg: 'Unable to find MysqlReleaseBatch with id 202601261025401180',
+      data: null
+    };
+    (global.fetch as any).mockResolvedValue({
+      ok: true, // HTTP 200
+      status: 200,
+      text: async () => JSON.stringify(errorResponse),
+      json: async () => errorResponse,
+    });
+
+    const req = new NextRequest('http://localhost/api/batches/local-123', {
+      method: 'PATCH',
+      body: JSON.stringify({ action: 'publish' }),
+    });
+
+    const response = await PATCH(req, { params: Promise.resolve({ id: 'local-123' }) });
+    const data = await response.json();
+
+    expect(response.status).toBe(502);
+    expect(data.error).toBe('External API Error');
+    expect(data.details).toContain('Unable to find MysqlReleaseBatch');
+    
+    // Should NOT have updated status to NOTIFIED
+    const updateCalls = (prisma.outageBatch.update as any).mock.calls;
+    const hasStatusUpdate = updateCalls.some((call: any) => call[0].data.status === 'NOTIFIED');
+    expect(hasStatusUpdate).toBe(false);
   });
 });

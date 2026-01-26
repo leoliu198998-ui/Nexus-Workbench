@@ -86,7 +86,10 @@ export async function PATCH(
         body: JSON.stringify(externalPayload),
       });
 
-      const responseData = (await response.json()) as Record<string, unknown>;
+      const responseText = await response.text();
+      // 使用正则将响应中的大整数 batchId 包装成字符串，防止 JSON.parse 丢失精度
+      const safeResponseText = responseText.replace(/"batchId"\s*:\s*(\d{15,})/g, '"batchId":"$1"');
+      const responseData = JSON.parse(safeResponseText) as Record<string, unknown>;
 
       logs.steps.push({
         step: action.toUpperCase(),
@@ -97,7 +100,12 @@ export async function PATCH(
       });
 
       if (!response.ok) {
-        throw new Error((responseData.message as string) || `External API failed for ${action}`);
+        throw new Error((responseData.errmsg as string) || (responseData.message as string) || `External API failed for ${action}`);
+      }
+
+      // 验证逻辑错误码 (errcode)
+      if (responseData.errcode !== undefined && String(responseData.errcode) !== '0') {
+        throw new Error((responseData.errmsg as string) || `接口返回错误码: ${responseData.errcode}`);
       }
     } catch (apiError: unknown) {
       console.error(`External API Error (${action}):`, apiError);

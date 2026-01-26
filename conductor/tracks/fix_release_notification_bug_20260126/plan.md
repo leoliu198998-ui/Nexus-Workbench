@@ -12,13 +12,13 @@
 - [x] Task: Conductor - User Manual Verification '阶段 1: 问题诊断与重现' (Protocol in workflow.md)
 
 ## 阶段 2: 修复后端 Bug 与增强鲁棒性 (Core Fix)
-- [ ] Task: 修复 ID 查找失败的根本原因
-    - [ ] 确保查询前数据已正确持久化
-    - [ ] 修复任何 ID 格式转换或参数传递中的 Bug
-- [ ] Task: 改进 API 错误处理逻辑
-    - [ ] 完善异常捕获，确保 `EntityNotFoundException` 被转化为标准的 `errcode: "1"` 响应
-    - [ ] 确保响应结构符合：`{ "errcode": "1", "errmsg": "...", "data": null }`
-- [ ] Task: Conductor - User Manual Verification '阶段 2: 修复后端 Bug 与增强鲁棒性' (Protocol in workflow.md)
+- [x] Task: 修复 ID 查找失败的根本原因
+    - [x] 确保查询前数据已正确持久化
+    - [x] 修复任何 ID 格式转换或参数传递中的 Bug
+- [x] Task: 改进 API 错误处理逻辑
+    - [x] 完善异常捕获，确保 `EntityNotFoundException` 被转化为标准的 `errcode: "1"` 响应
+    - [x] 确保响应结构符合：`{ "errcode": "1", "errmsg": "...", "data": null }`
+- [x] Task: Conductor - User Manual Verification '阶段 2: 修复后端 Bug 与增强鲁棒性' (Protocol in workflow.md)
 
 ## 阶段 3: 前端流程控制修复 (Flow Control)
 - [ ] Task: 更新前端 API 调用层

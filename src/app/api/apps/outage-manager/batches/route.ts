@@ -74,7 +74,11 @@ export async function POST(req: NextRequest) {
         body: JSON.stringify(externalPayload),
       });
 
-      const responseData = await response.json();
+      const responseText = await response.text();
+      // 使用正则将响应中的大整数 batchId 包装成字符串，防止 JSON.parse 丢失精度
+      // 匹配 "batchId": 2026... 这种未加引号的数字
+      const safeResponseText = responseText.replace(/"batchId"\s*:\s*(\d{15,})/g, '"batchId":"$1"');
+      const responseData = JSON.parse(safeResponseText);
       
       logs.steps.push({
         step: 'CREATE_BATCH',
@@ -88,9 +92,10 @@ export async function POST(req: NextRequest) {
         throw new Error(responseData.errmsg || responseData.message || 'External API failed');
       }
 
-      // 验证响应格式
-      if (responseData.errcode !== '0' && responseData.errcode !== 0) {
-        throw new Error(responseData.errmsg || `接口返回错误码: ${responseData.errcode}`);
+      // 验证响应格式 - 统一支持字符串和数字类型的 errcode
+      const errcode = String(responseData.errcode);
+      if (errcode !== '0') {
+        throw new Error(responseData.errmsg || `接口返回错误码: ${errcode}`);
       }
 
       // 验证必需的响应字段 - API返回对象而非数组
