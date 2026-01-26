@@ -3,7 +3,7 @@
 ## Phase 1: 数据库与模型重构 (Backend)
 本阶段专注于基础设施的变更，确保数据模型支持新的关联需求，并预置最新的环境数据。
 
-- [ ] Task: 更新数据库 Schema 并生成迁移
+- [x] Task: 更新数据库 Schema 并生成迁移 dc88f86
     - [ ] Sub-task: 在 `prisma/schema.prisma` 中更新 `SystemLog` 模型，添加 `outageBatchId` 字段及与 `OutageBatch` 的外键关联。
     - [ ] Sub-task: 运行 `pnpm prisma migrate dev --name link_systemlog_outage` 生成并应用迁移文件。
 - [ ] Task: 更新种子数据脚本
