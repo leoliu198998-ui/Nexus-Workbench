@@ -48,18 +48,16 @@ describe('POST /api/apps/outage-manager/batches', () => {
         errcode: '0',
         errmsg: '',
         errParams: {},
-        data: [
-          {
-            batchId: 202309081001536790,
-            batchName: 'Test Batch',
-            originalDateTime: '2023-09-08T10:30',
-            originalTimeZone: 'Asia/Shanghai',
-            duration: 5,
-            releaseDatetime: 1694140200000,
-            releaseStatus: 'RELEASED',
-            noticeStatus: 'STOPPED',
-          },
-        ],
+        data: {
+          batchId: 1234567890,
+          batchName: 'Test Batch',
+          originalDateTime: '2023-09-08T10:30',
+          originalTimeZone: 'Asia/Shanghai',
+          duration: 5,
+          releaseDatetime: 1694140200000,
+          releaseStatus: 'RELEASED',
+          noticeStatus: 'STOPPED',
+        },
       }),
     });
 
@@ -67,7 +65,7 @@ describe('POST /api/apps/outage-manager/batches', () => {
     (prisma.outageBatch.create as any).mockResolvedValue({
       id: 'local-uuid',
       ...validBody,
-      remoteBatchId: '202309081001536790',
+      remoteBatchId: '1234567890',
       status: 'CREATED',
     });
 
@@ -80,8 +78,12 @@ describe('POST /api/apps/outage-manager/batches', () => {
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(data.remoteBatchId).toBe('202309081001536790');
-    expect(prisma.outageBatch.create).toHaveBeenCalled();
+    expect(data.remoteBatchId).toBe('1234567890');
+    expect(prisma.outageBatch.create).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({
+        remoteBatchId: '1234567890',
+      }),
+    }));
     expect(global.fetch).toHaveBeenCalledWith('https://test-api.com/devops/release-batch', expect.any(Object));
   });
 
@@ -154,7 +156,7 @@ describe('POST /api/apps/outage-manager/batches', () => {
     expect(data.details).toContain('服务器内部错误');
   });
 
-  it('should return 502 if response data array is missing', async () => {
+  it('should return 502 if response data is missing', async () => {
     (prisma.releaseEnvironment.findUnique as any).mockResolvedValue({
       id: 'env-123',
       baseUrl: 'https://test-api.com',
@@ -180,37 +182,7 @@ describe('POST /api/apps/outage-manager/batches', () => {
 
     expect(response.status).toBe(502);
     expect(data.error).toBe('External API Error');
-    expect(data.details).toContain('缺少data数组或数组为空');
-  });
-
-  it('should return 502 if response data array is empty', async () => {
-    (prisma.releaseEnvironment.findUnique as any).mockResolvedValue({
-      id: 'env-123',
-      baseUrl: 'https://test-api.com',
-    });
-
-    (global.fetch as any).mockResolvedValue({
-      ok: true,
-      status: 200,
-      json: async () => ({
-        errcode: '0',
-        errmsg: '',
-        errParams: {},
-        data: [],
-      }),
-    });
-
-    const req = new NextRequest('http://localhost/api/batches', {
-      method: 'POST',
-      body: JSON.stringify(validBody),
-    });
-
-    const response = await POST(req);
-    const data = await response.json();
-
-    expect(response.status).toBe(502);
-    expect(data.error).toBe('External API Error');
-    expect(data.details).toContain('缺少data数组或数组为空');
+    expect(data.details).toContain('缺少data对象');
   });
 
   it('should return 502 if required fields are missing in batch data', async () => {
@@ -226,13 +198,11 @@ describe('POST /api/apps/outage-manager/batches', () => {
         errcode: '0',
         errmsg: '',
         errParams: {},
-        data: [
-          {
-            batchId: 202309081001536790,
-            batchName: 'Test Batch',
-            // Missing required fields: originalDateTime, originalTimeZone, duration, releaseDatetime, releaseStatus, noticeStatus
-          },
-        ],
+        data: {
+          batchId: 1234567890,
+          batchName: 'Test Batch',
+          // Missing required fields
+        },
       }),
     });
 
@@ -262,18 +232,16 @@ describe('POST /api/apps/outage-manager/batches', () => {
         errcode: '0',
         errmsg: '',
         errParams: {},
-        data: [
-          {
-            batchId: null,
-            batchName: 'Test Batch',
-            originalDateTime: '2023-09-08T10:30',
-            originalTimeZone: 'Asia/Shanghai',
-            duration: 5,
-            releaseDatetime: 1694140200000,
-            releaseStatus: 'RELEASED',
-            noticeStatus: 'STOPPED',
-          },
-        ],
+        data: {
+          batchId: null,
+          batchName: 'Test Batch',
+          originalDateTime: '2023-09-08T10:30',
+          originalTimeZone: 'Asia/Shanghai',
+          duration: 5,
+          releaseDatetime: 1694140200000,
+          releaseStatus: 'RELEASED',
+          noticeStatus: 'STOPPED',
+        },
       }),
     });
 
