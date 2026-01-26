@@ -16,7 +16,7 @@ export interface LogEntry {
   response?: {
     raw?: string;
     parsed?: unknown;
-  } | unknown;
+  };
 }
 
 export interface OutageBatch {

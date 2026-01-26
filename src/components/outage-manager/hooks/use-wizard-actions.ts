@@ -6,7 +6,7 @@ type ActionType = 'publish' | 'release' | 'finish';
 
 interface UseWizardActionsProps {
   batch: OutageBatch;
-  onUpdate: (updatedBatch: OutageBatch) => void;
+  onUpdate: (updatedBatch: Partial<OutageBatch>) => void;
 }
 
 export function useWizardActions({ batch, onUpdate }: UseWizardActionsProps) {

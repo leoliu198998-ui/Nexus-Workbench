@@ -23,7 +23,7 @@ import type { OutageBatch } from '@/types/outage';
 
 interface WizardControlProps {
   batch: OutageBatch;
-  onUpdate: (updatedBatch: OutageBatch) => void;
+  onUpdate: (updatedBatch: Partial<OutageBatch>) => void;
   onReset: () => void;
   // Pass token props through
   token: string;
@@ -51,7 +51,9 @@ export function WizardControl({ batch, onUpdate, onReset, token, onTokenChange, 
   } = useWizardActions({ batch, onUpdate });
 
   const currentStepIndex = STEPS.findIndex(s => s.id === batch.status);
-  const nextStep = STEPS[currentStepIndex + 1];
+  const nextStep = currentStepIndex !== -1 && currentStepIndex < STEPS.length - 1 
+    ? STEPS[currentStepIndex + 1] 
+    : null;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-full">

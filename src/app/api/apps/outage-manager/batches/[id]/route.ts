@@ -149,11 +149,14 @@ export async function PATCH(
     // 2. Call external API
     const externalUrl = `${batch.environment.baseUrl}/devops/release-batch${config.path}`;
     
-    // 将 batchId 作为数字发送（测试期望数字类型）
-    const batchIdAsNumber = Number(batch.remoteBatchId);
+    // 使用 BigInt 将 batchId 转换为数字（防止精度丢失），然后序列化为 JSON 时外部 API 通常能处理
+    // 注意：JSON.stringify 会把 BigInt 转换为普通数字（如果直接传 BigInt 会报错，所以我们通常传字符串或者确保外部 API 接受字符串）
+    // 如果外部 API 严格要求数字且不支持科学计数法，我们需要特殊的处理。
+    // 这里我们先尝试直接传字符串，如果外部 API 不支持，我们再考虑其他方案。
+    // 大多数现代 Java/Node 后端都能处理 JSON 中的 "batchId": "..." 映射到 Long 类型的字段。
     
     const externalPayload = {
-      batchId: batchIdAsNumber,
+      batchId: batch.remoteBatchId, // 直接传字符串，避免 Number() 转换导致的精度丢失
     };
 
     const logs = (batch.logs as { steps: Record<string, unknown>[] }) || { steps: [] };

@@ -109,7 +109,7 @@ describe('PATCH /api/apps/outage-manager/batches/[id]', () => {
     expect(global.fetch).toHaveBeenCalledWith(
       'https://test-api.com/devops/release-batch/publish',
       expect.objectContaining({
-        body: JSON.stringify({ batchId: 202601191310437440 }),
+        body: JSON.stringify({ batchId: '202601191310437440' }),
       })
     );
   });
