@@ -30,7 +30,14 @@ function TestWizardPage({ batch }: { batch: any }) {
   return (
     <div>
       <GlobalTokenInput value={token} onChange={handleTokenChange} />
-      <WizardControl batch={batch} onUpdate={() => {}} onReset={() => {}} />
+      <WizardControl 
+        batch={batch} 
+        onUpdate={() => {}} 
+        onReset={() => {}} 
+        token={token}
+        onTokenChange={handleTokenChange}
+        isSavingToken={false}
+      />
     </div>
   );
 }
@@ -66,7 +73,7 @@ describe('WizardControl - Token Expiration Flow', () => {
     );
 
     // Click next step (Publish)
-    await user.click(screen.getByText(/开始执行: 发布通知/));
+    await user.click(screen.getByText(/立即执行/));
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith(expect.stringContaining('Unauthorized'));
@@ -87,7 +94,7 @@ describe('WizardControl - Token Expiration Flow', () => {
       json: async () => ({ ...mockBatch, status: 'NOTIFIED' }),
     });
 
-    await user.click(screen.getByText(/开始执行: 发布通知/));
+    await user.click(screen.getByText(/立即执行/));
 
     await waitFor(() => {
       expect(toast.success).toHaveBeenCalledWith('状态更新成功');

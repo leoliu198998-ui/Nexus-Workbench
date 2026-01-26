@@ -5,6 +5,13 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { CreateBatchForm } from './create-batch-form';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+    refresh: vi.fn(),
+  }),
+}));
+
 global.fetch = vi.fn();
 
 // Mock EnvironmentSelector

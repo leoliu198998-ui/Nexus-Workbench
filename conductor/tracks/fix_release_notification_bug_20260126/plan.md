@@ -21,16 +21,16 @@
 - [x] Task: Conductor - User Manual Verification '阶段 2: 修复后端 Bug 与增强鲁棒性' (Protocol in workflow.md)
 
 ## 阶段 3: 前端流程控制修复 (Flow Control)
-- [ ] Task: 更新前端 API 调用层
-    - [ ] 在调用发布通知接口后，增加对 `errcode` 的显式判断
-    - [ ] 只有当 `errcode === "0"` 且 `releaseStatus` 匹配时才推进 `currentStep`
-- [ ] Task: 实现失败反馈 UI
-    - [ ] 增加错误处理分支，弹出包含服务端 `errmsg` 的 Toast/Alert
-    - [ ] 确保出错后流程停留在当前步骤，并启用“重试”按钮（如果适用）
-- [ ] Task: Conductor - User Manual Verification '阶段 3: 前端流程控制修复' (Protocol in workflow.md)
+- [x] Task: 更新前端 API 调用层
+    - [x] 在调用发布通知接口后，增加对 `errcode` 的显式判断
+    - [x] 只有当 `errcode === "0"` 且 `releaseStatus` 匹配时才推进 `currentStep`
+- [x] Task: 实现失败反馈 UI
+    - [x] 增加错误处理分支，弹出包含服务端 `errmsg` 的 Toast/Alert
+    - [x] 确保出错后流程停留在当前步骤，并启用“重试”按钮（如果适用）
+- [x] Task: Conductor - User Manual Verification '阶段 3: 前端流程控制修复' (Protocol in workflow.md)
 
 ## 阶段 4: 最终验证 (Final Verification)
-- [ ] Task: 进行端到端测试
-    - [ ] 验证正常流程：成功发布，状态更新，流程进入下一步
-    - [ ] 验证异常流程：人为制造失败响应，确认前端报错且不自动跳转
-- [ ] Task: Conductor - User Manual Verification '阶段 4: 最终验证' (Protocol in workflow.md)
+- [x] Task: 进行端到端测试
+    - [x] 验证正常流程：成功发布，状态更新，流程进入下一步
+    - [x] 验证异常流程：人为制造失败响应，确认前端报错且不自动跳转
+- [x] Task: Conductor - User Manual Verification '阶段 4: 最终验证' (Protocol in workflow.md)

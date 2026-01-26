@@ -28,12 +28,21 @@ describe('WizardControl', () => {
       json: async () => ({ ...mockBatch, status: 'NOTIFIED' }),
     });
 
-    render(<WizardControl batch={mockBatch} onUpdate={mockOnUpdate} onReset={vi.fn()} />);
+    render(
+      <WizardControl 
+        batch={mockBatch} 
+        onUpdate={mockOnUpdate} 
+        onReset={vi.fn()} 
+        token="test-token"
+        onTokenChange={vi.fn()}
+        isSavingToken={false}
+      />
+    );
 
-    expect(screen.getByText('Test Batch')).toBeInTheDocument();
+    expect(screen.getByText('发布进度')).toBeInTheDocument();
     
     // Check for the new button
-    const actionButton = screen.getByRole('button', { name: /执行: 发布通知/ });
+    const actionButton = screen.getByRole('button', { name: /立即执行/ });
     expect(actionButton).toBeInTheDocument();
     expect(actionButton).not.toBeDisabled();
 
