@@ -52,4 +52,17 @@ describe('SystemLog - OutageBatch Relation', () => {
         await prisma.outageBatch.delete({ where: { id: batch.id } });
     }
   });
+
+  it('should allow creating a SystemLog without an OutageBatch', async () => {
+    const log = await prisma.systemLog.create({
+      data: {
+        action: 'TEST_NO_BATCH',
+        details: 'Testing optional relation'
+      }
+    });
+    
+    expect(log.outageBatchId).toBeNull();
+    
+    await prisma.systemLog.delete({ where: { id: log.id } });
+  });
 });
