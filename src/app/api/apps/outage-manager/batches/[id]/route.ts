@@ -2,6 +2,24 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { OutageStatus, Prisma } from '@/generated/client';
 
+/**
+ * 生成 curl 命令字符串，用于调试和记录 API 调用
+ */
+function generateCurlCommand(
+  url: string,
+  method: string,
+  headers: Record<string, string>,
+  body?: unknown
+): string {
+  const headersStr = Object.entries(headers)
+    .map(([key, value]) => `-H '${key}: ${value}'`)
+    .join(' \\\n  ');
+  
+  const bodyStr = body ? `-d '${JSON.stringify(body)}'` : '';
+  
+  return `curl -X ${method} '${url}' \\\n  ${headersStr}${bodyStr ? ` \\\n  ${bodyStr}` : ''}`;
+}
+
 const ACTION_MAP: Record<string, { path: string; nextStatus: OutageStatus }> = {
   publish: { path: '/publish', nextStatus: OutageStatus.NOTIFIED },
   release: { path: '/release', nextStatus: OutageStatus.STARTED },
@@ -49,6 +67,50 @@ export async function PATCH(
       return NextResponse.json(updatedBatch);
     }
 
+    // 1.5. 如果 action 是 'fix-batch-id'，则从 logs 中提取正确的 batchId 并更新
+    if (action === 'fix-batch-id') {
+      const batch = await prisma.outageBatch.findUnique({
+        where: { id },
+        include: { environment: true },
+      });
+
+      if (!batch) {
+        return NextResponse.json({ error: 'Batch not found' }, { status: 404 });
+      }
+
+      const logs = batch.logs as { steps: Record<string, unknown>[] } | null;
+      const createStep = logs?.steps?.find((s: any) => s.step === 'CREATE_BATCH');
+      
+      if (!createStep || !createStep.response) {
+        return NextResponse.json({ error: '无法找到创建批次的日志' }, { status: 400 });
+      }
+
+      // 从原始响应文本中提取 batchId
+      const responseRaw = (createStep.response as { raw?: string }).raw;
+      if (!responseRaw) {
+        return NextResponse.json({ error: '日志中缺少原始响应文本' }, { status: 400 });
+      }
+
+      // 从原始响应文本中提取 batchId（作为字符串），防止精度丢失
+      const batchIdMatch = responseRaw.match(/"batchId"\s*:\s*"?(\d{15,})"?/);
+      if (!batchIdMatch || !batchIdMatch[1]) {
+        return NextResponse.json({ error: '无法从日志中提取 batchId' }, { status: 400 });
+      }
+
+      const correctBatchId = batchIdMatch[1];
+      
+      // 更新 remoteBatchId
+      const updatedBatch = await prisma.outageBatch.update({
+        where: { id },
+        data: { remoteBatchId: correctBatchId },
+      });
+
+      return NextResponse.json({
+        ...updatedBatch,
+        message: `已修复 batchId: ${batch.remoteBatchId} -> ${correctBatchId}`,
+      });
+    }
+
     const config = ACTION_MAP[action];
     if (!config) {
       return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
@@ -70,32 +132,62 @@ export async function PATCH(
 
     // 2. Call external API
     const externalUrl = `${batch.environment.baseUrl}/devops/release-batch${config.path}`;
+    
+    // 将 batchId 作为数字发送（测试期望数字类型）
+    const batchIdAsNumber = Number(batch.remoteBatchId);
+    
     const externalPayload = {
-      batchId: Number(batch.remoteBatchId),
+      batchId: batchIdAsNumber,
     };
 
     const logs = (batch.logs as { steps: Record<string, unknown>[] }) || { steps: [] };
 
+    // 准备请求头
+    const requestHeaders = {
+      'Content-Type': 'application/json',
+      'x-dk-token': batch.token,
+    };
+
+    // 生成 curl 命令
+    const curlCommand = generateCurlCommand(
+      externalUrl,
+      'POST',
+      requestHeaders,
+      externalPayload
+    );
+
+    let response: Response | null = null;
+    let responseText = '';
+    let responseData: Record<string, unknown> | null = null;
+
     try {
-      const response = await fetch(externalUrl, {
+      response = await fetch(externalUrl, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-dk-token': batch.token,
-        },
+        headers: requestHeaders,
         body: JSON.stringify(externalPayload),
       });
 
-      const responseText = await response.text();
+      responseText = await response.text();
+      
       // 使用正则将响应中的大整数 batchId 包装成字符串，防止 JSON.parse 丢失精度
       const safeResponseText = responseText.replace(/"batchId"\s*:\s*(\d{15,})/g, '"batchId":"$1"');
-      const responseData = JSON.parse(safeResponseText) as Record<string, unknown>;
+      responseData = JSON.parse(safeResponseText) as Record<string, unknown>;
 
+      // 记录完整的 API 调用信息，包括 curl 命令和响应
       logs.steps.push({
         step: action.toUpperCase(),
         url: externalUrl,
+        method: 'POST',
+        request: {
+          headers: requestHeaders,
+          body: externalPayload,
+          curl: curlCommand,
+        },
         status: response.status,
-        response: responseData,
+        response: {
+          raw: responseText,
+          parsed: responseData,
+        },
         timestamp: new Date().toISOString(),
       });
 
@@ -105,7 +197,12 @@ export async function PATCH(
 
       // 验证逻辑错误码 (errcode)
       if (responseData.errcode !== undefined && String(responseData.errcode) !== '0') {
-        throw new Error((responseData.errmsg as string) || `接口返回错误码: ${responseData.errcode}`);
+        const errmsg = responseData.errmsg as string;
+        // 检查是否是 EntityNotFoundException
+        if (errmsg && errmsg.includes('EntityNotFoundException') && errmsg.includes('Unable to find')) {
+          throw new Error(`外部系统中找不到对应的批次记录 (ID: ${batch.remoteBatchId})。这可能是因为：1) 创建批次时外部系统未成功保存记录；2) 外部系统中的记录已被删除；3) 批次 ID 不匹配。请检查外部系统或重新创建批次。原始错误: ${errmsg}`);
+        }
+        throw new Error(errmsg || `接口返回错误码: ${responseData.errcode}`);
       }
     } catch (apiError: unknown) {
       console.error(`External API Error (${action}):`, apiError);
@@ -116,9 +213,24 @@ export async function PATCH(
         data: { logs: logs as unknown as Prisma.InputJsonValue },
       });
 
+      // 返回错误响应，包含 curl 命令和完整的请求/响应信息
       return NextResponse.json({ 
         error: 'External API Error', 
         details: apiError instanceof Error ? apiError.message : 'Unknown error',
+        apiCall: {
+          url: externalUrl,
+          method: 'POST',
+          headers: requestHeaders,
+          body: externalPayload,
+          curl: curlCommand,
+          ...(response && responseData ? {
+            response: {
+              status: response.status,
+              raw: responseText,
+              parsed: responseData,
+            },
+          } : {}),
+        },
         logs 
       }, { status: 502 });
     }
@@ -132,7 +244,24 @@ export async function PATCH(
       },
     });
 
-    return NextResponse.json(updatedBatch);
+    // 返回成功响应，包含 curl 命令和完整的请求/响应信息
+    return NextResponse.json({
+      ...updatedBatch,
+      apiCall: {
+        url: externalUrl,
+        method: 'POST',
+        request: {
+          headers: requestHeaders,
+          body: externalPayload,
+          curl: curlCommand,
+        },
+        response: {
+          status: response!.status,
+          raw: responseText,
+          parsed: responseData!,
+        },
+      },
+    });
   } catch (error) {
     console.error('Failed to update batch status:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
