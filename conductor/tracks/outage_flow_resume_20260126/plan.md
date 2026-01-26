@@ -25,12 +25,12 @@
     - [ ] Sub-task: 编写集成测试，模拟 API 调用，验证操作后 `SystemLog` 中是否生成了带有正确 `outageBatchId` 的记录。
 - [ ] Task: Conductor - User Manual Verification '后端日志逻辑实现' (Protocol in workflow.md)
 
-## Phase 3: 前端界面增强 (Frontend)
+## Phase 3: 前端界面增强 (Frontend) [checkpoint: 4f8d7a8]
 本阶段关注用户体验的微调。
 
-- [ ] Task: 更新发布详情页 UI
-    - [ ] Sub-task: 找到发布详情页组件（预计在 `src/components/outage-manager/` 或 `src/app/apps/outage-manager/` 下）。
-    - [ ] Sub-task: 在页面头部区域增加显示 `batchName`。
-- [ ] Task: 前端验证
-    - [ ] Sub-task: 启动开发服务器，访问详情页，确认批次名称显示位置合理且数据加载正确。
-- [ ] Task: Conductor - User Manual Verification '前端界面增强' (Protocol in workflow.md)
+- [x] Task: 更新发布详情页 UI 4f8d7a8
+    - [x] Sub-task: 找到发布详情页组件。
+    - [x] Sub-task: 在页面头部区域增加显示 `batchName`。
+- [x] Task: 前端验证
+    - [x] Sub-task: 启动开发服务器，访问详情页，确认批次名称显示位置合理且数据加载正确。
+- [x] Task: Conductor - User Manual Verification '前端界面增强' (Protocol in workflow.md) 4f8d7a8
