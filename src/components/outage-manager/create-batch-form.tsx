@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,6 +14,7 @@ interface CreateBatchFormProps {
 }
 
 export function CreateBatchForm({ onSuccess }: CreateBatchFormProps) {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     envId: '',
@@ -42,6 +44,7 @@ export function CreateBatchForm({ onSuccess }: CreateBatchFormProps) {
       if (!res.ok) throw new Error(data.details || data.error || '创建失败');
 
       toast.success('发布批次创建成功');
+      router.push(`/apps/outage-manager/wizard/${data.id}`);
       onSuccess(data);
     } catch (error: unknown) {
       console.error(error);
