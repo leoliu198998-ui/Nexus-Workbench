@@ -1,17 +1,17 @@
 # 实施计划 (plan.md) - 停机流程优化与日志增强
 
-## Phase 1: 数据库与模型重构 (Backend)
+## Phase 1: 数据库与模型重构 (Backend) [checkpoint: e86525c]
 本阶段专注于基础设施的变更，确保数据模型支持新的关联需求，并预置最新的环境数据。
 
 - [x] Task: 更新数据库 Schema 并生成迁移 dc88f86
-    - [ ] Sub-task: 在 `prisma/schema.prisma` 中更新 `SystemLog` 模型，添加 `outageBatchId` 字段及与 `OutageBatch` 的外键关联。
-    - [ ] Sub-task: 运行 `pnpm prisma migrate dev --name link_systemlog_outage` 生成并应用迁移文件。
+    - [x] Sub-task: 在 `prisma/schema.prisma` 中更新 `SystemLog` 模型，添加 `outageBatchId` 字段及与 `OutageBatch` 的外键关联。
+    - [x] Sub-task: 运行 `pnpm prisma migrate dev --name link_systemlog_outage` 生成并应用迁移文件。
 - [x] Task: 更新种子数据脚本 44ab701
-    - [ ] Sub-task: 修改 `prisma/seed.ts`，添加或更新 5 个标准环境（Test, UAT, EU, CN, Wise）及其对应的维护页面 URL。
-    - [ ] Sub-task: 运行 `pnpm prisma db seed` 并验证数据库中的数据是否正确更新。
+    - [x] Sub-task: 修改 `prisma/seed.ts`，添加或更新 5 个标准环境（Test, UAT, EU, CN, Wise）及其对应的维护页面 URL。
+    - [x] Sub-task: 运行 `pnpm prisma db seed` 并验证数据库中的数据是否正确更新。
 - [x] Task: 单元测试 - 模型关联 68f2e4c
-    - [ ] Sub-task: 编写或更新单元测试，验证 `SystemLog` 与 `OutageBatch` 之间的关联写入和读取是否正常工作。
-- [ ] Task: Conductor - User Manual Verification '数据库与模型重构' (Protocol in workflow.md)
+    - [x] Sub-task: 编写或更新单元测试，验证 `SystemLog` 与 `OutageBatch` 之间的关联写入和读取是否正常工作。
+- [x] Task: Conductor - User Manual Verification '数据库与模型重构' (Protocol in workflow.md) e86525c
 
 ## Phase 2: 后端日志逻辑实现 (Backend)
 本阶段将业务逻辑与新的日志表进行集成。
