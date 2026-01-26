@@ -1,0 +1,8 @@
+{
+  "track_id": "outage_flow_resume_20260126",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-01-26T14:30:00Z",
+  "updated_at": "2026-01-26T14:30:00Z",
+  "description": "流程调整，创建完发布批次之后会进入流程中，那后续的每一个步骤都需要将创建批次时返回的 batchid 存储下来用于后续接口传递使用。并且每次请求新的接口，如果是 token 过期了，也需要允许手动修改 token"
+}
