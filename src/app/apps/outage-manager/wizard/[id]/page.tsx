@@ -123,9 +123,11 @@ export default function OutageWizardPage({ params }: { params: Promise<{ id: str
 
   return (
     <OutageWizardProvider initialBatch={batch}>
-      <div className="container mx-auto py-6 space-y-6">
-        <WizardContent onReset={() => router.push('/apps/outage-manager')} />
-      </div>
+      <main className="min-h-screen bg-background bg-dot-pattern">
+        <div className="container mx-auto py-6 sm:py-8 space-y-6">
+          <WizardContent onReset={() => router.push('/apps/outage-manager')} />
+        </div>
+      </main>
     </OutageWizardProvider>
   );
 }
