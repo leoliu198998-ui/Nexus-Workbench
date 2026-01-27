@@ -26,15 +26,15 @@
 - Task: Conductor - User Manual Verification '阶段 2：后端 API 开发' (Protocol in workflow.md)
 
 ## 阶段 3：前端 UI 开发
+- [x] Task: 创建更新批次对话框组件 (`UpdateBatchDialog`)
+    - [x] 实现包含名称、日期、时长等字段的表单及校验
+- [x] Task: 在 `WizardControl` 中集成按钮
+    - [x] 在主按钮下方添加“更新”和“取消”按钮
+    - [x] 仅在 `CREATED` 和 `NOTIFIED` 状态下显示这些按钮
+- [x] Task: 实现交互逻辑与状态刷新
+    - [x] 集成取消确认对话框
+    - [x] 成功操作后调用 `onUpdate` 或刷新页面数据
 
-- Task: 创建更新批次对话框组件 (`UpdateBatchDialog`)
-  - 实现包含名称、日期、时长等字段的表单及校验
-- Task: 在 `WizardControl` 中集成按钮
-  - 在主按钮下方添加“更新”和“取消”按钮
-  - 仅在 `CREATED` 和 `NOTIFIED` 状态下显示这些按钮
-- Task: 实现交互逻辑与状态刷新
-  - 集成取消确认对话框
-  - 成功操作后调用 `onUpdate` 或刷新页面数据
 - Task: Conductor - User Manual Verification '阶段 3：前端 UI 开发' (Protocol in workflow.md)
 
 ## 阶段 4：回归测试与收尾
