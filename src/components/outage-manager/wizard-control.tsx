@@ -20,6 +20,7 @@ import { WizardTimeline } from './wizard-timeline';
 import { WizardLogs } from './wizard-logs';
 import { useWizardActions } from './hooks/use-wizard-actions';
 import type { OutageBatch } from '@/types/outage';
+import { LucideIcon } from 'lucide-react';
 
 interface WizardControlProps {
   batch: OutageBatch;
@@ -31,7 +32,14 @@ interface WizardControlProps {
   isSavingToken: boolean;
 }
 
-const STEPS = [
+interface Step {
+  id: string;
+  label: string;
+  icon: LucideIcon;
+  action: 'publish' | 'release' | 'finish' | null;
+}
+
+const STEPS: readonly Step[] = [
   { id: 'CREATED', label: '已创建', icon: Circle, action: null },
   { id: 'NOTIFIED', label: '发布通知', icon: Megaphone, action: 'publish' },
   { id: 'STARTED', label: '停机发布', icon: Play, action: 'release' },
@@ -61,15 +69,15 @@ export function WizardControl({ batch, onUpdate, onReset, token, onTokenChange, 
       <div className="lg:col-span-8 space-y-6">
         
         {/* Main Action Card */}
-        <Card className="relative overflow-hidden border-0 shadow-2xl bg-gradient-to-br from-background via-background to-muted/20 min-h-[300px] flex flex-col justify-center">
-          <div className="absolute inset-0 bg-grid-white/5 [mask-image:radial-gradient(ellipse_80%_80%_at_50%_50%,black,transparent)]" />
+        <Card className="relative overflow-hidden border-0 shadow-2xl bg-linear-to-br from-background via-background to-muted/20 min-h-[300px] flex flex-col justify-center">
+          <div className="absolute inset-0 bg-grid-white/5 mask-[radial-gradient(ellipse_80%_80%_at_50%_50%,black,transparent)]" />
           
           <CardContent className="relative py-12 px-8 flex flex-col items-center text-center space-y-8">
              {batch.status === 'COMPLETED' ? (
               <div className="space-y-6 animate-in fade-in zoom-in duration-700">
                 <div className="relative inline-flex items-center justify-center">
                    <div className="absolute inset-0 bg-green-500/20 rounded-full blur-2xl animate-pulse" />
-                   <div className="relative p-8 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 text-green-600 dark:text-green-400 rounded-full shadow-xl">
+                   <div className="relative p-8 bg-linear-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 text-green-600 dark:text-green-400 rounded-full shadow-xl">
                      <Check className="w-16 h-16" strokeWidth={3} />
                    </div>
                 </div>
@@ -138,7 +146,7 @@ export function WizardControl({ batch, onUpdate, onReset, token, onTokenChange, 
       <div className="lg:col-span-4 space-y-6">
         
         {/* Token Configuration */}
-        <Card className="border-l-4 border-l-amber-500 bg-gradient-to-br from-amber-50/50 to-background dark:from-amber-950/10">
+        <Card className="border-l-4 border-l-amber-500 bg-linear-to-br from-amber-50/50 to-background dark:from-amber-950/10">
           <CardContent className="pt-6">
             <GlobalTokenInput 
               value={token} 

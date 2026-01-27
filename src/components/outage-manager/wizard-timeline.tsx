@@ -26,10 +26,11 @@ export function WizardTimeline({ steps, currentStatus }: WizardTimelineProps) {
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-6 px-6">
-        <div className="relative space-y-8 before:absolute before:inset-0 before:ml-5 before:h-full before:w-0.5 before:-translate-x-1/2 before:bg-gradient-to-b before:from-border before:via-border before:to-transparent before:z-0">
+        <div className="relative space-y-8 before:absolute before:inset-0 before:ml-5 before:h-full before:w-0.5 before:-translate-x-1/2 before:bg-linear-to-b before:from-border before:via-border before:to-transparent before:z-0">
           {steps.map((step, index) => {
             const isCompleted = index <= currentStepIndex;
             const isCurrent = index === currentStepIndex;
+            const StepIcon = step.icon;
             
             return (
               <div key={step.id} className="relative flex items-start gap-4 z-10 group">
@@ -39,7 +40,7 @@ export function WizardTimeline({ steps, currentStatus }: WizardTimelineProps) {
                   isCurrent ? "bg-background border-primary ring-4 ring-primary/10 animate-pulse" : 
                   "bg-muted border-transparent text-muted-foreground"
                 )}>
-                  {isCompleted ? <Check className="w-5 h-5" /> : <step.icon className="w-5 h-5" />}
+                  {isCompleted ? <Check className="w-5 h-5" /> : <StepIcon className="w-5 h-5" />}
                 </div>
                 <div className="flex flex-col pt-1.5 space-y-1">
                   <span className={cn(

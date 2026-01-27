@@ -29,7 +29,7 @@ export function Navbar() {
   const pathSegments = pathname.split('/').filter(Boolean);
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
+    <nav className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md supports-backdrop-filter:bg-background/60">
       <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
         <div className="flex items-center gap-6 md:gap-8">
           <Link href="/" className="flex items-center gap-2.5 group">
@@ -103,6 +103,7 @@ export function Navbar() {
              <input 
                type="text" 
                placeholder="Search tools..." 
+               aria-label="Search tools"
                className="w-full h-9 pl-9 pr-4 rounded-md border border-input bg-muted/50 text-sm focus:outline-none focus:ring-1 focus:ring-primary/20 focus:border-primary/50 transition-all placeholder:text-muted-foreground/70"
              />
              <div className="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none">
@@ -116,7 +117,7 @@ export function Navbar() {
             <Bell className="w-5 h-5" />
           </Button>
           
-          <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-primary/20 to-primary/10 border border-primary/20 flex items-center justify-center text-xs font-bold text-primary">
+          <div className="h-8 w-8 rounded-full bg-linear-to-tr from-primary/20 to-primary/10 border border-primary/20 flex items-center justify-center text-xs font-bold text-primary">
             L
           </div>
         </div>
