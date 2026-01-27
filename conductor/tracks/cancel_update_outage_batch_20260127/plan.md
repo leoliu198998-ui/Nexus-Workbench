@@ -1,6 +1,6 @@
 # 实施计划：停机发布批次取消与更新功能
 
-## 阶段 1：基础架构与数据库更新
+## 阶段 1：基础架构与数据库更新 [checkpoint: 0515a3e]
 
 - [x] Task: 修改 Prisma Schema 以支持 `CANCELLED` 状态 c16c2cd
 
