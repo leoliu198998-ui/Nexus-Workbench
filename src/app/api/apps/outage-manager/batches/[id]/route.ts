@@ -307,3 +307,133 @@ export async function PATCH(
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
+
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const body = await req.json();
+    const { batchName, releaseDatetime, releaseTimeZone, duration } = body;
+
+    // 1. Fetch current batch
+    const batch = await prisma.outageBatch.findUnique({
+      where: { id },
+      include: { environment: true },
+    });
+
+    if (!batch) {
+      return NextResponse.json({ error: 'Batch not found' }, { status: 404 });
+    }
+
+    // 2. Validate status
+    if (batch.status !== OutageStatus.CREATED && batch.status !== OutageStatus.NOTIFIED) {
+      return NextResponse.json({ error: 'Only CREATED or NOTIFIED batches can be updated' }, { status: 403 });
+    }
+
+    if (!batch.remoteBatchId) {
+      return NextResponse.json({ error: 'Remote batch ID is missing' }, { status: 400 });
+    }
+
+    // 3. Call external API
+    const externalUrl = `${batch.environment.baseUrl}/devops/release-batch/update/${batch.remoteBatchId}`;
+    
+    const externalPayload = {
+      batchName,
+      releaseDatetime, // Format: "yyyy-MM-dd HH:mm"
+      releaseTimeZone,
+      duration
+    };
+
+    const requestHeaders = {
+      'Content-Type': 'application/json',
+      'x-dk-token': batch.token,
+    };
+
+    const curlCommand = generateCurlCommand(externalUrl, 'PUT', requestHeaders, externalPayload);
+
+    let response: Response | null = null;
+    let responseText = '';
+    let responseData: Record<string, unknown> | null = null;
+
+    const logs = (batch.logs as { steps: Record<string, unknown>[] }) || { steps: [] };
+
+    try {
+      response = await fetch(externalUrl, {
+        method: 'PUT',
+        headers: requestHeaders,
+        body: JSON.stringify(externalPayload),
+      });
+
+      responseText = await response.text();
+      const safeResponseText = responseText.replace(/"batchId"\s*:\s*(\d{15,})/g, '"batchId":"$1"');
+      responseData = JSON.parse(safeResponseText) as Record<string, unknown>;
+
+      logs.steps.push({
+        step: 'UPDATE_BATCH',
+        url: externalUrl,
+        method: 'PUT',
+        request: {
+          headers: requestHeaders,
+          body: externalPayload,
+          curl: curlCommand,
+        },
+        status: response.status,
+        response: {
+          raw: responseText,
+          parsed: responseData,
+        },
+        timestamp: new Date().toISOString(),
+      });
+
+      if (!response.ok) {
+        throw new Error((responseData.errmsg as string) || (responseData.message as string) || 'External API failed');
+      }
+
+      if (responseData.errcode !== undefined && String(responseData.errcode) !== '0') {
+        throw new Error((responseData.errmsg as string) || `接口返回错误码: ${responseData.errcode}`);
+      }
+    } catch (apiError: unknown) {
+      console.error('External API Update Error:', apiError);
+      
+      // Update logs even on failure
+      await prisma.outageBatch.update({
+        where: { id },
+        data: { logs: logs as unknown as Prisma.InputJsonValue },
+      });
+
+      return NextResponse.json({ 
+        error: 'External API Error', 
+        details: apiError instanceof Error ? apiError.message : 'Unknown error',
+        logs 
+      }, { status: 502 });
+    }
+
+    // 4. Update local record AND RESET STATUS TO CREATED
+    const updatedBatch = await prisma.outageBatch.update({
+      where: { id },
+      data: {
+        batchName,
+        releaseDatetime: new Date(releaseDatetime), // Assuming ISO string or compatible
+        releaseTimeZone,
+        duration,
+        status: OutageStatus.CREATED, // Force reset to CREATED
+        logs: logs as unknown as Prisma.InputJsonValue,
+      },
+    });
+
+    // 5. Log action
+    try {
+      await logOutageAction(id, 'OUTAGE_BATCH_UPDATE_SUCCESS', `成功更新批次信息并重置状态为 CREATED`);
+    } catch (e) {
+      console.error('[LOGGING] Failed to log update success:', e);
+    }
+
+    return NextResponse.json(updatedBatch);
+
+  } catch (error) {
+    console.error('Failed to update batch:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
+}
