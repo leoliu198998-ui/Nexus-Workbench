@@ -6,9 +6,9 @@
 - [x] Task: 封装 JSON 安全解析工具 876d669
     - [x] 在 `src/lib/utils.ts` 中实现 `safeJsonParse` 函数
     - [x] 编写 `safeJsonParse` 的单元测试
-- [ ] Task: 抽离 Curl 生成工具
-    - [ ] 将 `generateCurlCommand` 从 `route.ts` 移动到 `src/lib/utils.ts` (或新文件)
-    - [ ] 确保导出并在原文件中引用（临时）
+- [x] Task: 抽离 Curl 生成工具 69bee0b
+    - [x] 将 `generateCurlCommand` 从 `route.ts` 移动到 `src/lib/utils.ts` (或新文件)
+    - [x] 确保导出并在原文件中引用（临时）
 - [ ] Task: Conductor - User Manual Verification '阶段 1：基础设施准备' (Protocol in workflow.md)
 
 ## 阶段 2：Service 层实现 (TDD)
