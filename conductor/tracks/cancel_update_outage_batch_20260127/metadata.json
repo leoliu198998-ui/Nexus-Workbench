@@ -1,8 +1,0 @@
-{
-  "track_id": "cancel_update_outage_batch_20260127",
-  "type": "feature",
-  "status": "new",
-  "created_at": "2026-01-27T10:00:00Z",
-  "updated_at": "2026-01-27T10:00:00Z",
-  "description": "停机发布支持取消和更新操作，且仅在 CREATED 和 NOTIFIED 状态下可用，更新后状态重置为 CREATED。"
-}

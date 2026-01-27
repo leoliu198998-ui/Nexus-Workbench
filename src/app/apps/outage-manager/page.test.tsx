@@ -45,15 +45,15 @@ describe('OutageManagerPage', () => {
   it('renders page title and main components', () => {
     render(<OutageManagerPage />);
 
-    expect(screen.getByText('系统停机发布管理')).toBeInTheDocument();
-    expect(screen.getByText('发布批次管理')).toBeInTheDocument();
+    expect(screen.getByText('Outage Manager')).toBeInTheDocument();
+    expect(screen.getByText('Release Batches')).toBeInTheDocument();
     expect(screen.getByTestId('batch-list')).toBeInTheDocument();
   });
 
   it('renders create button that is always enabled', () => {
     render(<OutageManagerPage />);
 
-    const createButton = screen.getByText('创建新批次');
+    const createButton = screen.getByRole('button', { name: /Create New Batch/i });
     expect(createButton).not.toBeDisabled();
   });
 
@@ -61,7 +61,7 @@ describe('OutageManagerPage', () => {
     const user = userEvent.setup();
     render(<OutageManagerPage />);
 
-    await user.click(screen.getByText('创建新批次'));
+    await user.click(screen.getByRole('button', { name: /Create New Batch/i }));
 
     expect(screen.getByTestId('create-batch-dialog')).toBeInTheDocument();
   });
