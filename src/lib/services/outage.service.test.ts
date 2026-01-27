@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { outageService } from './outage.service';
 import { prisma } from '@/lib/prisma';
 import { logOutageAction } from './logger';
@@ -31,7 +31,7 @@ describe('OutageService', () => {
   describe('getBatch', () => {
     it('should return batch if found', async () => {
       const mockBatch = { id: '1', batchName: 'test' };
-      (prisma.outageBatch.findUnique as any).mockResolvedValue(mockBatch);
+      (prisma.outageBatch.findUnique as Mock).mockResolvedValue(mockBatch);
 
       const result = await outageService.getBatch('1');
       expect(result).toEqual(mockBatch);
@@ -42,7 +42,7 @@ describe('OutageService', () => {
     });
 
     it('should throw error if batch not found', async () => {
-      (prisma.outageBatch.findUnique as any).mockResolvedValue(null);
+      (prisma.outageBatch.findUnique as Mock).mockResolvedValue(null);
       await expect(outageService.getBatch('1')).rejects.toThrow('Batch not found');
     });
   });
@@ -59,12 +59,24 @@ describe('OutageService', () => {
     };
 
     it('should create batch successfully', async () => {
-      (prisma.releaseEnvironment.findUnique as any).mockResolvedValue(mockEnv);
-      (global.fetch as any).mockResolvedValue({
+      (prisma.releaseEnvironment.findUnique as Mock).mockResolvedValue(mockEnv);
+      (global.fetch as Mock).mockResolvedValue({
         ok: true,
-        text: async () => JSON.stringify({ errcode: '0', data: { batchId: '12345' } }),
+        text: async () => JSON.stringify({
+          errcode: '0',
+          data: {
+            batchId: '12345',
+            batchName: 'Test Batch',
+            originalDateTime: '2026-01-01 10:00',
+            originalTimeZone: 'UTC',
+            duration: 60,
+            releaseDatetime: '2026-01-01 10:00',
+            releaseStatus: 'UNPUBLISHED',
+            noticeStatus: 'UNSENT'
+          }
+        }),
       });
-      (prisma.outageBatch.create as any).mockResolvedValue({ id: 'new-batch-id', ...createDto });
+      (prisma.outageBatch.create as Mock).mockResolvedValue({ id: 'new-batch-id', ...createDto });
 
       const result = await outageService.createBatch(createDto);
       expect(result).toBeDefined();
@@ -73,7 +85,7 @@ describe('OutageService', () => {
     });
 
     it('should throw error if environment not found', async () => {
-      (prisma.releaseEnvironment.findUnique as any).mockResolvedValue(null);
+      (prisma.releaseEnvironment.findUnique as Mock).mockResolvedValue(null);
       await expect(outageService.createBatch(createDto)).rejects.toThrow('Environment not found');
     });
   });
@@ -95,22 +107,22 @@ describe('OutageService', () => {
     };
 
     it('should update batch successfully and reset status', async () => {
-      (prisma.outageBatch.findUnique as any).mockResolvedValue(mockBatch);
-      (global.fetch as any).mockResolvedValue({
+      (prisma.outageBatch.findUnique as Mock).mockResolvedValue(mockBatch);
+      (global.fetch as Mock).mockResolvedValue({
         ok: true,
         text: async () => JSON.stringify({ errcode: '0', data: {} }),
       });
-      (prisma.outageBatch.update as any).mockResolvedValue({ ...mockBatch, ...updateDto });
+      (prisma.outageBatch.update as Mock).mockResolvedValue({ ...mockBatch, ...updateDto });
 
       await outageService.updateBatch('batch-1', updateDto);
-      
+
       expect(prisma.outageBatch.update).toHaveBeenCalledWith(expect.objectContaining({
         data: expect.objectContaining({ status: 'CREATED' })
       }));
     });
 
     it('should throw error if batch not editable', async () => {
-      (prisma.outageBatch.findUnique as any).mockResolvedValue({ ...mockBatch, status: 'STARTED' });
+      (prisma.outageBatch.findUnique as Mock).mockResolvedValue({ ...mockBatch, status: 'STARTED' });
       await expect(outageService.updateBatch('batch-1', updateDto)).rejects.toThrow('Only CREATED or NOTIFIED batches can be updated');
     });
   });
@@ -126,22 +138,22 @@ describe('OutageService', () => {
     };
 
     it('should execute publish action successfully', async () => {
-      (prisma.outageBatch.findUnique as any).mockResolvedValue(mockBatch);
-      (global.fetch as any).mockResolvedValue({
+      (prisma.outageBatch.findUnique as Mock).mockResolvedValue(mockBatch);
+      (global.fetch as Mock).mockResolvedValue({
         ok: true,
         text: async () => JSON.stringify({ errcode: '0', data: {} }),
       });
-      (prisma.outageBatch.update as any).mockResolvedValue({ ...mockBatch, status: 'NOTIFIED' });
+      (prisma.outageBatch.update as Mock).mockResolvedValue({ ...mockBatch, status: 'NOTIFIED' });
 
       await outageService.executeAction('batch-1', 'publish');
-      
+
       expect(prisma.outageBatch.update).toHaveBeenCalledWith(expect.objectContaining({
         data: expect.objectContaining({ status: 'NOTIFIED' })
       }));
     });
 
     it('should handle token update action', async () => {
-      (prisma.outageBatch.update as any).mockResolvedValue({ ...mockBatch, token: 'new-token' });
+      (prisma.outageBatch.update as Mock).mockResolvedValue({ ...mockBatch, token: 'new-token' });
       await outageService.executeAction('batch-1', '', 'new-token');
       expect(prisma.outageBatch.update).toHaveBeenCalledWith(expect.objectContaining({
         data: { token: 'new-token' }
@@ -149,17 +161,17 @@ describe('OutageService', () => {
     });
 
     it('should handle fix-batch-id action', async () => {
-        const batchWithLogs = {
-            ...mockBatch,
-            logs: { steps: [{ step: 'CREATE_BATCH', response: { raw: '{"data":{"batchId":9999999999999999}}' } }] }
-        };
-        (prisma.outageBatch.findUnique as any).mockResolvedValue(batchWithLogs);
-        
-        await outageService.executeAction('batch-1', 'fix-batch-id');
-        
-        expect(prisma.outageBatch.update).toHaveBeenCalledWith(expect.objectContaining({
-            data: { remoteBatchId: '9999999999999999' }
-        }));
+      const batchWithLogs = {
+        ...mockBatch,
+        logs: { steps: [{ step: 'CREATE_BATCH', response: { raw: '{"data":{"batchId":9999999999999999}}' } }] }
+      };
+      (prisma.outageBatch.findUnique as Mock).mockResolvedValue(batchWithLogs);
+
+      await outageService.executeAction('batch-1', 'fix-batch-id');
+
+      expect(prisma.outageBatch.update).toHaveBeenCalledWith(expect.objectContaining({
+        data: { remoteBatchId: '9999999999999999' }
+      }));
     });
   });
 });

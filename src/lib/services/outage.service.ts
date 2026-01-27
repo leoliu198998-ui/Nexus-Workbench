@@ -29,7 +29,7 @@ const ACTION_MAP: Record<string, { path: string; nextStatus: OutageStatus }> = {
 export class OutageService {
   private static instance: OutageService;
 
-  private constructor() {}
+  private constructor() { }
 
   public static getInstance(): OutageService {
     if (!OutageService.instance) {
@@ -65,13 +65,13 @@ export class OutageService {
 
     // 2. Call external API
     const externalUrl = `${environment.baseUrl}/devops/release-batch`;
-    
+
     // Format datetime logic
     let formattedReleaseDatetime = releaseDatetime;
     if (releaseDatetime && releaseDatetime.length === 16 && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(releaseDatetime)) {
       formattedReleaseDatetime = releaseDatetime.replace('T', ' ');
     }
-    
+
     const externalPayload = {
       batchName,
       releaseDatetime: formattedReleaseDatetime,
@@ -97,7 +97,7 @@ export class OutageService {
 
       const responseText = await response.text();
       // Use safeJsonParse to handle BigInt
-      const responseData = safeJsonParse<any>(responseText);
+      const responseData = safeJsonParse<Record<string, unknown>>(responseText);
 
       logs.steps.push({
         step: 'CREATE_BATCH',
@@ -117,23 +117,37 @@ export class OutageService {
       });
 
       if (!response.ok) {
-        throw new Error(responseData.errmsg || responseData.message || 'External API failed');
+        throw new Error((responseData.errmsg as string) || (responseData.message as string) || 'External API failed');
       }
 
       if (String(responseData.errcode) !== '0') {
-        throw new Error(responseData.errmsg || `接口返回错误码: ${responseData.errcode}`);
+        throw new Error((responseData.errmsg as string) || `接口返回错误码: ${responseData.errcode}`);
       }
 
       if (!responseData.data || typeof responseData.data !== 'object') {
         throw new Error('接口返回数据格式错误: 缺少data对象');
       }
 
-      const batchData = responseData.data;
+      const batchData = responseData.data as Record<string, unknown>;
+
+      // Validate required fields
+      const requiredFields = ['batchId', 'batchName', 'originalDateTime', 'originalTimeZone', 'duration', 'releaseDatetime', 'releaseStatus', 'noticeStatus'];
+      const missingFields = requiredFields.filter(field => !(field in batchData));
+
+      if (missingFields.length > 0) {
+        throw new Error(`接口返回数据格式错误: 缺少必需字段 [${missingFields.join(', ')}]`);
+      }
+
+      // Validate batchId
+      if (!batchData.batchId || (typeof batchData.batchId !== 'number' && typeof batchData.batchId !== 'string')) {
+        throw new Error('接口返回的batchId无效');
+      }
+
       remoteBatchId = String(batchData.batchId);
 
     } catch (apiError: unknown) {
       console.error('External API Error:', apiError);
-      throw apiError; 
+      throw apiError;
     }
 
     // 3. Create local record
@@ -184,7 +198,7 @@ export class OutageService {
 
     // 3. Call external API
     const externalUrl = `${batch.environment.baseUrl}/devops/release-batch/update/${batch.remoteBatchId}`;
-    
+
     // Format datetime
     let formattedReleaseDatetime = releaseDatetime;
     if (releaseDatetime && releaseDatetime.length === 16 && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(releaseDatetime)) {
@@ -214,7 +228,7 @@ export class OutageService {
       });
 
       const responseText = await response.text();
-      const responseData = safeJsonParse<any>(responseText);
+      const responseData = safeJsonParse<Record<string, unknown>>(responseText);
 
       logs.steps.push({
         step: 'UPDATE_BATCH',
@@ -234,11 +248,11 @@ export class OutageService {
       });
 
       if (!response.ok) {
-        throw new Error(responseData.errmsg || responseData.message || 'External API failed');
+        throw new Error((responseData.errmsg as string) || (responseData.message as string) || 'External API failed');
       }
 
       if (String(responseData.errcode) !== '0') {
-        throw new Error(responseData.errmsg || `接口返回错误码: ${responseData.errcode}`);
+        throw new Error((responseData.errmsg as string) || `接口返回错误码: ${responseData.errcode}`);
       }
     } catch (apiError: unknown) {
       console.error('External API Update Error:', apiError);
@@ -247,7 +261,7 @@ export class OutageService {
         where: { id },
         data: { logs: logs as unknown as Prisma.InputJsonValue },
       });
-      throw apiError; 
+      throw apiError;
     }
 
     // 4. Update local record AND RESET STATUS TO CREATED
@@ -318,7 +332,7 @@ export class OutageService {
       }
 
       const correctBatchId = batchIdMatch[1];
-      
+
       const updatedBatch = await prisma.outageBatch.update({
         where: { id },
         data: { remoteBatchId: correctBatchId },
@@ -380,7 +394,7 @@ export class OutageService {
       });
 
       responseText = await response.text();
-      responseData = safeJsonParse<any>(responseText);
+      responseData = safeJsonParse<Record<string, unknown>>(responseText);
 
       logs.steps.push({
         step: action.toUpperCase(),
@@ -416,7 +430,7 @@ export class OutageService {
         } catch (e) {
           console.error('[LOGGING] Failed to log action failure (Logic):', e);
         }
-        
+
         if (errmsg && errmsg.includes('EntityNotFoundException') && errmsg.includes('Unable to find')) {
           throw new Error(`外部系统中找不到对应的批次记录 (ID: ${batch.remoteBatchId})。请检查外部系统或重新创建批次。`);
         }
@@ -424,14 +438,20 @@ export class OutageService {
       }
     } catch (apiError: unknown) {
       console.error(`External API Error (${action}):`, apiError);
-      
+
       await prisma.outageBatch.update({
         where: { id },
         data: { logs: logs as unknown as Prisma.InputJsonValue },
       });
 
       // Wrap the error to include logs and apiCall details
-      const error: any = new Error(apiError instanceof Error ? apiError.message : 'Unknown error');
+      interface ExtendedError extends Error {
+        details?: string;
+        apiCall?: Record<string, unknown>;
+        logs?: { steps: Record<string, unknown>[] };
+        status?: number;
+      }
+      const error = new Error(apiError instanceof Error ? apiError.message : 'Unknown error') as ExtendedError;
       error.details = error.message;
       error.apiCall = {
         url: externalUrl,

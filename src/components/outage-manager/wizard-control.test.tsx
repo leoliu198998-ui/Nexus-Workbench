@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
@@ -32,10 +31,10 @@ describe('WizardControl', () => {
     });
 
     render(
-      <WizardControl 
-        batch={mockBatch} 
-        onUpdate={mockOnUpdate} 
-        onReset={vi.fn()} 
+      <WizardControl
+        batch={mockBatch}
+        onUpdate={mockOnUpdate}
+        onReset={vi.fn()}
         token="test-token"
         onTokenChange={vi.fn()}
         isSavingToken={false}
@@ -43,7 +42,7 @@ describe('WizardControl', () => {
     );
 
     expect(screen.getByText('发布进度')).toBeInTheDocument();
-    
+
     // Check for the new button
     const actionButton = screen.getByRole('button', { name: /立即执行/ });
     expect(actionButton).toBeInTheDocument();
@@ -60,7 +59,7 @@ describe('WizardControl', () => {
         })
       );
     });
-    
+
     expect(mockOnUpdate).toHaveBeenCalled();
   });
 });

@@ -8,7 +8,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import type { OutageBatch } from '@/types/outage';
-import { format } from 'date-fns';
 
 interface UpdateBatchDialogProps {
   open: boolean;
@@ -33,16 +32,16 @@ export function UpdateBatchDialog({ open, onClose, batch, onSuccess }: UpdateBat
       let formattedDate = '';
       if (batch.releaseDatetime) {
         try {
-            const date = new Date(batch.releaseDatetime);
-            // Adjust to local timezone for input or keep as is? 
-            // The input type="datetime-local" is tricky with timezones. 
-            // For simplicity, we'll format it as local ISO string without 'Z'
-            // But we must be careful not to shift time unintentionally.
-            // Let's rely on date-fns format if possible, or simple ISO slice.
-            const offset = date.getTimezoneOffset() * 60000;
-            formattedDate = new Date(date.getTime() - offset).toISOString().slice(0, 16);
+          const date = new Date(batch.releaseDatetime);
+          // Adjust to local timezone for input or keep as is? 
+          // The input type="datetime-local" is tricky with timezones. 
+          // For simplicity, we'll format it as local ISO string without 'Z'
+          // But we must be careful not to shift time unintentionally.
+          // Let's rely on date-fns format if possible, or simple ISO slice.
+          const offset = date.getTimezoneOffset() * 60000;
+          formattedDate = new Date(date.getTime() - offset).toISOString().slice(0, 16);
         } catch (e) {
-            console.error('Date parsing error', e);
+          console.error('Date parsing error', e);
         }
       }
 
@@ -125,13 +124,13 @@ export function UpdateBatchDialog({ open, onClose, batch, onSuccess }: UpdateBat
               />
             </div>
             <div className="space-y-2">
-               <Label htmlFor="timezone">时区</Label>
-               <Input 
-                 id="timezone"
-                 value={formData.releaseTimeZone}
-                 disabled
-                 className="bg-muted"
-               />
+              <Label htmlFor="timezone">时区</Label>
+              <Input
+                id="timezone"
+                value={formData.releaseTimeZone}
+                disabled
+                className="bg-muted"
+              />
             </div>
           </div>
 

@@ -1,5 +1,4 @@
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import type { OutageBatch } from '@/types/outage';
 import { Calendar, Clock, Hash, History } from 'lucide-react';
 
@@ -20,7 +19,7 @@ export function BatchInfoCard({ batch }: BatchInfoCardProps) {
         minute: '2-digit',
         hour12: false
       }).replace(/\//g, '-');
-    } catch (e) {
+    } catch {
       return 'Invalid Date';
     }
   };
