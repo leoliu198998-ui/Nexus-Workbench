@@ -37,7 +37,7 @@
 
 - Task: Conductor - User Manual Verification '阶段 3：前端 UI 开发' (Protocol in workflow.md)
 
-## 阶段 4：回归测试与收尾
+## 阶段 4：回归测试与收尾 [checkpoint: 7b664d3]
 - [x] Task: 运行全量测试套件确保无回归风险
     - [x] Task: 清理测试数据并完善代码文档
     - [x] Task: Conductor - User Manual Verification '阶段 4：回归测试与收尾' (Protocol in workflow.md)
