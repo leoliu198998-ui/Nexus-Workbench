@@ -2,24 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { OutageStatus, Prisma } from '@/generated/client';
 import { logOutageAction } from '@/lib/services/logger';
-
-/**
- * 生成 curl 命令字符串，用于调试和记录 API 调用
- */
-function generateCurlCommand(
-  url: string,
-  method: string,
-  headers: Record<string, string>,
-  body?: unknown
-): string {
-  const headersStr = Object.entries(headers)
-    .map(([key, value]) => `-H '${key}: ${value}'`)
-    .join(' \\\n  ');
-  
-  const bodyStr = body ? `-d '${JSON.stringify(body)}'` : '';
-  
-  return `curl -X ${method} '${url}' \\\n  ${headersStr}${bodyStr ? ` \\\n  ${bodyStr}` : ''}`;
-}
+import { generateCurlCommand } from '@/lib/utils';
 
 const ACTION_MAP: Record<string, { path: string; nextStatus: OutageStatus }> = {
   publish: { path: '/publish', nextStatus: OutageStatus.NOTIFIED },
