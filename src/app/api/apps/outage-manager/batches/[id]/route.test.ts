@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { PATCH, GET } from './route';
 import { prisma } from '@/lib/prisma';
 import { NextRequest } from 'next/server';
+import { logOutageAction } from '@/lib/services/logger';
 
 // Mock prisma
 vi.mock('@/lib/prisma', () => ({
@@ -112,6 +113,12 @@ describe('PATCH /api/apps/outage-manager/batches/[id]', () => {
         body: JSON.stringify({ batchId: '202601191310437440' }),
       })
     );
+    // Verify logging
+    expect(logOutageAction).toHaveBeenCalledWith(
+      'local-123',
+      'OUTAGE_BATCH_PUBLISH_SUCCESS',
+      expect.stringContaining('成功执行操作: publish')
+    );
   });
 
   it('should return 400 for invalid action', async () => {
@@ -144,6 +151,12 @@ describe('PATCH /api/apps/outage-manager/batches/[id]', () => {
       where: { id: 'local-123' },
       data: { token: 'new-token-123' },
     });
+    // Verify logging
+    expect(logOutageAction).toHaveBeenCalledWith(
+      'local-123',
+      'OUTAGE_BATCH_TOKEN_UPDATE',
+      '更新了鉴权 Token'
+    );
   });
 
   it('should return 502 and NOT update status if API returns errcode 1', async () => {
@@ -172,6 +185,13 @@ describe('PATCH /api/apps/outage-manager/batches/[id]', () => {
     expect(data.error).toBe('External API Error');
     expect(data.details).toContain('Unable to find MysqlReleaseBatch');
     
+    // Verify failure logging
+    expect(logOutageAction).toHaveBeenCalledWith(
+      'local-123',
+      'OUTAGE_BATCH_PUBLISH_FAILED',
+      expect.stringContaining('接口返回错误码: 1')
+    );
+
     // Should NOT have updated status to NOTIFIED
     const updateCalls = (prisma.outageBatch.update as any).mock.calls;
     const hasStatusUpdate = updateCalls.some((call: any) => call[0].data.status === 'NOTIFIED');
