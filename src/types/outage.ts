@@ -19,11 +19,13 @@ export interface LogEntry {
   };
 }
 
+export type OutageStatus = 'CREATED' | 'NOTIFIED' | 'STARTED' | 'COMPLETED' | 'CANCELLED';
+
 export interface OutageBatch {
   id: string;
   envId: string;
   batchName: string;
-  status: string;
+  status: OutageStatus | string; // Keep string for backward compat if needed, but prefer union
   token: string;
   remoteBatchId?: string | null;
   releaseTimeZone?: string;
