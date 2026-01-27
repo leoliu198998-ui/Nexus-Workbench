@@ -1,7 +1,14 @@
 import { ToolCard } from '@/components/dashboard/tool-card';
-import { FileSpreadsheet, Sparkles, Terminal, Database, Clock } from 'lucide-react';
+import { FileSpreadsheet, Sparkles, Terminal, Database, Clock, Users } from 'lucide-react';
 
 const tools = [
+  {
+    title: 'Personnel Creator',
+    description: 'Create and manage personnel records including Candidates, Contractors, and Applicants.',
+    icon: Users,
+    href: '/apps/personnel-creation',
+    status: 'active' as const,
+  },
   {
     title: 'Outage Release Manager',
     description: '4-step standardized workflow for managing system outages during releases across different environments.',
