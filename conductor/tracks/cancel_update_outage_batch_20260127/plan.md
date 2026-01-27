@@ -16,10 +16,9 @@
 - Task: Conductor - User Manual Verification '阶段 1：基础架构与数据库更新' (Protocol in workflow.md)
 
 ## 阶段 2：后端 API 开发 (TDD)
-
-- Task: 实现批次更新 API (`PUT /api/apps/outage-manager/batches/[id]`)
-  - **Red**: 编写测试用例验证更新逻辑（校验、调用外部 API、本地同步、状态重置为 CREATED、日志）
-  - **Green**: 在 `route.ts` 中实现 `PUT` 方法，确保更新后状态回退
+- [x] Task: 实现批次更新 API (`PUT /api/apps/outage-manager/batches/[id]`) f3ac026
+    - [x] **Red**: 编写测试用例验证更新逻辑（校验、调用外部 API、本地同步、状态重置为 CREATED、日志）
+    - [x] **Green**: 在 `route.ts` 中实现 `PUT` 方法，确保更新后状态回退
 - Task: 实现批次取消逻辑 (集成在 `PATCH` API)
   - **Red**: 编写测试用例验证 `action: 'cancel'` 逻辑
   - **Green**: 在 `route.ts` 的 `PATCH` 方法中处理 `cancel` 操作
