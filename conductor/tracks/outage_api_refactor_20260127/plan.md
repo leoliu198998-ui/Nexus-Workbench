@@ -3,9 +3,9 @@
 ## 阶段 1：基础设施准备
 - [x] Task: 引入 `json-bigint` 依赖 d8ac684
     - [x] 安装 `json-bigint` 包和类型定义
-- [ ] Task: 封装 JSON 安全解析工具
-    - [ ] 在 `src/lib/utils.ts` 中实现 `safeJsonParse` 函数
-    - [ ] 编写 `safeJsonParse` 的单元测试
+- [x] Task: 封装 JSON 安全解析工具 876d669
+    - [x] 在 `src/lib/utils.ts` 中实现 `safeJsonParse` 函数
+    - [x] 编写 `safeJsonParse` 的单元测试
 - [ ] Task: 抽离 Curl 生成工具
     - [ ] 将 `generateCurlCommand` 从 `route.ts` 移动到 `src/lib/utils.ts` (或新文件)
     - [ ] 确保导出并在原文件中引用（临时）
