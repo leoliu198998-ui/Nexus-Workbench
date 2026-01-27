@@ -1,6 +1,6 @@
 # 实施计划：停机发布 API 架构优化
 
-## 阶段 1：基础设施准备
+## 阶段 1：基础设施准备 [checkpoint: 87b0c77]
 - [x] Task: 引入 `json-bigint` 依赖 d8ac684
     - [x] 安装 `json-bigint` 包和类型定义
 - [x] Task: 封装 JSON 安全解析工具 876d669
@@ -9,7 +9,7 @@
 - [x] Task: 抽离 Curl 生成工具 69bee0b
     - [x] 将 `generateCurlCommand` 从 `route.ts` 移动到 `src/lib/utils.ts` (或新文件)
     - [x] 确保导出并在原文件中引用（临时）
-- [ ] Task: Conductor - User Manual Verification '阶段 1：基础设施准备' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification '阶段 1：基础设施准备' (Protocol in workflow.md)
 
 ## 阶段 2：Service 层实现 (TDD)
 - [ ] Task: 创建 OutageService 骨架与测试
