@@ -15,7 +15,7 @@
 
 - Task: Conductor - User Manual Verification '阶段 1：基础架构与数据库更新' (Protocol in workflow.md)
 
-## 阶段 2：后端 API 开发 (TDD)
+## 阶段 2：后端 API 开发 (TDD) [checkpoint: 8cc5294]
 - [x] Task: 实现批次更新 API (`PUT /api/apps/outage-manager/batches/[id]`) f3ac026
     - [x] **Red**: 编写测试用例验证更新逻辑（校验、调用外部 API、本地同步、状态重置为 CREATED、日志）
     - [x] **Green**: 在 `route.ts` 中实现 `PUT` 方法，确保更新后状态回退
