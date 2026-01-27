@@ -34,10 +34,10 @@
     - [x] 验证现有集成测试
 - [x] Task: Conductor - User Manual Verification '阶段 3：路由重构' (Protocol in workflow.md)
 
-## 阶段 4：清理与回归测试
-- [ ] Task: 清理废弃代码
-    - [ ] 删除 `route.ts` 中不再使用的正则替换逻辑和辅助函数
-    - [ ] 检查并移除其他冗余代码
-- [ ] Task: 运行全量测试
-    - [ ] 执行所有单元测试和集成测试，确保无回归
-- [ ] Task: Conductor - User Manual Verification '阶段 4：清理与回归测试' (Protocol in workflow.md)
+## 阶段 4：清理与回归测试 [checkpoint: e48ccac]
+- [x] Task: 清理废弃代码 
+    - [x] 删除 `route.ts` 中不再使用的正则替换逻辑和辅助函数
+    - [x] 检查并移除其他冗余代码
+- [x] Task: 运行全量测试
+    - [x] 执行所有单元测试和集成测试，确保无回归
+- [x] Task: Conductor - User Manual Verification '阶段 4：清理与回归测试' (Protocol in workflow.md)
