@@ -11,16 +11,16 @@
     - [x] 确保导出并在原文件中引用（临时）
 - [x] Task: Conductor - User Manual Verification '阶段 1：基础设施准备' (Protocol in workflow.md)
 
-## 阶段 2：Service 层实现 (TDD)
-- [ ] Task: 创建 OutageService 骨架与测试
-    - [ ] 创建 `src/lib/services/outage.service.ts`
-    - [ ] 创建 `src/lib/services/outage.service.test.ts`
-    - [ ] **Red**: 编写测试用例（Mock Prisma 和 fetch），验证创建、更新、查询、外部调用的逻辑
-- [ ] Task: 实现 OutageService 核心逻辑
-    - [ ] **Green**: 实现 `createBatch`, `updateBatch`, `getBatch`
-    - [ ] **Green**: 实现 `executeAction` (含鉴权、外部调用封装、日志)
-    - [ ] **Refactor**: 确保使用 `safeJsonParse` 处理外部响应
-- [ ] Task: Conductor - User Manual Verification '阶段 2：Service 层实现' (Protocol in workflow.md)
+## 阶段 2：Service 层实现 (TDD) [checkpoint: 6ccc336]
+- [x] Task: 创建 OutageService 骨架与测试
+    - [x] 创建 `src/lib/services/outage.service.ts`
+    - [x] 创建 `src/lib/services/outage.service.test.ts`
+    - [x] **Red**: 编写测试用例（Mock Prisma 和 fetch），验证创建、更新、查询、外部调用的逻辑
+- [x] Task: 实现 OutageService 核心逻辑
+    - [x] **Green**: 实现 `createBatch`, `updateBatch`, `getBatch`
+    - [x] **Green**: 实现 `executeAction` (含鉴权、外部调用封装、日志)
+    - [x] **Refactor**: 确保使用 `safeJsonParse` 处理外部响应
+- [x] Task: Conductor - User Manual Verification '阶段 2：Service 层实现' (Protocol in workflow.md)
 
 ## 阶段 3：路由重构
 - [ ] Task: 重构 GET 路由
