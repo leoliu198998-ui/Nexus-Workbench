@@ -22,17 +22,17 @@
     - [x] **Refactor**: 确保使用 `safeJsonParse` 处理外部响应
 - [x] Task: Conductor - User Manual Verification '阶段 2：Service 层实现' (Protocol in workflow.md)
 
-## 阶段 3：路由重构
-- [ ] Task: 重构 GET 路由
-    - [ ] 修改 `src/app/api/apps/outage-manager/batches/[id]/route.ts` 的 GET 方法调用 Service
-    - [ ] 验证现有集成测试 (`route.test.ts`) 是否通过
-- [ ] Task: 重构 POST 路由
-    - [ ] 修改 `src/app/api/apps/outage-manager/batches/route.ts` 的 POST 方法调用 Service
-    - [ ] 验证现有集成测试
-- [ ] Task: 重构 PATCH 和 PUT 路由
-    - [ ] 修改 `src/app/api/apps/outage-manager/batches/[id]/route.ts` 的 PATCH/PUT 方法调用 Service
-    - [ ] 验证现有集成测试
-- [ ] Task: Conductor - User Manual Verification '阶段 3：路由重构' (Protocol in workflow.md)
+## 阶段 3：路由重构 [checkpoint: 7fba5c9]
+- [x] Task: 重构 GET 路由
+    - [x] 修改 `src/app/api/apps/outage-manager/batches/[id]/route.ts` 的 GET 方法调用 Service
+    - [x] 验证现有集成测试 (`route.test.ts`) 是否通过
+- [x] Task: 重构 POST 路由
+    - [x] 修改 `src/app/api/apps/outage-manager/batches/route.ts` 的 POST 方法调用 Service
+    - [x] 验证现有集成测试
+- [x] Task: 重构 PATCH 和 PUT 路由
+    - [x] 修改 `src/app/api/apps/outage-manager/batches/[id]/route.ts` 的 PATCH/PUT 方法调用 Service
+    - [x] 验证现有集成测试
+- [x] Task: Conductor - User Manual Verification '阶段 3：路由重构' (Protocol in workflow.md)
 
 ## 阶段 4：清理与回归测试
 - [ ] Task: 清理废弃代码
