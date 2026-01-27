@@ -25,6 +25,7 @@ const ACTION_MAP: Record<string, { path: string; nextStatus: OutageStatus }> = {
   publish: { path: '/publish', nextStatus: OutageStatus.NOTIFIED },
   release: { path: '/release', nextStatus: OutageStatus.STARTED },
   finish: { path: '/finish', nextStatus: OutageStatus.COMPLETED },
+  cancel: { path: '/cancel', nextStatus: OutageStatus.CANCELLED },
 };
 
 export async function GET(
