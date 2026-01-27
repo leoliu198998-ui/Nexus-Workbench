@@ -25,7 +25,7 @@
 
 - Task: Conductor - User Manual Verification '阶段 2：后端 API 开发' (Protocol in workflow.md)
 
-## 阶段 3：前端 UI 开发
+## 阶段 3：前端 UI 开发 [checkpoint: 0c13a2c]
 - [x] Task: 创建更新批次对话框组件 (`UpdateBatchDialog`)
     - [x] 实现包含名称、日期、时长等字段的表单及校验
 - [x] Task: 在 `WizardControl` 中集成按钮
