@@ -37,11 +37,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Environment not found' }, { status: 404 });
     }
     
-    // Handle specific API format errors from service (re-throwing the same errors as before)
-    if (error.message === 'Environment not found') {
-      return NextResponse.json({ error: 'Environment not found' }, { status: 404 });
-    }
-    
     // Identify external API errors
     const isExternalError = 
         error.message.includes('接口返回数据格式错误') || 
