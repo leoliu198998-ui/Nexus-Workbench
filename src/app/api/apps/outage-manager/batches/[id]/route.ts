@@ -340,9 +340,19 @@ export async function PUT(
     // 3. Call external API
     const externalUrl = `${batch.environment.baseUrl}/devops/release-batch/update/${batch.remoteBatchId}`;
     
+    // Format datetime for external API
+    // datetime-local input returns YYYY-MM-DDTHH:mm
+    // External API expects YYYY-MM-DD HH:mm (space separator, no seconds)
+    let formattedReleaseDatetime = releaseDatetime;
+    
+    if (releaseDatetime && releaseDatetime.length === 16 && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(releaseDatetime)) {
+      // Replace T with space to get YYYY-MM-DD HH:mm format
+      formattedReleaseDatetime = releaseDatetime.replace('T', ' ');
+    }
+
     const externalPayload = {
       batchName,
-      releaseDatetime, // Format: "yyyy-MM-dd HH:mm"
+      releaseDatetime: formattedReleaseDatetime,
       releaseTimeZone,
       duration
     };

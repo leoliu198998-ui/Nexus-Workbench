@@ -63,11 +63,7 @@ export function UpdateBatchDialog({ open, onClose, batch, onSuccess }: UpdateBat
       const res = await fetch(`/api/apps/outage-manager/batches/${batch.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          // Ensure we send ISO string or standard format back
-          releaseDatetime: new Date(formData.releaseDatetime).toISOString(),
-        }),
+        body: JSON.stringify(formData),
       });
 
       const data = await res.json();
