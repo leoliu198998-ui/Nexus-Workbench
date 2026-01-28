@@ -1,4 +1,4 @@
-import { generateCurlCommand, safeJsonParse } from '@/lib/utils';
+import { safeJsonParse } from '@/lib/utils';
 
 interface TokenResponse {
   data: {
@@ -12,8 +12,14 @@ interface ProjectInfoResponse {
   data: {
     applicableServiceVersion: string[];
     serviceType: string[];
+    locations?: Array<{ id: string; [key: string]: unknown }>;
     [key: string]: unknown;
   };
+  [key: string]: unknown;
+}
+
+interface CreationFieldsResponse {
+  data: unknown;
   [key: string]: unknown;
 }
 
@@ -213,16 +219,246 @@ export class PersonnelService {
         throw new Error('Invalid project response: missing data');
       }
 
-      const { applicableServiceVersion, serviceType } = data.data;
+      const { applicableServiceVersion, serviceType, locations, location } = data.data;
+
+      // 提取 locationId
+      // 优先从 location 对象获取，如果不存在则尝试从 locations 数组获取
+      // 使用 any 类型转换以避免潜在的 TypeScript 类型推断问题
+      let locationId = (location as any)?.id;
+      if (!locationId && locations && locations.length > 0) {
+        locationId = (locations[0] as any).id;
+      }
+      
+      if (!locationId) {
+        console.warn('Warning: Location ID not found in project info (checked data.location.id and data.locations[0].id)');
+      }
 
       return {
         applicableServiceVersion,
         serviceType,
+        locationId,
         fullData: data.data // 返回完整数据以备后用
       };
 
     } catch (error) {
       console.error('Get Project Info Failed:', error);
+      throw error;
+    }
+  }
+  /**
+   * 3. 获取创建字段
+   * 对应接口 3: /services/dukang-service-online/schemas/filter
+   */
+  async getCreationFields(
+    token: string, 
+    userInfo: Record<string, any>, 
+    projectId: string, 
+    locationId: string, 
+    version: string
+  ) {
+    const url = `${this.baseUrl}/services/dukang-service-online/schemas/filter`;
+    
+    const headers: Record<string, string> = {
+      ...this.defaultHeaders,
+      'x-dk-token': token,
+      'x-actived-menu': 'Common-All Projects',
+      'referer': `${this.baseUrl}/projects/all-projects/${projectId}/candidate?clientId=${userInfo.clientId || ''}&tabKey=Candidate&locationId=${locationId}`,
+    };
+
+    if (userInfo?.externalId) {
+      headers['x-contact-id'] = String(userInfo.externalId);
+    }
+
+    const payload = {
+      referenceId: locationId,
+      objectType: ["candidateVisit", "sdAccess"],
+      projectId: projectId,
+      applicableServiceVersion: version
+    };
+
+    console.log('Fetching Creation Fields from:', url);
+    console.log('Payload:', JSON.stringify(payload, null, 2));
+
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(payload),
+      });
+
+      const responseText = await response.text();
+
+
+      const data = safeJsonParse<CreationFieldsResponse>(responseText);
+
+      if (!response.ok) {
+        console.error('Creation Fields API Error:', responseText);
+        throw new Error(`Failed to get creation fields: ${response.status} ${response.statusText} - ${responseText.substring(0, 200)}`);
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Get Creation Fields Failed:', error);
+      throw error;
+    }
+  }
+  /**
+   * 生成随机值
+   */
+  private generateRandomValue(attribute: any, locationId?: string): any {
+    if (!attribute) return null;
+
+    const { type, schemaData, id, required } = attribute;
+
+    // 特殊处理 Location: 即使不是必填，如果它是 workLocation，通常也需要填
+    const isWorkLocation = id === 'workLocation';
+
+    // 必填项才生成值 (除非有特殊逻辑)
+    if (!required && !isWorkLocation) {
+        return null;
+    }
+
+    try {
+      if (type === 'Text') {
+        // 如果 ID 包含 Email，生成随机邮箱
+        if (id && /email/i.test(id)) {
+          const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+          let user = '';
+          for(let i=0; i<8; i++) user += chars.charAt(Math.floor(Math.random() * chars.length));
+          return `${user}@example.com`;
+        }
+
+        // 生成5位随机字符
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let result = '';
+        for (let i = 0; i < 5; i++) {
+          result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return result;
+      } 
+      else if (type === 'EmployeeName') {
+        // 生成随机姓名 (英文或中文)
+        const isEnglish = Math.random() > 0.5;
+        if (isEnglish) {
+          const first = ['Alex', 'Bill', 'Chris', 'David', 'Eric', 'Frank', 'George', 'Henry', 'Jack', 'Tom'];
+          const last = ['Smith', 'Jones', 'Taylor', 'Brown', 'Williams', 'Wilson', 'Johnson', 'Miller', 'Davis'];
+          return `${first[Math.floor(Math.random() * first.length)]} ${last[Math.floor(Math.random() * last.length)]}`;
+        } else {
+           const xing = ['赵', '钱', '孙', '李', '周', '吴', '郑', '王', '冯', '陈'];
+           const ming = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+           return `${xing[Math.floor(Math.random() * xing.length)]}${ming[Math.floor(Math.random() * ming.length)]}`;
+        }
+      }
+      else if (type === 'Number') {
+        // 生成5位随机数字
+        return Math.floor(10000 + Math.random() * 90000);
+      }
+      else if (type === 'Date') {
+        // 生成当前日期 YYYY-MM-DD
+        return new Date().toISOString().split('T')[0];
+      }
+      else if (type === 'Select') {
+        // 取 schemaData 中的第一个 id
+        if (schemaData) {
+          const parsedSchema = typeof schemaData === 'string' ? safeJsonParse(schemaData) : schemaData;
+          if (parsedSchema?.dataSource && Array.isArray(parsedSchema.dataSource) && parsedSchema.dataSource.length > 0) {
+            return parsedSchema.dataSource[0].id;
+          }
+        }
+        return null;
+      }
+      else if (type === 'Location') {
+        // 返回包含 id 和 name 的数组
+        if (locationId) {
+          // 注意：这里需要确保返回的是对象数组
+          return [{ id: locationId, name: "Asia" }];
+        }
+        return null;
+      }
+      else if (type === 'Bool' || type === 'Boolean') {
+        // 默认返回 false
+        return false;
+      }
+    } catch (e) {
+      console.warn(`Failed to generate random value for attribute ${attribute.id}:`, e);
+    }
+    
+    return null;
+  }
+
+  /**
+   * 4. 创建 Candidate
+   * 对应接口 4: /services/dukang-service-online/candidates
+   */
+  async createCandidate(
+    token: string,
+    userInfo: Record<string, any>,
+    projectId: string,
+    creationFields: any,
+    locationId?: string
+  ) {
+    const url = `${this.baseUrl}/services/dukang-service-online/candidates`;
+
+    const headers: Record<string, string> = {
+      ...this.defaultHeaders,
+      'x-dk-token': token,
+      'x-actived-menu': 'Common-All Projects',
+      'referer': `${this.baseUrl}/projects/all-projects/${projectId}/candidate`,
+    };
+
+    if (userInfo?.externalId) {
+      headers['x-contact-id'] = String(userInfo.externalId);
+    }
+
+    // 构造 attributes 参数
+    const attributes: Record<string, any> = {};
+    const schemaId = creationFields?.data?.schemaId;
+
+    if (creationFields?.data?.groups) {
+      for (const group of creationFields.data.groups) {
+        if (group.attributes) {
+          for (const attr of group.attributes) {
+            attributes[attr.id] = this.generateRandomValue(attr, locationId);
+          }
+        }
+      }
+    }
+
+    const payload = {
+      projectId: projectId,
+      creationType: "FULL_ENTRY",
+      schemaId: schemaId,
+      attributes: attributes
+    };
+
+    console.log('Creating Candidate at:', url);
+    // console.log('Payload:', JSON.stringify(payload, null, 2)); // Payload might be large
+
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(payload),
+      });
+
+      const responseText = await response.text();
+
+
+      if (!response.ok) {
+        console.error('Create Candidate API Error:', responseText);
+        throw new Error(`Failed to create candidate: ${response.status} ${response.statusText} - ${responseText.substring(0, 200)}`);
+      }
+
+      const apiResult: any = safeJsonParse(responseText);
+      return {
+        ...(apiResult || {}), // 确保 apiResult 为 null 时不会出错
+        _sentAttributes: attributes // 返回发送的属性，用于 UI 展示
+      };
+
+    } catch (error) {
+      console.error('Create Candidate Failed:', error);
       throw error;
     }
   }

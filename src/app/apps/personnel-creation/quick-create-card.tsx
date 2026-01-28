@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Loader2, LucideIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { initializeCreation } from './actions';
+import { initializeCreation, executeCandidateCreation } from './actions';
 
 interface QuickCreateCardProps {
   title: string;
@@ -28,13 +28,19 @@ export function QuickCreateCard({
   bgColor,
 }: QuickCreateCardProps) {
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    projectId: string;
+    quantity: number | string;
+  }>({
     projectId: '',
     quantity: 1,
   });
   const [apiResult, setApiResult] = useState<{
     applicableServiceVersion: string[];
     serviceType: string[] | { name: string; id?: string }[];
+    locationId?: string;
+    creationFields?: any;
+    createResults?: Array<{ id: string; name: string; email: string }>;
   } | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -46,7 +52,7 @@ export function QuickCreateCard({
       return;
     }
 
-    if (formData.quantity < 1) {
+    if (!formData.quantity || Number(formData.quantity) < 1) {
       toast.error('Quantity must be at least 1');
       return;
     }
@@ -54,27 +60,28 @@ export function QuickCreateCard({
     setLoading(true);
 
     try {
-      console.log(`Starting creation process for ${type} with Project ID: ${formData.projectId}`);
+      console.log(`Starting creation process for ${type} with Project ID: ${formData.projectId}, Quantity: ${formData.quantity}`);
       
-      // 调用 Server Action 执行 Step 1 & 2
-      const result = await initializeCreation(formData.projectId);
+      // 调用 Server Action 执行 Step 1-4
+      const result = await executeCandidateCreation(formData.projectId, Number(formData.quantity));
 
       if (!result.success) {
         throw new Error(result.message);
       }
 
-      console.log('Step 1 & 2 Completed Successfully:', result.data);
+      console.log('Creation Completed Successfully:', result.data);
       
       if (result.data?.projectInfo) {
         setApiResult({
           applicableServiceVersion: result.data.projectInfo.applicableServiceVersion,
-          serviceType: result.data.projectInfo.serviceType as any, // 临时使用 any 以兼容复杂对象
+          serviceType: result.data.projectInfo.serviceType as any,
+          locationId: result.data.projectInfo.locationId,
+          creationFields: result.data.creationFields,
+          createResults: result.data.createResults,
         });
       }
 
-      toast.success('Successfully authenticated and fetched project info!');
-      
-      // TODO: 接下来的步骤 (Step 3 & 4) 将在这里继续
+      toast.success(result.message || 'Successfully created candidate!');
       
     } catch (error) {
       console.error('Creation failed:', error);
@@ -130,10 +137,23 @@ export function QuickCreateCard({
             <Label htmlFor={`${type}-quantity`}>Quantity</Label>
             <Input
               id={`${type}-quantity`}
-              type="number"
-              min={1}
+              type="text"
               value={formData.quantity}
-              onChange={(e) => setFormData((prev) => ({ ...prev, quantity: parseInt(e.target.value) || 1 }))}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val === '') {
+                  setFormData((prev) => ({ ...prev, quantity: '' }));
+                  return;
+                }
+                // Allow only non-negative integers
+                if (!/^\d+$/.test(val)) return;
+
+                const num = parseInt(val, 10);
+                // Limit to 0-20
+                if (num >= 0 && num <= 20) {
+                  setFormData((prev) => ({ ...prev, quantity: num }));
+                }
+              }}
               disabled={loading}
               className="bg-background/50"
             />
@@ -146,12 +166,28 @@ export function QuickCreateCard({
                 <span className="text-muted-foreground">Version:</span>{' '}
                 <span className="font-mono break-all">{renderVersion(apiResult.applicableServiceVersion)}</span>
               </div>
+              
               <div>
-                <span className="text-muted-foreground">Service Type:</span>{' '}
-                <span className="font-mono break-all">
-                  {renderServiceType(apiResult.serviceType as any[])}
-                </span>
+                <span className="text-muted-foreground">Location ID:</span>{' '}
+                <span className="font-mono break-all">{apiResult.locationId || 'N/A'}</span>
               </div>
+              
+              {apiResult.createResults && apiResult.createResults.length > 0 && (
+                <div className="mt-4">
+                   <h4 className="font-semibold mb-2">Create Result ({apiResult.createResults.length})</h4>
+                   <div className="space-y-2 max-h-[200px] overflow-y-auto border rounded p-2 bg-slate-50 dark:bg-slate-900">
+                     {apiResult.createResults.map((res, index) => (
+                       <div key={index} className="flex flex-col text-sm border-b last:border-0 pb-2 mb-2 last:mb-0 last:pb-0">
+                         <div className="flex justify-between">
+                            <span className="font-medium">Name: {res.name}</span>
+                            <span className="text-muted-foreground">ID: {res.id}</span>
+                         </div>
+                         <div className="text-muted-foreground text-xs truncate">Email: {res.email}</div>
+                       </div>
+                     ))}
+                   </div>
+                </div>
+              )}
             </div>
           )}
         </CardContent>
