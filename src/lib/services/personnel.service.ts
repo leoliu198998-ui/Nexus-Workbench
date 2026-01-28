@@ -254,7 +254,13 @@ export class PersonnelService {
     userInfo: Record<string, any>, 
     projectId: string, 
     locationId: string, 
-    version: string
+    version: string,
+    options?: {
+      referenceId?: string;
+      objectType?: string[];
+      excludeProjectId?: boolean;
+      excludeVersion?: boolean;
+    }
   ) {
     const url = `${this.baseUrl}/services/dukang-service-online/schemas/filter`;
     
@@ -269,28 +275,22 @@ export class PersonnelService {
       headers['x-contact-id'] = String(userInfo.externalId);
     }
 
-    const payload = {
-      referenceId: locationId,
-      objectType: ["candidateVisit", "sdAccess"],
-      projectId: projectId,
-      applicableServiceVersion: version
+    // 默认 Payload (Candidate)
+    const payload: any = {
+      referenceId: options?.referenceId || locationId,
+      objectType: options?.objectType || ["candidateVisit", "sdAccess"],
     };
+
+    if (!options?.excludeProjectId) {
+      payload.projectId = projectId;
+    }
+
+    if (!options?.excludeVersion) {
+      payload.applicableServiceVersion = version;
+    }
 
     console.log('Fetching Creation Fields from:', url);
     console.log('Payload:', JSON.stringify(payload, null, 2));
-
-    // 生成调试文件
-    try {
-      const fs = require('fs');
-      const path = require('path');
-      const curlCommand = generateCurlCommand(url, 'POST', headers, payload);
-      const debugDir = path.join(process.cwd()); // 直接生成在项目根目录
-      
-      fs.writeFileSync(path.join(debugDir, 'debug_creation_fields_curl.sh'), curlCommand);
-      console.log('Generated debug curl file: debug_creation_fields_curl.sh');
-    } catch (err) {
-      console.error('Failed to generate debug curl file:', err);
-    }
 
     try {
       const response = await fetch(url, {
@@ -300,17 +300,6 @@ export class PersonnelService {
       });
 
       const responseText = await response.text();
-
-      // 生成 Response 调试文件
-      try {
-        const fs = require('fs');
-        const path = require('path');
-        const debugDir = path.join(process.cwd());
-        fs.writeFileSync(path.join(debugDir, 'debug_creation_fields_response.json'), responseText);
-        console.log('Generated debug response file: debug_creation_fields_response.json');
-      } catch (err) {
-        console.error('Failed to generate debug response file:', err);
-      }
 
       const data = safeJsonParse<CreationFieldsResponse>(responseText);
 
@@ -343,6 +332,20 @@ export class PersonnelService {
 
     try {
       if (type === 'Text') {
+        // 1. 如果是 displayName，生成随机姓名
+        if (id === 'displayName') {
+           const isEnglish = Math.random() > 0.5;
+           if (isEnglish) {
+             const first = ['Alex', 'Bill', 'Chris', 'David', 'Eric', 'Frank', 'George', 'Henry', 'Jack', 'Tom'];
+             const last = ['Smith', 'Jones', 'Taylor', 'Brown', 'Williams', 'Wilson', 'Johnson', 'Miller', 'Davis'];
+             return `${first[Math.floor(Math.random() * first.length)]} ${last[Math.floor(Math.random() * last.length)]}`;
+           } else {
+              const xing = ['赵', '钱', '孙', '李', '周', '吴', '郑', '王', '冯', '陈'];
+              const ming = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+              return `${xing[Math.floor(Math.random() * xing.length)]}${ming[Math.floor(Math.random() * ming.length)]}`;
+           }
+        }
+
         // 如果 ID 包含 Email，生成随机邮箱
         if (id && /email/i.test(id)) {
           const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -409,6 +412,42 @@ export class PersonnelService {
         }
         return null;
       }
+      else if (type === 'LandingServiceRegion') {
+         // LandingServiceRegion 特殊处理：传 "region":[{"name":"Angola","id":"AGO"}]
+         // 这里我们先返回 [{ id: 'AGO', name: 'Angola' }]
+         // 但要注意，调用方可能直接用 id 作为 key
+         return [{ id: 'AGO', name: 'Angola' }];
+      }
+      else if (type === 'Currency') {
+         // 2. Currency 固定传值
+         return [{"id":"ADP","name":"ADP"}];
+      }
+      else if (type === 'TextArea') {
+         // 3. TextArea 随机生成50字符中文或英文
+         const isEnglish = Math.random() > 0.5;
+         let result = '';
+         if (isEnglish) {
+             const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ';
+             for (let i = 0; i < 50; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+             }
+         } else {
+             // 常用汉字
+             const chars = '的一是在不了有和人这中大为上个国我以要他时来用们生到作地于出就分对成会可主发年动同工也能下过子说产种面而方后多定行学法所民得经十三之进着等部度家电力里如水化高自二理起小物现实加量都两体制机当使点从业本去把性好应开它合还因由其些然前外天政四日那社义事平形相全表间样与关各重新线内数正心反你明看原又么利比或但质气第向道命此变条只没结解问意建月公无系军很情者最立代想已通并提直题党程展五果料象员革位入常文总次品式活设及管特件长求老头基资边流路级少格山统必况处石千拿更术领即设必离色自';
+             for (let i = 0; i < 50; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+             }
+         }
+         return result;
+      }
+      else if (type === 'Phone') {
+         // 4. Phone 传值 "phoneNoForContractor":{"number":"...","areaCode":"+86"}
+         let number = '1'; // 中国手机号通常以1开头
+         for (let i = 0; i < 10; i++) {
+            number += Math.floor(Math.random() * 10);
+         }
+         return { number, areaCode: "+86" };
+      }
       else if (type === 'Bool' || type === 'Boolean') {
         // 默认返回 false
         return false;
@@ -468,19 +507,6 @@ export class PersonnelService {
     console.log('Creating Candidate at:', url);
     // console.log('Payload:', JSON.stringify(payload, null, 2)); // Payload might be large
 
-    // 生成调试文件
-    try {
-      const fs = require('fs');
-      const path = require('path');
-      const curlCommand = generateCurlCommand(url, 'POST', headers, payload);
-      const debugDir = path.join(process.cwd());
-      
-      fs.writeFileSync(path.join(debugDir, 'debug_create_candidate_curl.sh'), curlCommand);
-      console.log('Generated debug curl file: debug_create_candidate_curl.sh');
-    } catch (err) {
-      console.error('Failed to generate debug curl file:', err);
-    }
-
     try {
       const response = await fetch(url, {
         method: 'POST',
@@ -489,17 +515,6 @@ export class PersonnelService {
       });
 
       const responseText = await response.text();
-
-      // 生成 Response 调试文件
-      try {
-        const fs = require('fs');
-        const path = require('path');
-        const debugDir = path.join(process.cwd());
-        fs.writeFileSync(path.join(debugDir, 'debug_create_candidate_response.json'), responseText);
-        console.log('Generated debug response file: debug_create_candidate_response.json');
-      } catch (err) {
-        console.error('Failed to generate debug response file:', err);
-      }
 
       if (!response.ok) {
         console.error('Create Candidate API Error:', responseText);
@@ -514,6 +529,79 @@ export class PersonnelService {
 
     } catch (error) {
       console.error('Create Candidate Failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 4. 创建 Contractor
+   * 对应接口 4: /services/dukang-service-online/contractors
+   */
+  async createContractor(
+    token: string,
+    userInfo: Record<string, any>,
+    projectId: string,
+    creationFields: any,
+    locationId?: string
+  ) {
+    const url = `${this.baseUrl}/services/dukang-service-online/contractors`;
+
+    const headers: Record<string, string> = {
+      ...this.defaultHeaders,
+      'x-dk-token': token,
+      'x-actived-menu': 'Common-All Projects',
+      'referer': `${this.baseUrl}/projects/all-projects/${projectId}/contractor`,
+    };
+
+    if (userInfo?.externalId) {
+      headers['x-contact-id'] = String(userInfo.externalId);
+    }
+
+    // 构造 attributes 参数
+    const attributes: Record<string, any> = {};
+    const schemaId = creationFields?.data?.schemaId;
+
+    if (creationFields?.data?.groups) {
+      for (const group of creationFields.data.groups) {
+        if (group.attributes) {
+          for (const attr of group.attributes) {
+            attributes[attr.id] = this.generateRandomValue(attr, locationId);
+          }
+        }
+      }
+    }
+
+    const payload = {
+      projectId: projectId,
+      state: "PreService",
+      schemaId: schemaId,
+      attributes: attributes
+    };
+
+    console.log('Creating Contractor at:', url);
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(payload),
+      });
+
+      const responseText = await response.text();
+
+      if (!response.ok) {
+        console.error('Create Contractor API Error:', responseText);
+        throw new Error(`Failed to create contractor: ${response.status} ${response.statusText} - ${responseText.substring(0, 200)}`);
+      }
+
+      const apiResult: any = safeJsonParse(responseText);
+      return {
+        ...(apiResult || {}),
+        _sentAttributes: attributes
+      };
+
+    } catch (error) {
+      console.error('Create Contractor Failed:', error);
       throw error;
     }
   }
