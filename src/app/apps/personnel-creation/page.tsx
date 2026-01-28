@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { UserPlus, Briefcase, FileText, ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { QuickCreateCard } from './quick-create-card';
 
 /**
@@ -10,27 +9,33 @@ import { QuickCreateCard } from './quick-create-card';
  */
 export default function PersonnelCreationPage() {
   return (
-    <div className="container max-w-6xl py-10 space-y-8">
-      {/* Header */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-2 text-muted-foreground mb-2">
-            <Link href="/">
-              <Button variant="ghost" size="sm" className="-ml-2 h-8 gap-1">
-                <ArrowLeft className="h-4 w-4" />
-                Back to Dashboard
-              </Button>
-            </Link>
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight">Personnel Creation</h1>
-          <p className="text-muted-foreground text-lg">
-            Quickly create personnel records directly from this dashboard.
-          </p>
+    <main className="min-h-screen bg-background bg-dot-pattern">
+      <div className="max-w-7xl mx-auto p-6 sm:p-8 space-y-8">
+        {/* Navigation */}
+        <div className="flex items-center justify-between">
+          <Link 
+            href="/" 
+            className="group inline-flex items-center text-sm font-medium text-muted-foreground hover:text-primary transition-colors px-1"
+          >
+            <div className="mr-2 p-1 rounded-md bg-muted group-hover:bg-primary/10 transition-colors">
+              <ArrowLeft className="w-4 h-4" />
+            </div>
+            Back to Dashboard
+          </Link>
         </div>
-      </div>
 
-      {/* Options Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Header */}
+        <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-border/60">
+          <div className="space-y-1.5">
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">Personnel Creation</h1>
+            <p className="text-muted-foreground text-lg max-w-2xl">
+              Quickly create personnel records directly from this dashboard.
+            </p>
+          </div>
+        </header>
+
+        {/* Options Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <QuickCreateCard
           title="Create Candidate"
           description="Create a new candidate profile for potential hires."
@@ -58,6 +63,7 @@ export default function PersonnelCreationPage() {
           bgColor="bg-purple-500/10"
         />
       </div>
-    </div>
+      </div>
+    </main>
   );
 }
