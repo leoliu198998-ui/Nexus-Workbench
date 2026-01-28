@@ -384,6 +384,17 @@ export class PersonnelService {
         // 取 schemaData 中的第一个 id
         if (schemaData) {
           const parsedSchema = typeof schemaData === 'string' ? safeJsonParse(schemaData) : schemaData;
+          
+          // 处理 selectOptions (新格式)
+          if (parsedSchema?.selectOptions && Array.isArray(parsedSchema.selectOptions) && parsedSchema.selectOptions.length > 0) {
+             const option = parsedSchema.selectOptions[0];
+             // 根据用户指示：需传递 [{ name: "...", id: "..." }] 的数组格式，且第一个元素索引为 0
+             // option 结构示例: { id, code, value, hrmsValue }
+             // 我们取 value 作为 name
+             return [{ name: option.value || option.code, id: option.id }];
+          }
+          
+          // 兼容旧逻辑 (dataSource)
           if (parsedSchema?.dataSource && Array.isArray(parsedSchema.dataSource) && parsedSchema.dataSource.length > 0) {
             return parsedSchema.dataSource[0].id;
           }
