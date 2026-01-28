@@ -1,4 +1,4 @@
-import { safeJsonParse } from '@/lib/utils';
+import { generateCurlCommand, safeJsonParse } from '@/lib/utils';
 
 interface TokenResponse {
   data: {
@@ -279,6 +279,18 @@ export class PersonnelService {
     console.log('Fetching Creation Fields from:', url);
     console.log('Payload:', JSON.stringify(payload, null, 2));
 
+    // 生成调试文件
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      const curlCommand = generateCurlCommand(url, 'POST', headers, payload);
+      const debugDir = path.join(process.cwd()); // 直接生成在项目根目录
+      
+      fs.writeFileSync(path.join(debugDir, 'debug_creation_fields_curl.sh'), curlCommand);
+      console.log('Generated debug curl file: debug_creation_fields_curl.sh');
+    } catch (err) {
+      console.error('Failed to generate debug curl file:', err);
+    }
 
     try {
       const response = await fetch(url, {
@@ -289,6 +301,16 @@ export class PersonnelService {
 
       const responseText = await response.text();
 
+      // 生成 Response 调试文件
+      try {
+        const fs = require('fs');
+        const path = require('path');
+        const debugDir = path.join(process.cwd());
+        fs.writeFileSync(path.join(debugDir, 'debug_creation_fields_response.json'), responseText);
+        console.log('Generated debug response file: debug_creation_fields_response.json');
+      } catch (err) {
+        console.error('Failed to generate debug response file:', err);
+      }
 
       const data = safeJsonParse<CreationFieldsResponse>(responseText);
 
@@ -435,6 +457,18 @@ export class PersonnelService {
     console.log('Creating Candidate at:', url);
     // console.log('Payload:', JSON.stringify(payload, null, 2)); // Payload might be large
 
+    // 生成调试文件
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      const curlCommand = generateCurlCommand(url, 'POST', headers, payload);
+      const debugDir = path.join(process.cwd());
+      
+      fs.writeFileSync(path.join(debugDir, 'debug_create_candidate_curl.sh'), curlCommand);
+      console.log('Generated debug curl file: debug_create_candidate_curl.sh');
+    } catch (err) {
+      console.error('Failed to generate debug curl file:', err);
+    }
 
     try {
       const response = await fetch(url, {
@@ -445,6 +479,16 @@ export class PersonnelService {
 
       const responseText = await response.text();
 
+      // 生成 Response 调试文件
+      try {
+        const fs = require('fs');
+        const path = require('path');
+        const debugDir = path.join(process.cwd());
+        fs.writeFileSync(path.join(debugDir, 'debug_create_candidate_response.json'), responseText);
+        console.log('Generated debug response file: debug_create_candidate_response.json');
+      } catch (err) {
+        console.error('Failed to generate debug response file:', err);
+      }
 
       if (!response.ok) {
         console.error('Create Candidate API Error:', responseText);

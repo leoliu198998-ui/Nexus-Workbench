@@ -44,12 +44,11 @@ export async function executeCandidateCreation(projectId: string, quantity: numb
     let creationFields = null;
     let version = 'V2'; // Default
     if (projectInfo.locationId) {
-      if (projectInfo.applicableServiceVersion && projectInfo.applicableServiceVersion.length > 0) {
-         if (projectInfo.applicableServiceVersion.includes('V2')) {
-           version = 'V2';
-         } else {
-           version = projectInfo.applicableServiceVersion[0];
-         }
+      const appVer = projectInfo.applicableServiceVersion;
+      
+      // 总是使用 API 返回的 version，不进行数组处理
+      if (appVer) {
+         version = String(appVer);
       }
 
       try {
@@ -188,13 +187,11 @@ export async function initializeCreation(projectId: string): Promise<CreatePerso
     if (projectInfo.locationId) {
       // 确定 version: 优先使用 "V2"，或者取第一个
       let version = 'V2';
-      if (projectInfo.applicableServiceVersion && projectInfo.applicableServiceVersion.length > 0) {
-         // 简单起见，如果有 V2 则用 V2，否则用第一个
-         if (projectInfo.applicableServiceVersion.includes('V2')) {
-           version = 'V2';
-         } else {
-           version = projectInfo.applicableServiceVersion[0];
-         }
+      const appVer = projectInfo.applicableServiceVersion;
+
+      // 总是使用 API 返回的 version，不进行数组处理
+      if (appVer) {
+         version = String(appVer);
       }
 
       try {
