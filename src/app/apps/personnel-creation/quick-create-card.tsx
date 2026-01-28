@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Loader2, LucideIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { initializeCreation } from './actions';
+
 interface QuickCreateCardProps {
   title: string;
   description: string;
@@ -30,9 +32,14 @@ export function QuickCreateCard({
     projectId: '',
     quantity: 1,
   });
+  const [apiResult, setApiResult] = useState<{
+    applicableServiceVersion: string[];
+    serviceType: string[] | { name: string; id?: string }[];
+  } | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setApiResult(null);
 
     if (!formData.projectId.trim()) {
       toast.error('Please enter a Project ID');
@@ -46,18 +53,49 @@ export function QuickCreateCard({
 
     setLoading(true);
 
-    // 模拟 API 调用
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      console.log(`Creating ${type}:`, formData);
-      toast.success(`Successfully created ${formData.quantity} ${type}(s) for project ${formData.projectId}`);
-      // 可选：创建成功后重置表单
-      // setFormData({ projectId: '', quantity: 1 });
+      console.log(`Starting creation process for ${type} with Project ID: ${formData.projectId}`);
+      
+      // 调用 Server Action 执行 Step 1 & 2
+      const result = await initializeCreation(formData.projectId);
+
+      if (!result.success) {
+        throw new Error(result.message);
+      }
+
+      console.log('Step 1 & 2 Completed Successfully:', result.data);
+      
+      if (result.data?.projectInfo) {
+        setApiResult({
+          applicableServiceVersion: result.data.projectInfo.applicableServiceVersion,
+          serviceType: result.data.projectInfo.serviceType as any, // 临时使用 any 以兼容复杂对象
+        });
+      }
+
+      toast.success('Successfully authenticated and fetched project info!');
+      
+      // TODO: 接下来的步骤 (Step 3 & 4) 将在这里继续
+      
     } catch (error) {
-      toast.error(`Failed to create ${type}`);
+      console.error('Creation failed:', error);
+      toast.error(error instanceof Error ? error.message : `Failed to process ${type}`);
     } finally {
       setLoading(false);
     }
+  };
+
+  const renderServiceType = (types: any[]) => {
+    if (!types || !Array.isArray(types)) return '';
+    return types.map((type, index) => {
+      if (typeof type === 'string') return type;
+      return type.name || type.id || JSON.stringify(type);
+    }).join(', ');
+  };
+
+  const renderVersion = (versions: any) => {
+    if (!versions) return '';
+    if (Array.isArray(versions)) return versions.join(', ');
+    return String(versions);
   };
 
   return (
@@ -100,6 +138,22 @@ export function QuickCreateCard({
               className="bg-background/50"
             />
           </div>
+
+          {apiResult && (
+            <div className="rounded-md bg-muted p-3 text-xs space-y-2 animate-in fade-in slide-in-from-top-2">
+              <div className="font-semibold text-foreground">Project Info:</div>
+              <div>
+                <span className="text-muted-foreground">Version:</span>{' '}
+                <span className="font-mono break-all">{renderVersion(apiResult.applicableServiceVersion)}</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Service Type:</span>{' '}
+                <span className="font-mono break-all">
+                  {renderServiceType(apiResult.serviceType as any[])}
+                </span>
+              </div>
+            </div>
+          )}
         </CardContent>
 
         <CardFooter className="pt-2 pb-6">
@@ -107,7 +161,7 @@ export function QuickCreateCard({
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Creating...
+                Processing...
               </>
             ) : (
               'Create'
