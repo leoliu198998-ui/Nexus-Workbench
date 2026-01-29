@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Loader2, LucideIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { initializeCreation, executePersonnelCreation } from './actions';
 
 interface QuickCreateCardProps {
@@ -125,15 +124,38 @@ export function QuickCreateCard({
         <CardContent className="space-y-4 flex-1">
           <div className="space-y-2">
             <Label>Environment</Label>
-            <Select value={environment} onValueChange={(val: 'test' | 'dev') => setEnvironment(val)}>
-              <SelectTrigger className="bg-background/50">
-                <SelectValue placeholder="Select environment" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="test">Test Environment</SelectItem>
-                <SelectItem value="dev">Dev Environment</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="grid grid-cols-2 gap-3">
+              <div 
+                className={`flex items-center space-x-2 rounded-md border p-3 cursor-pointer transition-all ${environment === 'test' ? 'border-primary bg-primary/5' : 'hover:bg-muted/50'}`}
+                onClick={() => setEnvironment('test')}
+              >
+                <input
+                  type="radio"
+                  id={`${type}-env-test`}
+                  name={`${type}-environment`}
+                  value="test"
+                  checked={environment === 'test'}
+                  onChange={() => setEnvironment('test')}
+                  className="h-4 w-4 accent-primary cursor-pointer"
+                />
+                <Label htmlFor={`${type}-env-test`} className="cursor-pointer font-normal">Test Env</Label>
+              </div>
+              <div 
+                className={`flex items-center space-x-2 rounded-md border p-3 cursor-pointer transition-all ${environment === 'dev' ? 'border-primary bg-primary/5' : 'hover:bg-muted/50'}`}
+                onClick={() => setEnvironment('dev')}
+              >
+                <input
+                  type="radio"
+                  id={`${type}-env-dev`}
+                  name={`${type}-environment`}
+                  value="dev"
+                  checked={environment === 'dev'}
+                  onChange={() => setEnvironment('dev')}
+                  className="h-4 w-4 accent-primary cursor-pointer"
+                />
+                <Label htmlFor={`${type}-env-dev`} className="cursor-pointer font-normal">Dev Env</Label>
+              </div>
+            </div>
           </div>
 
           <div className="space-y-2">
