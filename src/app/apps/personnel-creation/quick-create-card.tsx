@@ -5,29 +5,14 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Loader2, LucideIcon } from 'lucide-react';
+import { Loader2, LucideIcon, UserPlus, Briefcase, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { initializeCreation, executePersonnelCreation } from './actions';
 
-interface QuickCreateCardProps {
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-  type: 'candidate' | 'contractor' | 'applicant';
-  color: string;
-  bgColor: string;
-}
-
-export function QuickCreateCard({
-  title,
-  description,
-  icon,
-  type,
-  color,
-  bgColor,
-}: QuickCreateCardProps) {
+export function QuickCreateCard() {
   const [loading, setLoading] = useState(false);
+  const [personnelType, setPersonnelType] = useState<'candidate' | 'contractor' | 'applicant'>('candidate');
   const [environment, setEnvironment] = useState<'test' | 'dev'>('test');
   const [formData, setFormData] = useState<{
     projectId: string;
@@ -36,6 +21,34 @@ export function QuickCreateCard({
     projectId: '',
     quantity: 1,
   });
+
+  // Dynamic content based on type
+  const typeConfig = {
+    candidate: {
+      title: 'Create Candidate',
+      description: 'Create a new candidate profile for potential hires.',
+      icon: <UserPlus className="w-6 h-6" />,
+      color: 'text-blue-500',
+      bgColor: 'bg-blue-500/10'
+    },
+    contractor: {
+      title: 'Create Contractor',
+      description: 'Register a new external contractor or freelancer.',
+      icon: <Briefcase className="w-6 h-6" />,
+      color: 'text-amber-500',
+      bgColor: 'bg-amber-500/10'
+    },
+    applicant: {
+      title: 'Create Applicant',
+      description: 'Add a new job applicant to the tracking system.',
+      icon: <FileText className="w-6 h-6" />,
+      color: 'text-purple-500',
+      bgColor: 'bg-purple-500/10'
+    }
+  };
+
+  const { title, description, icon, color, bgColor } = typeConfig[personnelType];
+
   const [apiResult, setApiResult] = useState<{
     applicableServiceVersion: string[];
     serviceType: string[] | { name: string; id?: string }[];
@@ -61,10 +74,10 @@ export function QuickCreateCard({
     setLoading(true);
 
     try {
-      console.log(`Starting creation process for ${type} with Project ID: ${formData.projectId}, Quantity: ${formData.quantity}, Env: ${environment}`);
+      console.log(`Starting creation process for ${personnelType} with Project ID: ${formData.projectId}, Quantity: ${formData.quantity}, Env: ${environment}`);
       
       // 调用 Server Action 执行 Step 1-4
-      const result = await executePersonnelCreation(type, formData.projectId, Number(formData.quantity), environment);
+      const result = await executePersonnelCreation(personnelType, formData.projectId, Number(formData.quantity), environment);
 
       if (!result.success) {
         throw new Error(result.message);
@@ -82,15 +95,16 @@ export function QuickCreateCard({
         });
       }
 
-      toast.success(result.message || 'Successfully created candidate!');
+      toast.success(result.message || `Successfully created ${personnelType}!`);
       
     } catch (error) {
       console.error('Creation failed:', error);
-      toast.error(error instanceof Error ? error.message : `Failed to process ${type}`);
+      toast.error(error instanceof Error ? error.message : `Failed to process ${personnelType}`);
     } finally {
       setLoading(false);
     }
   };
+
 
   const renderServiceType = (types: any[]) => {
     if (!types || !Array.isArray(types)) return '';
@@ -122,6 +136,58 @@ export function QuickCreateCard({
       
       <form onSubmit={handleSubmit} className="flex-1 flex flex-col">
         <CardContent className="space-y-4 flex-1">
+          {/* Personnel Type Selection */}
+          <div className="space-y-2">
+            <Label>Personnel Type</Label>
+            <div className="grid grid-cols-3 gap-3">
+              <div 
+                className={`flex items-center space-x-2 rounded-md border p-3 cursor-pointer transition-all ${personnelType === 'candidate' ? 'border-primary bg-primary/5' : 'hover:bg-muted/50'}`}
+                onClick={() => setPersonnelType('candidate')}
+              >
+                <input
+                  type="radio"
+                  id="type-candidate"
+                  name="personnel-type"
+                  value="candidate"
+                  checked={personnelType === 'candidate'}
+                  onChange={() => setPersonnelType('candidate')}
+                  className="h-4 w-4 accent-primary cursor-pointer"
+                />
+                <Label htmlFor="type-candidate" className="cursor-pointer font-normal">Candidate</Label>
+              </div>
+              <div 
+                className={`flex items-center space-x-2 rounded-md border p-3 cursor-pointer transition-all ${personnelType === 'contractor' ? 'border-primary bg-primary/5' : 'hover:bg-muted/50'}`}
+                onClick={() => setPersonnelType('contractor')}
+              >
+                <input
+                  type="radio"
+                  id="type-contractor"
+                  name="personnel-type"
+                  value="contractor"
+                  checked={personnelType === 'contractor'}
+                  onChange={() => setPersonnelType('contractor')}
+                  className="h-4 w-4 accent-primary cursor-pointer"
+                />
+                <Label htmlFor="type-contractor" className="cursor-pointer font-normal">Contractor</Label>
+              </div>
+              <div 
+                className={`flex items-center space-x-2 rounded-md border p-3 cursor-pointer transition-all ${personnelType === 'applicant' ? 'border-primary bg-primary/5' : 'hover:bg-muted/50'}`}
+                onClick={() => setPersonnelType('applicant')}
+              >
+                <input
+                  type="radio"
+                  id="type-applicant"
+                  name="personnel-type"
+                  value="applicant"
+                  checked={personnelType === 'applicant'}
+                  onChange={() => setPersonnelType('applicant')}
+                  className="h-4 w-4 accent-primary cursor-pointer"
+                />
+                <Label htmlFor="type-applicant" className="cursor-pointer font-normal">Applicant</Label>
+              </div>
+            </div>
+          </div>
+
           <div className="space-y-2">
             <Label>Environment</Label>
             <div className="grid grid-cols-2 gap-3">
@@ -131,14 +197,14 @@ export function QuickCreateCard({
               >
                 <input
                   type="radio"
-                  id={`${type}-env-test`}
-                  name={`${type}-environment`}
+                  id="env-test"
+                  name="environment"
                   value="test"
                   checked={environment === 'test'}
                   onChange={() => setEnvironment('test')}
                   className="h-4 w-4 accent-primary cursor-pointer"
                 />
-                <Label htmlFor={`${type}-env-test`} className="cursor-pointer font-normal">Test Env</Label>
+                <Label htmlFor="env-test" className="cursor-pointer font-normal">Test Env</Label>
               </div>
               <div 
                 className={`flex items-center space-x-2 rounded-md border p-3 cursor-pointer transition-all ${environment === 'dev' ? 'border-primary bg-primary/5' : 'hover:bg-muted/50'}`}
@@ -146,22 +212,22 @@ export function QuickCreateCard({
               >
                 <input
                   type="radio"
-                  id={`${type}-env-dev`}
-                  name={`${type}-environment`}
+                  id="env-dev"
+                  name="environment"
                   value="dev"
                   checked={environment === 'dev'}
                   onChange={() => setEnvironment('dev')}
                   className="h-4 w-4 accent-primary cursor-pointer"
                 />
-                <Label htmlFor={`${type}-env-dev`} className="cursor-pointer font-normal">Dev Env</Label>
+                <Label htmlFor="env-dev" className="cursor-pointer font-normal">Dev Env</Label>
               </div>
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor={`${type}-projectId`}>Project ID <span className="text-red-500">*</span></Label>
+            <Label htmlFor="projectId">Project ID <span className="text-red-500">*</span></Label>
             <Input
-              id={`${type}-projectId`}
+              id="projectId"
               placeholder="e.g. PROJ-123"
               value={formData.projectId}
               onChange={(e) => setFormData((prev) => ({ ...prev, projectId: e.target.value }))}
@@ -171,9 +237,9 @@ export function QuickCreateCard({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor={`${type}-quantity`}>Quantity</Label>
+            <Label htmlFor="quantity">Quantity</Label>
             <Input
-              id={`${type}-quantity`}
+              id="quantity"
               type="text"
               value={formData.quantity}
               onChange={(e) => {
