@@ -358,12 +358,12 @@ export class PersonnelService {
         if (id === 'displayName') {
            const isEnglish = Math.random() > 0.5;
            if (isEnglish) {
-             const first = ['Alex', 'Bill', 'Chris', 'David', 'Eric', 'Frank', 'George', 'Henry', 'Jack', 'Tom'];
-             const last = ['Smith', 'Jones', 'Taylor', 'Brown', 'Williams', 'Wilson', 'Johnson', 'Miller', 'Davis'];
+             const first = ['Alex', 'Bill', 'Chris', 'David', 'Eric', 'Frank', 'George', 'Henry', 'Jack', 'Tom', 'James', 'Robert', 'John', 'Michael', 'William', 'Richard', 'Joseph', 'Thomas', 'Charles', 'Christopher', 'Daniel', 'Matthew', 'Anthony', 'Mark', 'Donald', 'Steven', 'Paul', 'Andrew', 'Joshua', 'Kenneth', 'Kevin', 'Brian', 'Edward', 'Ronald', 'Timothy', 'Jason', 'Jeffrey', 'Ryan', 'Jacob', 'Gary', 'Nicholas', 'Jonathan', 'Stephen', 'Larry', 'Justin', 'Scott', 'Brandon', 'Benjamin', 'Samuel', 'Gregory', 'Alexander', 'Raymond', 'Patrick', 'Dennis', 'Jerry'];
+             const last = ['Smith', 'Jones', 'Taylor', 'Brown', 'Williams', 'Wilson', 'Johnson', 'Miller', 'Davis', 'Garcia', 'Rodriguez', 'Martinez', 'Hernandez', 'Lopez', 'Gonzalez', 'Anderson', 'Moore', 'Jackson', 'Martin', 'Lee', 'Perez', 'Thompson', 'White', 'Harris', 'Sanchez', 'Clark', 'Ramirez', 'Lewis', 'Robinson', 'Walker', 'Young', 'Allen', 'King', 'Wright', 'Torres', 'Nguyen', 'Hill', 'Flores', 'Green', 'Adams', 'Nelson', 'Baker', 'Hall', 'Rivera', 'Campbell', 'Mitchell', 'Carter', 'Roberts'];
              return `${first[Math.floor(Math.random() * first.length)]} ${last[Math.floor(Math.random() * last.length)]}`;
            } else {
-              const xing = ['赵', '钱', '孙', '李', '周', '吴', '郑', '王', '冯', '陈'];
-              const ming = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+              const xing = ['赵', '钱', '孙', '李', '周', '吴', '郑', '王', '冯', '陈', '张', '刘', '杨', '黄', '徐', '胡', '朱', '高', '林', '何', '郭', '马', '罗', '梁', '宋', '谢', '韩', '唐', '于', '董', '萧', '程', '曹', '袁', '邓', '许', '傅', '沈', '曾', '彭', '吕', '苏', '卢', '蒋', '蔡', '贾', '丁', '魏', '薛', '叶', '阎', '余', '潘', '杜', '戴', '夏', '钟', '汪', '田', '任', '姜', '范', '方', '石', '姚', '谭', '廖', '邹', '熊', '金', '陆', '郝', '孔', '崔', '康', '毛', '邱', '秦', '江', '史', '顾', '侯', '邵', '孟', '龙', '万', '段', '漕', '汤', '尹', '黎', '易', '常', '武', '乔', '贺', '赖', '龚', '文'];
+              const ming = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '伟', '芳', '娜', '秀英', '敏', '静', '丽', '强', '磊', '军', '洋', '勇', '艳', '杰', '娟', '涛', '明', '超', '秀兰', '霞', '平', '刚', '桂英', '桂兰', '玲', '萍', '丹', '华', '红', '玉兰', '飞', '鹏', '兰', '凤英', '峰', '辉', '燕', '宏', '鑫', '彬', '斌', '宇', '浩', '凯', '健', '俊', '帆', '然', '婷', '慧', '莹', '颖', '琳', '洁', '梅', '琴', '蕾', '薇', '欣', '悦', '佳', '宁', '欣怡', '梓', '涵', '晨', '曦', '轩', '泽', '睿', '嘉', '懿', '皓', '铭', '钧', '恩', '熙', '瑞', '哲', '瀚', '诚', '致', '远', '硕', '昊'];
               return `${xing[Math.floor(Math.random() * xing.length)]}${ming[Math.floor(Math.random() * ming.length)]}`;
            }
         }
@@ -393,12 +393,12 @@ export class PersonnelService {
         // 生成随机姓名 (英文或中文)
         const isEnglish = Math.random() > 0.5;
         if (isEnglish) {
-          const first = ['Alex', 'Bill', 'Chris', 'David', 'Eric', 'Frank', 'George', 'Henry', 'Jack', 'Tom'];
-          const last = ['Smith', 'Jones', 'Taylor', 'Brown', 'Williams', 'Wilson', 'Johnson', 'Miller', 'Davis'];
+          const first = ['Alex', 'Bill', 'Chris', 'David', 'Eric', 'Frank', 'George', 'Henry', 'Jack', 'Tom', 'James', 'Robert', 'John', 'Michael', 'William', 'Richard', 'Joseph', 'Thomas', 'Charles', 'Christopher', 'Daniel', 'Matthew', 'Anthony', 'Mark', 'Donald', 'Steven', 'Paul', 'Andrew', 'Joshua', 'Kenneth', 'Kevin', 'Brian', 'Edward', 'Ronald', 'Timothy', 'Jason', 'Jeffrey', 'Ryan', 'Jacob', 'Gary', 'Nicholas', 'Jonathan', 'Stephen', 'Larry', 'Justin', 'Scott', 'Brandon', 'Benjamin', 'Samuel', 'Gregory', 'Alexander', 'Raymond', 'Patrick', 'Dennis', 'Jerry'];
+          const last = ['Smith', 'Jones', 'Taylor', 'Brown', 'Williams', 'Wilson', 'Johnson', 'Miller', 'Davis', 'Garcia', 'Rodriguez', 'Martinez', 'Hernandez', 'Lopez', 'Gonzalez', 'Anderson', 'Moore', 'Jackson', 'Martin', 'Lee', 'Perez', 'Thompson', 'White', 'Harris', 'Sanchez', 'Clark', 'Ramirez', 'Lewis', 'Robinson', 'Walker', 'Young', 'Allen', 'King', 'Wright', 'Torres', 'Nguyen', 'Hill', 'Flores', 'Green', 'Adams', 'Nelson', 'Baker', 'Hall', 'Rivera', 'Campbell', 'Mitchell', 'Carter', 'Roberts'];
           return `${first[Math.floor(Math.random() * first.length)]} ${last[Math.floor(Math.random() * last.length)]}`;
         } else {
-           const xing = ['赵', '钱', '孙', '李', '周', '吴', '郑', '王', '冯', '陈'];
-           const ming = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+           const xing = ['赵', '钱', '孙', '李', '周', '吴', '郑', '王', '冯', '陈', '张', '刘', '杨', '黄', '徐', '胡', '朱', '高', '林', '何', '郭', '马', '罗', '梁', '宋', '谢', '韩', '唐', '于', '董', '萧', '程', '曹', '袁', '邓', '许', '傅', '沈', '曾', '彭', '吕', '苏', '卢', '蒋', '蔡', '贾', '丁', '魏', '薛', '叶', '阎', '余', '潘', '杜', '戴', '夏', '钟', '汪', '田', '任', '姜', '范', '方', '石', '姚', '谭', '廖', '邹', '熊', '金', '陆', '郝', '孔', '崔', '康', '毛', '邱', '秦', '江', '史', '顾', '侯', '邵', '孟', '龙', '万', '段', '漕', '汤', '尹', '黎', '易', '常', '武', '乔', '贺', '赖', '龚', '文'];
+           const ming = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '伟', '芳', '娜', '秀英', '敏', '静', '丽', '强', '磊', '军', '洋', '勇', '艳', '杰', '娟', '涛', '明', '超', '秀兰', '霞', '平', '刚', '桂英', '桂兰', '玲', '萍', '丹', '华', '红', '玉兰', '飞', '鹏', '兰', '凤英', '峰', '辉', '燕', '宏', '鑫', '彬', '斌', '宇', '浩', '凯', '健', '俊', '帆', '然', '婷', '慧', '莹', '颖', '琳', '洁', '梅', '琴', '蕾', '薇', '欣', '悦', '佳', '宁', '欣怡', '梓', '涵', '晨', '曦', '轩', '泽', '睿', '嘉', '懿', '皓', '铭', '钧', '恩', '熙', '瑞', '哲', '瀚', '诚', '致', '远', '硕', '昊'];
            return `${xing[Math.floor(Math.random() * xing.length)]}${ming[Math.floor(Math.random() * ming.length)]}`;
         }
       }
