@@ -294,6 +294,139 @@ export async function executeCandidateCreation(projectId: string, quantity: numb
 }
 
 /**
+ * 执行完整的 Applicant 创建流程 (Step 1-4)
+ */
+export async function executeApplicantCreation(projectId: string, quantity: number = 1): Promise<CreatePersonnelState> {
+  try {
+    if (!projectId) {
+      return { success: false, message: 'Project ID is required' };
+    }
+
+    // 1. 获取 Token
+    const { token, cookie, userInfo } = await personnelService.getToken();
+    if (!token) {
+      return { success: false, message: 'Failed to retrieve authentication token' };
+    }
+
+    // 2. 获取项目信息
+    const projectInfo = await personnelService.getProjectInfo(projectId, token, cookie, userInfo);
+
+    // 3. 获取创建字段
+    let creationFields = null;
+    let version = 'V2'; // Default
+    if (projectInfo.locationId) {
+      const appVer = projectInfo.applicableServiceVersion;
+      if (appVer) {
+         version = String(appVer);
+      }
+
+      try {
+        creationFields = await personnelService.getCreationFields(
+          token, 
+          userInfo, 
+          projectId, 
+          projectInfo.locationId, 
+          version,
+          {
+            referenceId: "globalVisaSystemId",
+            objectType: ["applicantVisit", "sdAccess"],
+            // applicant logic uses projectId and version same as candidate, so no exclude
+          }
+        );
+      } catch (err) {
+        console.error('Failed to get creation fields:', err);
+        throw new Error('Failed to retrieve creation fields required for step 4');
+      }
+    } else {
+      throw new Error('Location ID missing, cannot proceed to step 3');
+    }
+
+    // 4. 创建 Applicant (循环调用)
+    const createResults: Array<{ id: string; name: string; email: string }> = [];
+    
+    if (creationFields) {
+      try {
+        for (let i = 0; i < quantity; i++) {
+          if (i > 0) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
+
+          const result = await personnelService.createApplicant(
+            token,
+            userInfo,
+            projectId,
+            creationFields,
+            projectInfo.locationId
+          );
+          
+          if (result && result.data && result.data.id) {
+             const attributes = result._sentAttributes || {};
+             
+             let name = 'Unknown';
+             let email = 'Unknown';
+
+             const groups = (creationFields as any)?.data?.groups;
+             if (groups) {
+               for (const group of groups) {
+                 if (group.attributes) {
+                   for (const attr of group.attributes) {
+                     const value = attributes[attr.id];
+                     if (value) {
+                       if (attr.type === 'EmployeeName' || attr.id.toLowerCase().includes('name')) {
+                         if (attr.id === 'displayName' || attr.type === 'EmployeeName') {
+                            name = value;
+                         } else if (name === 'Unknown') {
+                            name = value;
+                         }
+                       }
+                       if (attr.type === 'Text' && attr.id.toLowerCase().includes('email')) {
+                         email = value;
+                       }
+                     }
+                   }
+                 }
+               }
+             }
+
+             createResults.push({
+               id: result.data.id,
+               name,
+               email
+             });
+          }
+        }
+      } catch (err) {
+         console.error('Failed to create applicant:', err);
+         throw err;
+      }
+    }
+
+    // 序列化返回数据
+    const serializedProjectInfo = JSON.parse(JSON.stringify(projectInfo));
+    const serializedCreationFields = JSON.parse(JSON.stringify(creationFields));
+    const serializedCreateResults = JSON.parse(JSON.stringify(createResults));
+
+    return {
+      success: true,
+      data: {
+        token,
+        projectInfo: serializedProjectInfo,
+        creationFields: serializedCreationFields,
+        createResults: serializedCreateResults
+      },
+      message: `Successfully created ${createResults.length} applicant(s)!`,
+    };
+
+  } catch (error) {
+    console.error('Applicant creation process failed:', error);
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Unknown error occurred',
+    };
+  }
+}
+
+/**
  * 初始化人员创建流程
  * 执行 Step 1 (获取 Token) 和 Step 2 (获取项目信息)
  * @param projectId 项目 ID

@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Loader2, LucideIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { initializeCreation, executeCandidateCreation, executeContractorCreation } from './actions';
+import { initializeCreation, executeCandidateCreation, executeContractorCreation, executeApplicantCreation } from './actions';
 
 interface QuickCreateCardProps {
   title: string;
@@ -66,6 +66,8 @@ export function QuickCreateCard({
       let result;
       if (type === 'contractor') {
          result = await executeContractorCreation(formData.projectId, Number(formData.quantity));
+      } else if (type === 'applicant') {
+         result = await executeApplicantCreation(formData.projectId, Number(formData.quantity));
       } else {
          result = await executeCandidateCreation(formData.projectId, Number(formData.quantity));
       }

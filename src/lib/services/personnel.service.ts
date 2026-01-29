@@ -346,6 +346,11 @@ export class PersonnelService {
            }
         }
 
+        // 如果 ID 是 Salary，生成 1000-50000 随机数
+        if (id === 'Salary' || id === 'salary') {
+            return String(Math.floor(Math.random() * (50000 - 1000 + 1)) + 1000);
+        }
+
         // 如果 ID 包含 Email，生成随机邮箱
         if (id && /email/i.test(id)) {
           const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -602,6 +607,79 @@ export class PersonnelService {
 
     } catch (error) {
       console.error('Create Contractor Failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 4. 创建 Applicant
+   * 对应接口 4: /services/dukang-service-online/applicants
+   */
+  async createApplicant(
+    token: string,
+    userInfo: Record<string, any>,
+    projectId: string,
+    creationFields: any,
+    locationId?: string
+  ) {
+    const url = `${this.baseUrl}/services/dukang-service-online/applicants`;
+
+    const headers: Record<string, string> = {
+      ...this.defaultHeaders,
+      'x-dk-token': token,
+      'x-actived-menu': 'Common-All Projects',
+      'referer': `${this.baseUrl}/projects/all-projects/${projectId}/applicant?clientId=${userInfo.clientId || ''}&tabKey=Applicant&locationId=${locationId}`,
+    };
+
+    if (userInfo?.externalId) {
+      headers['x-contact-id'] = String(userInfo.externalId);
+    }
+
+    // 构造 attributes 参数
+    const attributes: Record<string, any> = {};
+    const schemaId = creationFields?.data?.schemaId;
+
+    if (creationFields?.data?.groups) {
+      for (const group of creationFields.data.groups) {
+        if (group.attributes) {
+          for (const attr of group.attributes) {
+            attributes[attr.id] = this.generateRandomValue(attr, locationId);
+          }
+        }
+      }
+    }
+
+    const payload = {
+      projectId: projectId,
+      attributes: attributes,
+      schemaId: schemaId,
+      status: "active"
+    };
+
+    console.log('Creating Applicant at:', url);
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(payload),
+      });
+
+      const responseText = await response.text();
+
+      if (!response.ok) {
+        console.error('Create Applicant API Error:', responseText);
+        throw new Error(`Failed to create applicant: ${response.status} ${response.statusText} - ${responseText.substring(0, 200)}`);
+      }
+
+      const apiResult: any = safeJsonParse(responseText);
+      return {
+        ...(apiResult || {}),
+        _sentAttributes: attributes
+      };
+
+    } catch (error) {
+      console.error('Create Applicant Failed:', error);
       throw error;
     }
   }
