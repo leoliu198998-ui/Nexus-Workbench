@@ -23,6 +23,8 @@ interface CreationFieldsResponse {
   [key: string]: unknown;
 }
 
+export type Environment = 'test' | 'dev';
+
 /**
  * 人员创建相关服务
  * 封装了获取 Token 和项目信息的逻辑
@@ -30,8 +32,6 @@ interface CreationFieldsResponse {
 export class PersonnelService {
   private static instance: PersonnelService;
   
-  // 硬编码的配置信息，源自 curl
-  private readonly baseUrl = 'https://global-test-butter.bipocloud.com';
   private readonly tenantCode = 'bipo';
   private readonly defaultHeaders = {
     'accept': 'application/json, text/plain, */*',
@@ -56,30 +56,48 @@ export class PersonnelService {
     return PersonnelService.instance;
   }
 
+  private getBaseUrl(env: Environment = 'test'): string {
+    return env === 'dev' 
+      ? 'https://global-dev-butter.bipocloud.com' 
+      : 'https://global-test-butter.bipocloud.com';
+  }
+
   /**
    * 1. 获取认证 Token
    * 对应接口 1: /services/dukang-iam-identity/id_token/password_signin
    */
-  async getToken(): Promise<{ token: string; cookie: string | null; userInfo: Record<string, any> }> {
-    const url = `${this.baseUrl}/services/dukang-iam-identity/id_token/password_signin`;
+  async getToken(env: Environment = 'test'): Promise<{ token: string; cookie: string | null; userInfo: Record<string, any> }> {
+    const baseUrl = this.getBaseUrl(env);
+    const url = `${baseUrl}/services/dukang-iam-identity/id_token/password_signin`;
     
-    const payload = {
-      businessEmail: "miasd@123.com",
-      rsaPassword: "OS0Ol7SNO+EWpseh4riA9QfoKv6/l3wXS/N49CdP8DKEH5LFB/2K5A5iSIJrajOXAbYlolBHX5NGLZBwS8uEju2XtcbqT6A6ULtEi9jLTGz0B5lQmbscPRTxCMaylHfF0hoqWlzxi++RMijiE/1lU66G9oLBXFpUogDrIeAeXBI=",
-      clientId: "7e5e017fd1004d5395857dbe1fd5a07a",
-      companyCode: "bipo",
-      principalType: "BUSINESS_EMAIL"
-    };
+    let payload;
+    if (env === 'dev') {
+        payload = {
+            "businessEmail": "miasd@123.com",
+            "rsaPassword": "fPgHQohLYC7X/JkqBCUx+nB7tWw2gX4iSJNWxFxp53+m+AFdVAD0VSoDtartpw3RUYeDQLIi87GkG2jwgQ3P7nQvhlrh4zinPrGuUFxz9l+nelcZ1Gj7wa/OOkc4xn+MUp/dTJIVepyHjCya++OUf80QXM4WBFqf8ZXHOqy98EA=",
+            "clientId": "7e5e017fd1004d5395857dbe1fd5a07a",
+            "companyCode": "bipo",
+            "principalType": "BUSINESS_EMAIL"
+        };
+    } else {
+        payload = {
+            businessEmail: "miasd@123.com",
+            rsaPassword: "OS0Ol7SNO+EWpseh4riA9QfoKv6/l3wXS/N49CdP8DKEH5LFB/2K5A5iSIJrajOXAbYlolBHX5NGLZBwS8uEju2XtcbqT6A6ULtEi9jLTGz0B5lQmbscPRTxCMaylHfF0hoqWlzxi++RMijiE/1lU66G9oLBXFpUogDrIeAeXBI=",
+            clientId: "7e5e017fd1004d5395857dbe1fd5a07a",
+            companyCode: "bipo",
+            principalType: "BUSINESS_EMAIL"
+        };
+    }
 
     const headers = {
       ...this.defaultHeaders,
-      'origin': this.baseUrl,
-      'referer': `${this.baseUrl}/bipo`,
+      'origin': baseUrl,
+      'referer': `${baseUrl}/bipo`,
       'x-actived-menu': 'NORMAL',
     };
 
     try {
-      console.log('Fetching Token from:', url);
+      console.log(`Fetching Token from (${env}):`, url);
       
       const response = await fetch(url, {
         method: 'POST',
@@ -168,15 +186,17 @@ export class PersonnelService {
    * @param token 认证Token
    * @param cookie (可选) Cookie
    * @param userInfo (可选) 从Token解析出的用户信息
+   * @param env 环境
    */
-  async getProjectInfo(projectId: string, token: string, cookie?: string | null, userInfo?: Record<string, any>) {
-    const url = `${this.baseUrl}/services/dukang-service-online/projects/${projectId}`;
+  async getProjectInfo(projectId: string, token: string, cookie?: string | null, userInfo?: Record<string, any>, env: Environment = 'test') {
+    const baseUrl = this.getBaseUrl(env);
+    const url = `${baseUrl}/services/dukang-service-online/projects/${projectId}`;
     
     const headers: Record<string, string> = {
       ...this.defaultHeaders,
       'x-dk-token': token, // 确保这里使用了正确的 token
       'x-actived-menu': 'Common-All Projects',
-      'referer': `${this.baseUrl}/projects/all-projects/${projectId}/candidate`,
+      'referer': `${baseUrl}/projects/all-projects/${projectId}/candidate`,
     };
 
     if (cookie) {
@@ -260,15 +280,17 @@ export class PersonnelService {
       objectType?: string[];
       excludeProjectId?: boolean;
       excludeVersion?: boolean;
-    }
+    },
+    env: Environment = 'test'
   ) {
-    const url = `${this.baseUrl}/services/dukang-service-online/schemas/filter`;
+    const baseUrl = this.getBaseUrl(env);
+    const url = `${baseUrl}/services/dukang-service-online/schemas/filter`;
     
     const headers: Record<string, string> = {
       ...this.defaultHeaders,
       'x-dk-token': token,
       'x-actived-menu': 'Common-All Projects',
-      'referer': `${this.baseUrl}/projects/all-projects/${projectId}/candidate?clientId=${userInfo.clientId || ''}&tabKey=Candidate&locationId=${locationId}`,
+      'referer': `${baseUrl}/projects/all-projects/${projectId}/candidate?clientId=${userInfo.clientId || ''}&tabKey=Candidate&locationId=${locationId}`,
     };
 
     if (userInfo?.externalId) {
@@ -527,15 +549,17 @@ export class PersonnelService {
     userInfo: Record<string, any>,
     projectId: string,
     creationFields: any,
-    locationId?: string
+    locationId?: string,
+    env: Environment = 'test'
   ) {
-    const url = `${this.baseUrl}/services/dukang-service-online/candidates`;
+    const baseUrl = this.getBaseUrl(env);
+    const url = `${baseUrl}/services/dukang-service-online/candidates`;
 
     const headers: Record<string, string> = {
       ...this.defaultHeaders,
       'x-dk-token': token,
       'x-actived-menu': 'Common-All Projects',
-      'referer': `${this.baseUrl}/projects/all-projects/${projectId}/candidate`,
+      'referer': `${baseUrl}/projects/all-projects/${projectId}/candidate`,
     };
 
     if (userInfo?.externalId) {
@@ -564,15 +588,17 @@ export class PersonnelService {
     userInfo: Record<string, any>,
     projectId: string,
     creationFields: any,
-    locationId?: string
+    locationId?: string,
+    env: Environment = 'test'
   ) {
-    const url = `${this.baseUrl}/services/dukang-service-online/contractors`;
+    const baseUrl = this.getBaseUrl(env);
+    const url = `${baseUrl}/services/dukang-service-online/contractors`;
 
     const headers: Record<string, string> = {
       ...this.defaultHeaders,
       'x-dk-token': token,
       'x-actived-menu': 'Common-All Projects',
-      'referer': `${this.baseUrl}/projects/all-projects/${projectId}/contractor`,
+      'referer': `${baseUrl}/projects/all-projects/${projectId}/contractor`,
     };
 
     if (userInfo?.externalId) {
@@ -601,15 +627,17 @@ export class PersonnelService {
     userInfo: Record<string, any>,
     projectId: string,
     creationFields: any,
-    locationId?: string
+    locationId?: string,
+    env: Environment = 'test'
   ) {
-    const url = `${this.baseUrl}/services/dukang-service-online/applicants`;
+    const baseUrl = this.getBaseUrl(env);
+    const url = `${baseUrl}/services/dukang-service-online/applicants`;
 
     const headers: Record<string, string> = {
       ...this.defaultHeaders,
       'x-dk-token': token,
       'x-actived-menu': 'Common-All Projects',
-      'referer': `${this.baseUrl}/projects/all-projects/${projectId}/applicant?clientId=${userInfo.clientId || ''}&tabKey=Applicant&locationId=${locationId}`,
+      'referer': `${baseUrl}/projects/all-projects/${projectId}/applicant?clientId=${userInfo.clientId || ''}&tabKey=Applicant&locationId=${locationId}`,
     };
 
     if (userInfo?.externalId) {

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Loader2, LucideIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { initializeCreation, executePersonnelCreation } from './actions';
 
 interface QuickCreateCardProps {
@@ -28,6 +29,7 @@ export function QuickCreateCard({
   bgColor,
 }: QuickCreateCardProps) {
   const [loading, setLoading] = useState(false);
+  const [environment, setEnvironment] = useState<'test' | 'dev'>('test');
   const [formData, setFormData] = useState<{
     projectId: string;
     quantity: number | string;
@@ -60,10 +62,10 @@ export function QuickCreateCard({
     setLoading(true);
 
     try {
-      console.log(`Starting creation process for ${type} with Project ID: ${formData.projectId}, Quantity: ${formData.quantity}`);
+      console.log(`Starting creation process for ${type} with Project ID: ${formData.projectId}, Quantity: ${formData.quantity}, Env: ${environment}`);
       
       // 调用 Server Action 执行 Step 1-4
-      const result = await executePersonnelCreation(type, formData.projectId, Number(formData.quantity));
+      const result = await executePersonnelCreation(type, formData.projectId, Number(formData.quantity), environment);
 
       if (!result.success) {
         throw new Error(result.message);
@@ -121,6 +123,19 @@ export function QuickCreateCard({
       
       <form onSubmit={handleSubmit} className="flex-1 flex flex-col">
         <CardContent className="space-y-4 flex-1">
+          <div className="space-y-2">
+            <Label>Environment</Label>
+            <Select value={environment} onValueChange={(val: 'test' | 'dev') => setEnvironment(val)}>
+              <SelectTrigger className="bg-background/50">
+                <SelectValue placeholder="Select environment" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="test">Test Environment</SelectItem>
+                <SelectItem value="dev">Dev Environment</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor={`${type}-projectId`}>Project ID <span className="text-red-500">*</span></Label>
             <Input

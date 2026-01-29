@@ -1,6 +1,6 @@
 'use server';
 
-import { personnelService } from '@/lib/services/personnel.service';
+import { personnelService, type Environment } from '@/lib/services/personnel.service';
 
 export type PersonnelType = 'candidate' | 'contractor' | 'applicant';
 
@@ -30,7 +30,8 @@ export interface CreatePersonnelState {
 export async function executePersonnelCreation(
   type: PersonnelType,
   projectId: string,
-  quantity: number = 1
+  quantity: number = 1,
+  env: Environment = 'test'
 ): Promise<CreatePersonnelState> {
   try {
     if (!projectId) {
@@ -38,13 +39,13 @@ export async function executePersonnelCreation(
     }
 
     // 1. 获取 Token
-    const { token, cookie, userInfo } = await personnelService.getToken();
+    const { token, cookie, userInfo } = await personnelService.getToken(env);
     if (!token) {
       return { success: false, message: 'Failed to retrieve authentication token' };
     }
 
     // 2. 获取项目信息
-    const projectInfo = await personnelService.getProjectInfo(projectId, token, cookie, userInfo);
+    const projectInfo = await personnelService.getProjectInfo(projectId, token, cookie, userInfo, env);
 
     // 配置不同类型的参数
     const config = {
@@ -106,7 +107,8 @@ export async function executePersonnelCreation(
         projectId, 
         locId,
         version,
-        options
+        options,
+        env
       );
     } catch (err) {
       console.error('Failed to get creation fields:', err);
@@ -128,7 +130,8 @@ export async function executePersonnelCreation(
             userInfo,
             projectId,
             creationFields,
-            projectInfo.locationId
+            projectInfo.locationId,
+            env
           );
           
           if (result && result.data && result.data.id) {
