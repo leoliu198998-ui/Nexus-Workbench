@@ -465,6 +465,60 @@ export class PersonnelService {
   }
 
   /**
+   * 提取并生成属性值
+   */
+  private extractAttributes(creationFields: any, locationId?: string) {
+    const attributes: Record<string, any> = {};
+    if (creationFields?.data?.groups) {
+      for (const group of creationFields.data.groups) {
+        if (group.attributes) {
+          for (const attr of group.attributes) {
+            attributes[attr.id] = this.generateRandomValue(attr, locationId);
+          }
+        }
+      }
+    }
+    return attributes;
+  }
+
+  /**
+   * 通用请求发送方法
+   */
+  private async sendCreationRequest(
+    url: string,
+    headers: Record<string, string>,
+    payload: any,
+    logPrefix: string
+  ) {
+    console.log(`${logPrefix} at:`, url);
+    
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(payload),
+      });
+
+      const responseText = await response.text();
+
+      if (!response.ok) {
+        console.error(`${logPrefix} API Error:`, responseText);
+        throw new Error(`Failed to ${logPrefix.toLowerCase()}: ${response.status} ${response.statusText} - ${responseText.substring(0, 200)}`);
+      }
+
+      const apiResult: any = safeJsonParse(responseText);
+      return {
+        ...(apiResult || {}),
+        _sentAttributes: payload.attributes
+      };
+
+    } catch (error) {
+      console.error(`${logPrefix} Failed:`, error);
+      throw error;
+    }
+  }
+
+  /**
    * 4. 创建 Candidate
    * 对应接口 4: /services/dukang-service-online/candidates
    */
@@ -488,19 +542,8 @@ export class PersonnelService {
       headers['x-contact-id'] = String(userInfo.externalId);
     }
 
-    // 构造 attributes 参数
-    const attributes: Record<string, any> = {};
+    const attributes = this.extractAttributes(creationFields, locationId);
     const schemaId = creationFields?.data?.schemaId;
-
-    if (creationFields?.data?.groups) {
-      for (const group of creationFields.data.groups) {
-        if (group.attributes) {
-          for (const attr of group.attributes) {
-            attributes[attr.id] = this.generateRandomValue(attr, locationId);
-          }
-        }
-      }
-    }
 
     const payload = {
       projectId: projectId,
@@ -509,33 +552,7 @@ export class PersonnelService {
       attributes: attributes
     };
 
-    console.log('Creating Candidate at:', url);
-    // console.log('Payload:', JSON.stringify(payload, null, 2)); // Payload might be large
-
-    try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify(payload),
-      });
-
-      const responseText = await response.text();
-
-      if (!response.ok) {
-        console.error('Create Candidate API Error:', responseText);
-        throw new Error(`Failed to create candidate: ${response.status} ${response.statusText} - ${responseText.substring(0, 200)}`);
-      }
-
-      const apiResult: any = safeJsonParse(responseText);
-      return {
-        ...(apiResult || {}), // 确保 apiResult 为 null 时不会出错
-        _sentAttributes: attributes // 返回发送的属性，用于 UI 展示
-      };
-
-    } catch (error) {
-      console.error('Create Candidate Failed:', error);
-      throw error;
-    }
+    return this.sendCreationRequest(url, headers, payload, 'Create Candidate');
   }
 
   /**
@@ -562,19 +579,8 @@ export class PersonnelService {
       headers['x-contact-id'] = String(userInfo.externalId);
     }
 
-    // 构造 attributes 参数
-    const attributes: Record<string, any> = {};
+    const attributes = this.extractAttributes(creationFields, locationId);
     const schemaId = creationFields?.data?.schemaId;
-
-    if (creationFields?.data?.groups) {
-      for (const group of creationFields.data.groups) {
-        if (group.attributes) {
-          for (const attr of group.attributes) {
-            attributes[attr.id] = this.generateRandomValue(attr, locationId);
-          }
-        }
-      }
-    }
 
     const payload = {
       projectId: projectId,
@@ -583,32 +589,7 @@ export class PersonnelService {
       attributes: attributes
     };
 
-    console.log('Creating Contractor at:', url);
-
-    try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify(payload),
-      });
-
-      const responseText = await response.text();
-
-      if (!response.ok) {
-        console.error('Create Contractor API Error:', responseText);
-        throw new Error(`Failed to create contractor: ${response.status} ${response.statusText} - ${responseText.substring(0, 200)}`);
-      }
-
-      const apiResult: any = safeJsonParse(responseText);
-      return {
-        ...(apiResult || {}),
-        _sentAttributes: attributes
-      };
-
-    } catch (error) {
-      console.error('Create Contractor Failed:', error);
-      throw error;
-    }
+    return this.sendCreationRequest(url, headers, payload, 'Create Contractor');
   }
 
   /**
@@ -635,19 +616,8 @@ export class PersonnelService {
       headers['x-contact-id'] = String(userInfo.externalId);
     }
 
-    // 构造 attributes 参数
-    const attributes: Record<string, any> = {};
+    const attributes = this.extractAttributes(creationFields, locationId);
     const schemaId = creationFields?.data?.schemaId;
-
-    if (creationFields?.data?.groups) {
-      for (const group of creationFields.data.groups) {
-        if (group.attributes) {
-          for (const attr of group.attributes) {
-            attributes[attr.id] = this.generateRandomValue(attr, locationId);
-          }
-        }
-      }
-    }
 
     const payload = {
       projectId: projectId,
@@ -656,32 +626,7 @@ export class PersonnelService {
       status: "active"
     };
 
-    console.log('Creating Applicant at:', url);
-
-    try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify(payload),
-      });
-
-      const responseText = await response.text();
-
-      if (!response.ok) {
-        console.error('Create Applicant API Error:', responseText);
-        throw new Error(`Failed to create applicant: ${response.status} ${response.statusText} - ${responseText.substring(0, 200)}`);
-      }
-
-      const apiResult: any = safeJsonParse(responseText);
-      return {
-        ...(apiResult || {}),
-        _sentAttributes: attributes
-      };
-
-    } catch (error) {
-      console.error('Create Applicant Failed:', error);
-      throw error;
-    }
+    return this.sendCreationRequest(url, headers, payload, 'Create Applicant');
   }
 }
 
