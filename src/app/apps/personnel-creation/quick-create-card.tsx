@@ -246,9 +246,22 @@ export function QuickCreateCard() {
               />
             </div>
           </div>
+        </CardContent>
+
+        <CardFooter className="pt-2 pb-6 px-6 flex-col gap-6">
+          <Button type="submit" disabled={loading} size="lg" className="w-full shadow-lg shadow-primary/20">
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              'Create Personnel'
+            )}
+          </Button>
 
           {apiResult && (
-            <div className="rounded-lg border bg-muted/30 p-4 text-sm space-y-3 animate-in fade-in slide-in-from-top-2">
+            <div className="w-full rounded-lg border bg-muted/30 p-4 text-sm space-y-3 animate-in fade-in slide-in-from-top-2">
               <div className="flex items-center justify-between pb-2 border-b border-border/50">
                 <span className="font-semibold text-foreground">Creation Results</span>
                 <span className="text-xs text-muted-foreground bg-background px-2 py-0.5 rounded-full border">
@@ -287,19 +300,6 @@ export function QuickCreateCard() {
               )}
             </div>
           )}
-        </CardContent>
-
-        <CardFooter className="pt-2 pb-6 px-6">
-          <Button type="submit" disabled={loading} size="lg" className="w-full shadow-lg shadow-primary/20">
-            {loading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Processing...
-              </>
-            ) : (
-              'Create Personnel'
-            )}
-          </Button>
         </CardFooter>
       </form>
     </Card>
