@@ -339,10 +339,21 @@ export class PersonnelService {
   /**
    * 生成随机值
    */
-  private generateRandomValue(attribute: any, locationId?: string): any {
+  private generateRandomValue(attribute: any, locationId?: string, context?: 'candidate' | 'contractor' | 'applicant'): any {
     if (!attribute) return null;
 
     const { type, schemaData, id, required } = attribute;
+
+    // 特殊处理 Candidate 的 manager 字段
+    if (context === 'candidate' && id === 'manager') {
+        return [{
+            "reportingToJobTitle": "Business Manager",
+            "reportingToEmployeeType": [{ "name": "SD Manager", "id": "SD" }],
+            "reportingToMail": "nancymanager@mail.com",
+            "reportingToEmployeeCode": "nancymanager01",
+            "reportingToName": "Nancy Manager"
+        }];
+    }
 
     // 特殊处理 Location: 即使不是必填，如果它是 workLocation，通常也需要填
     const isWorkLocation = id === 'workLocation';
@@ -489,13 +500,13 @@ export class PersonnelService {
   /**
    * 提取并生成属性值
    */
-  private extractAttributes(creationFields: any, locationId?: string) {
+  private extractAttributes(creationFields: any, locationId?: string, context?: 'candidate' | 'contractor' | 'applicant') {
     const attributes: Record<string, any> = {};
     if (creationFields?.data?.groups) {
       for (const group of creationFields.data.groups) {
         if (group.attributes) {
           for (const attr of group.attributes) {
-            attributes[attr.id] = this.generateRandomValue(attr, locationId);
+            attributes[attr.id] = this.generateRandomValue(attr, locationId, context);
           }
         }
       }
@@ -566,7 +577,7 @@ export class PersonnelService {
       headers['x-contact-id'] = String(userInfo.externalId);
     }
 
-    const attributes = this.extractAttributes(creationFields, locationId);
+    const attributes = this.extractAttributes(creationFields, locationId, 'candidate');
     const schemaId = creationFields?.data?.schemaId;
 
     const payload = {
@@ -605,7 +616,7 @@ export class PersonnelService {
       headers['x-contact-id'] = String(userInfo.externalId);
     }
 
-    const attributes = this.extractAttributes(creationFields, locationId);
+    const attributes = this.extractAttributes(creationFields, locationId, 'contractor');
     const schemaId = creationFields?.data?.schemaId;
 
     const payload = {
@@ -644,7 +655,7 @@ export class PersonnelService {
       headers['x-contact-id'] = String(userInfo.externalId);
     }
 
-    const attributes = this.extractAttributes(creationFields, locationId);
+    const attributes = this.extractAttributes(creationFields, locationId, 'applicant');
     const schemaId = creationFields?.data?.schemaId;
 
     const payload = {
