@@ -17,6 +17,8 @@ export interface ScheduleApiItem {
   serviceModule?: {
     name?: string;
   };
+  createTime?: string | number;
+  create_time?: string | number;
   failureReason?: string[];
   generateStatus?: string;
   missingHolidayLocations?: Array<{
@@ -39,6 +41,7 @@ export interface ScheduleExportItem {
   locationName: string;
   serviceType: string;
   serviceModuleName: string;
+  createTime: string;
   failureReason: string;
   generateStatus: string;
   globalSD: string;

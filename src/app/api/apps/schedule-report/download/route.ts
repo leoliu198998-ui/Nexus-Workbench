@@ -106,6 +106,7 @@ export async function POST(req: NextRequest) {
       { header: 'Location Name', key: 'locationName', width: 20 },
       { header: 'Service Type', key: 'serviceType', width: 20 },
       { header: 'Service Module Name', key: 'serviceModuleName', width: 25 },
+      { header: 'Create Time', key: 'createTime', width: 25 },
       { header: 'Failure Reason', key: 'failureReason', width: 40 },
       { header: 'Generate Status', key: 'generateStatus', width: 15 },
       { header: 'Global SD', key: 'globalSD', width: 30 },
