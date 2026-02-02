@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { outageService } from '@/lib/services/outage.service';
+import { handleApiError } from '@/lib/api-utils';
 
 export async function GET(
   req: NextRequest,
@@ -10,11 +11,7 @@ export async function GET(
     const batch = await outageService.getBatch(id);
     return NextResponse.json(batch);
   } catch (error) {
-    if (error instanceof Error && error.message === 'Batch not found') {
-      return NextResponse.json({ error: 'Batch not found' }, { status: 404 });
-    }
-    console.error('Failed to fetch batch:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return handleApiError(error, 'Failed to fetch batch');
   }
 }
 
@@ -29,26 +26,8 @@ export async function PATCH(
 
     const result = await outageService.executeAction(id, action, token);
     return NextResponse.json(result);
-  } catch (error: unknown) {
-    if (error instanceof Error && error.message === 'Batch not found') {
-      return NextResponse.json({ error: 'Batch not found' }, { status: 404 });
-    }
-    if (error instanceof Error && error.message === 'Invalid action') {
-      return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
-    }
-
-    // Handle external API errors wrapped by service
-    if (error && typeof error === 'object' && 'apiCall' in error) {
-      return NextResponse.json({
-        error: 'External API Error',
-        details: error instanceof Error ? error.message : 'Unknown error',
-        apiCall: 'apiCall' in error ? error.apiCall : undefined,
-        logs: 'logs' in error ? error.logs : undefined,
-      }, { status: ('status' in error && typeof error.status === 'number') ? error.status : 502 });
-    }
-
-    console.error('Failed to update batch status:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  } catch (error) {
+    return handleApiError(error, 'Failed to update batch status');
   }
 }
 
@@ -62,21 +41,7 @@ export async function PUT(
 
     const updatedBatch = await outageService.updateBatch(id, body);
     return NextResponse.json(updatedBatch);
-  } catch (error: unknown) {
-    if (error instanceof Error && error.message === 'Batch not found') {
-      return NextResponse.json({ error: 'Batch not found' }, { status: 404 });
-    }
-    if (error instanceof Error && error.message.includes('Only CREATED or NOTIFIED')) {
-      return NextResponse.json({ error: error.message }, { status: 403 });
-    }
-
-    // Handle external API errors
-    // Note: updateBatch currently re-throws the error but doesn't attach logs/apiCall like executeAction.
-    // However, the original route.ts logic for PUT also didn't return full details on 502, just message and logs.
-    // The service logs the failure to DB.
-    // We should probably align the service to throw standardized errors, but for now we adapt the route to catch what we have.
-
-    console.error('Failed to update batch:', error);
-    return NextResponse.json({ error: 'Internal Server Error', details: error instanceof Error ? error.message : 'Unknown error' }, { status: 502 });
+  } catch (error) {
+    return handleApiError(error, 'Failed to update batch');
   }
 }
