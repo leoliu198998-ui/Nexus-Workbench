@@ -17,6 +17,14 @@ export interface ButterConfig {
 }
 
 const DEFAULT_BUTTER_CONFIG: ButterConfig = {
+  clientId: '',
+  businessEmail: '',
+  rsaPassword: '',
+  companyCode: 'bipo',
+  principalType: 'BUSINESS_EMAIL',
+};
+
+const TEST_BUTTER_CONFIG: ButterConfig = {
   clientId: '7e5e017fd1004d5395857dbe1fd5a07a',
   businessEmail: 'miasd@123.com',
   rsaPassword: 'i8v6HVzeK5KmY0uu6UQ/h++abSj1QgSHyFyBzUYoUIvCPgZENYrEpmLGJ0qwopSCEkkJnhOPldDj0jxHLSI519QzRDx+KQaRAPdtqwKuVXXmduSEcczYrjBXJjV7uYa8Wmiw0QhoA6veRW00DgY2ZBRCiiK0xcwbtQZO6EOB8oY=',
@@ -25,28 +33,43 @@ const DEFAULT_BUTTER_CONFIG: ButterConfig = {
 };
 
 export default function ButterTokenManager() {
-  const [env, setEnv] = useState<string>('dev');
+  const [env, setEnv] = useState<string>('test'); // Default to test
   const [token, setToken] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   
-  const [butterConfig, setButterConfig] = useState<ButterConfig>(DEFAULT_BUTTER_CONFIG);
+  const [butterConfig, setButterConfig] = useState<ButterConfig>(TEST_BUTTER_CONFIG);
   const [isConfigLoaded, setIsConfigLoaded] = useState(false);
 
   // Load config from localStorage on mount
   useEffect(() => {
+    // Clear previous environment's result
+    setToken('');
+    setError('');
+
     if (typeof window !== 'undefined') {
       const savedButterConfig = localStorage.getItem(`butter_config_${env}`);
       if (savedButterConfig) {
         try {
           const parsedConfig = JSON.parse(savedButterConfig);
-          setButterConfig({ ...DEFAULT_BUTTER_CONFIG, ...parsedConfig });
+          
+          // Intelligent Reset: 
+          // If we are NOT in 'test' env, but the saved config has the 'test' Client ID,
+          // it means it was likely auto-saved from the previous default values.
+          // We should reset it to empty defaults to avoid confusion.
+          if (env !== 'test' && parsedConfig.clientId === TEST_BUTTER_CONFIG.clientId) {
+             console.log(`[Butter] Detected stale test data in ${env} environment, resetting to defaults.`);
+             setButterConfig(DEFAULT_BUTTER_CONFIG);
+          } else {
+             setButterConfig({ ...DEFAULT_BUTTER_CONFIG, ...parsedConfig });
+          }
         } catch (e) {
           console.error('Failed to parse saved butter config', e);
-          setButterConfig(DEFAULT_BUTTER_CONFIG);
+          setButterConfig(env === 'test' ? TEST_BUTTER_CONFIG : DEFAULT_BUTTER_CONFIG);
         }
       } else {
-        setButterConfig(DEFAULT_BUTTER_CONFIG);
+        // No saved config for this env
+        setButterConfig(env === 'test' ? TEST_BUTTER_CONFIG : DEFAULT_BUTTER_CONFIG);
       }
       setIsConfigLoaded(true);
     }

@@ -15,42 +15,56 @@ export interface TaxConfig {
 }
 
 const DEFAULT_TAX_CONFIG: TaxConfig = {
+  clientId: '',
+  mobile: '',
+  mobileAreaCode: '86',
+};
+
+const TEST_TAX_CONFIG: TaxConfig = {
   clientId: 'e99239eac2fa4ed986b1f9e05d1bb175',
   mobile: '13122220805', 
   mobileAreaCode: '86',
 };
 
 export default function TaxTokenManager() {
-  const [env, setEnv] = useState<string>('dev');
+  const [env, setEnv] = useState<string>('test'); // Default to test
   const [token, setToken] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   
-  const [taxConfig, setTaxConfig] = useState<TaxConfig>(DEFAULT_TAX_CONFIG);
+  const [taxConfig, setTaxConfig] = useState<TaxConfig>(TEST_TAX_CONFIG);
   const [isConfigLoaded, setIsConfigLoaded] = useState(false);
 
   // Load config from localStorage on mount
   useEffect(() => {
+    // Clear previous environment's result
+    setToken('');
+    setError('');
+
     if (typeof window !== 'undefined') {
       const savedTaxConfig = localStorage.getItem(`tax_config_${env}`);
       if (savedTaxConfig) {
         try {
           const parsedConfig = JSON.parse(savedTaxConfig);
-          if (!('mobile' in parsedConfig)) {
-            setTaxConfig(DEFAULT_TAX_CONFIG);
+          
+          // Intelligent Reset for Tax
+          // If we are NOT in 'test' env, but the saved config has the 'test' Client ID,
+          // it means it was likely auto-saved from the previous default values.
+          if (env !== 'test' && parsedConfig.clientId === TEST_TAX_CONFIG.clientId) {
+             console.log(`[Tax] Detected stale test data in ${env} environment, resetting to defaults.`);
+             setTaxConfig(DEFAULT_TAX_CONFIG);
+          } else if (!('mobile' in parsedConfig)) {
+             // Handle legacy config format
+             setTaxConfig(env === 'test' ? TEST_TAX_CONFIG : DEFAULT_TAX_CONFIG);
           } else {
-            const merged = { ...DEFAULT_TAX_CONFIG, ...parsedConfig };
-            if (!merged.mobile && DEFAULT_TAX_CONFIG.mobile) {
-                merged.mobile = DEFAULT_TAX_CONFIG.mobile;
-            }
-            setTaxConfig(merged);
+             setTaxConfig({ ...DEFAULT_TAX_CONFIG, ...parsedConfig });
           }
         } catch (e) {
           console.error('Failed to parse saved tax config', e);
-          setTaxConfig(DEFAULT_TAX_CONFIG);
+          setTaxConfig(env === 'test' ? TEST_TAX_CONFIG : DEFAULT_TAX_CONFIG);
         }
       } else {
-        setTaxConfig(DEFAULT_TAX_CONFIG);
+        setTaxConfig(env === 'test' ? TEST_TAX_CONFIG : DEFAULT_TAX_CONFIG);
       }
       setIsConfigLoaded(true);
     }
