@@ -28,7 +28,7 @@ const tools = [
     description: 'Interactive environment to test and debug internal APIs with real-time response visualization.',
     icon: Terminal,
     href: '/apps/api-playground',
-    status: 'coming_soon' as const,
+    status: 'active' as const,
   },
   {
     title: 'Schema Registry',
