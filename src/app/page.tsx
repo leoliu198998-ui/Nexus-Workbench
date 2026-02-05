@@ -1,7 +1,14 @@
 import { ToolCard } from '@/components/dashboard/tool-card';
-import { FileSpreadsheet, Sparkles, Terminal, Database, Clock } from 'lucide-react';
+import { FileSpreadsheet, Sparkles, Terminal, Database, Clock, Users } from 'lucide-react';
 
 const tools = [
+  {
+    title: 'Personnel Creator',
+    description: 'Create and manage personnel records including Candidates, Contractors, and Applicants.',
+    icon: Users,
+    href: '/apps/personnel-creation',
+    status: 'active' as const,
+  },
   {
     title: 'Outage Release Manager',
     description: '4-step standardized workflow for managing system outages during releases across different environments.',
@@ -21,7 +28,7 @@ const tools = [
     description: 'Interactive environment to test and debug internal APIs with real-time response visualization.',
     icon: Terminal,
     href: '/apps/api-playground',
-    status: 'coming_soon' as const,
+    status: 'active' as const,
   },
   {
     title: 'Schema Registry',
@@ -42,30 +49,31 @@ const tools = [
 export default function Home() {
   return (
     <main className="min-h-screen bg-background bg-dot-pattern">
-      <div className="max-w-7xl mx-auto p-6 sm:p-8 space-y-10">
-        
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 py-8 space-y-12">
+
         {/* Hero Section */}
-        <header className="relative py-8 md:py-12 space-y-4">
-          <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-sm font-medium text-primary backdrop-blur-xl">
-            <Sparkles className="mr-2 h-3.5 w-3.5" />
+        <header className="relative py-10 md:py-16 space-y-6">
+          <div className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary shadow-sm">
+            <Sparkles className="mr-2 h-4 w-4" />
             <span>Nexus Workbench v1.0</span>
           </div>
-          <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground">
-            Developer Efficiency <span className="text-primary">Unlocked</span>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground leading-tight">
+            Developer Efficiency<br />
+            <span className="text-primary">Unlocked</span>
           </h1>
-          <p className="max-w-2xl text-lg text-muted-foreground leading-relaxed">
-            A unified suite of tools designed to accelerate your R&D workflow. 
+          <p className="max-w-2xl text-lg md:text-xl text-muted-foreground leading-relaxed">
+            A unified suite of tools designed to accelerate your R&D workflow.
             Access data utilities, API helpers, and automation wizards in one workspace.
           </p>
         </header>
 
         {/* Tools Grid */}
-        <section className="space-y-6">
-          <div className="flex items-center justify-between border-b border-border/60 pb-4">
-            <h2 className="text-xl font-semibold tracking-tight">Available Tools</h2>
-            <span className="text-sm text-muted-foreground">{tools.length} modules loaded</span>
+        <section className="space-y-8">
+          <div className="flex items-center justify-between border-b border-border pb-5">
+            <h2 className="text-2xl font-semibold tracking-tight">Available Tools</h2>
+            <span className="text-sm font-medium text-muted-foreground bg-muted/50 px-3 py-1 rounded-full">{tools.length} modules</span>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {tools.map((tool) => (
               <ToolCard key={tool.title} {...tool} />

@@ -4,7 +4,7 @@ import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, ArrowLeft } from 'lucide-react';
+import { Loader2, ArrowLeft, Calendar } from 'lucide-react';
 import { OutageWizardProvider, useOutageWizard } from '@/components/outage-manager/outage-wizard-context';
 import { WizardControl } from '@/components/outage-manager/wizard-control';
 import type { OutageBatch } from '@/types/outage';
@@ -54,6 +54,10 @@ function WizardContent({ onReset }: { onReset: () => void }) {
             <Badge variant="outline" className="font-normal text-xs px-1.5 py-0 h-5">
               {batch.environment?.name}
             </Badge>
+            <div className="flex items-center gap-1.5 ml-2 text-[10px] text-muted-foreground font-normal bg-muted/50 px-2 py-0.5 rounded-full border border-border/50">
+              <Calendar className="w-3 h-3" />
+              {batch.releaseDatetime ? new Date(batch.releaseDatetime).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : 'N/A'}
+            </div>
           </h1>
         </div>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -123,9 +127,11 @@ export default function OutageWizardPage({ params }: { params: Promise<{ id: str
 
   return (
     <OutageWizardProvider initialBatch={batch}>
-      <div className="container mx-auto py-6 space-y-6">
-        <WizardContent onReset={() => router.push('/apps/outage-manager')} />
-      </div>
+      <main className="min-h-screen bg-background bg-dot-pattern">
+        <div className="container mx-auto py-6 sm:py-8 space-y-6">
+          <WizardContent onReset={() => router.push('/apps/outage-manager')} />
+        </div>
+      </main>
     </OutageWizardProvider>
   );
 }

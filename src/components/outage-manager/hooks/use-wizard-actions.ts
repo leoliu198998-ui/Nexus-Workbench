@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import type { OutageBatch } from '@/types/outage';
 
-type ActionType = 'publish' | 'release' | 'finish';
+type ActionType = 'publish' | 'release' | 'finish' | 'cancel';
 
 interface UseWizardActionsProps {
   batch: OutageBatch;
@@ -58,7 +58,7 @@ export function useWizardActions({ batch, onUpdate }: UseWizardActionsProps) {
         console.groupEnd();
       }
 
-      toast.success('状态更新成功');
+      toast.success(action === 'cancel' ? '批次已取消' : '状态更新成功');
       onUpdate(data);
     } catch (error: unknown) {
       console.error(error);
@@ -70,7 +70,7 @@ export function useWizardActions({ batch, onUpdate }: UseWizardActionsProps) {
   };
 
   const initiateAction = (action: ActionType) => {
-    if (action === 'release' || action === 'finish') {
+    if (action === 'release' || action === 'finish' || action === 'cancel') {
       setPendingAction(action);
       setConfirmOpen(true);
     } else {

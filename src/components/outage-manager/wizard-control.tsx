@@ -20,7 +20,8 @@ import { WizardTimeline } from './wizard-timeline';
 import { WizardLogs } from './wizard-logs';
 import { useWizardActions } from './hooks/use-wizard-actions';
 import type { OutageBatch } from '@/types/outage';
-import { LucideIcon } from 'lucide-react';
+import { LucideIcon, Edit, XCircle } from 'lucide-react';
+import { UpdateBatchDialog } from './update-batch-dialog';
 
 interface WizardControlProps {
   batch: OutageBatch;
@@ -48,6 +49,7 @@ const STEPS: readonly Step[] = [
 
 export function WizardControl({ batch, onUpdate, onReset, token, onTokenChange, isSavingToken }: WizardControlProps) {
   const [logsOpen, setLogsOpen] = useState(true); // Default open in new layout
+  const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
   
   const { 
     loading, 
@@ -62,6 +64,8 @@ export function WizardControl({ batch, onUpdate, onReset, token, onTokenChange, 
   const nextStep = currentStepIndex !== -1 && currentStepIndex < STEPS.length - 1 
     ? STEPS[currentStepIndex + 1] 
     : null;
+
+  const canEditOrCancel = batch.status === 'CREATED' || batch.status === 'NOTIFIED';
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-full">
@@ -89,6 +93,22 @@ export function WizardControl({ batch, onUpdate, onReset, token, onTokenChange, 
                   返回列表
                 </Button>
               </div>
+             ) : batch.status === 'CANCELLED' ? (
+               <div className="space-y-6 animate-in fade-in zoom-in duration-700">
+                <div className="relative inline-flex items-center justify-center">
+                   <div className="absolute inset-0 bg-red-500/20 rounded-full blur-2xl" />
+                   <div className="relative p-8 bg-linear-to-br from-red-50 to-red-100 dark:from-red-950 dark:to-red-900 text-red-600 dark:text-red-400 rounded-full shadow-xl">
+                     <XCircle className="w-16 h-16" strokeWidth={3} />
+                   </div>
+                </div>
+                <div className="space-y-2">
+                  <h2 className="text-3xl font-bold tracking-tight text-foreground">发布已取消</h2>
+                  <p className="text-muted-foreground">该发布批次已被撤销。</p>
+                </div>
+                 <Button onClick={onReset} variant="outline" className="mt-4">
+                  返回列表
+                </Button>
+               </div>
              ) : nextStep ? (
                <>
                  <div className="space-y-4">
@@ -129,6 +149,30 @@ export function WizardControl({ batch, onUpdate, onReset, token, onTokenChange, 
                       </>
                     )}
                   </Button>
+
+                  {/* Edit and Cancel Buttons */}
+                  {canEditOrCancel && (
+                    <div className="flex gap-4 pt-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setUpdateDialogOpen(true)}
+                        disabled={loading}
+                        className="gap-2"
+                      >
+                        <Edit className="w-4 h-4" />
+                        更新批次
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => initiateAction('cancel')}
+                        disabled={loading}
+                        className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20 border-red-200 dark:border-red-900"
+                      >
+                        <XCircle className="w-4 h-4" />
+                        取消发布
+                      </Button>
+                    </div>
+                  )}
                </>
              ) : null}
           </CardContent>
@@ -171,6 +215,14 @@ export function WizardControl({ batch, onUpdate, onReset, token, onTokenChange, 
         action={pendingAction}
         onConfirm={() => pendingAction && executeAction(pendingAction)}
         onCancel={() => setConfirmOpen(false)}
+      />
+
+      {/* Update Dialog */}
+      <UpdateBatchDialog 
+        open={updateDialogOpen}
+        onClose={() => setUpdateDialogOpen(false)}
+        batch={batch}
+        onSuccess={onUpdate}
       />
     </div>
   );

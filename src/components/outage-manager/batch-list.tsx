@@ -81,6 +81,7 @@ export function BatchList({ onBatchClick }: BatchListProps) {
               <SelectItem value="NOTIFIED">已通知</SelectItem>
               <SelectItem value="STARTED">进行中</SelectItem>
               <SelectItem value="COMPLETED">已完成</SelectItem>
+              <SelectItem value="CANCELLED">已取消</SelectItem>
             </SelectContent>
           </Select>
           {statusFilter !== 'all' && (
@@ -151,18 +152,18 @@ export function BatchList({ onBatchClick }: BatchListProps) {
                   </TableCell>
                   <TableCell className="text-right">
                     <Button
-                      variant={batch.status === 'COMPLETED' ? "ghost" : "default"}
+                      variant={(batch.status === 'COMPLETED' || batch.status === 'CANCELLED') ? "ghost" : "default"}
                       size="sm"
                       className={cn(
                         "gap-1.5 h-8",
-                        batch.status !== 'COMPLETED' && "shadow-sm bg-primary/90 hover:bg-primary"
+                        (batch.status !== 'COMPLETED' && batch.status !== 'CANCELLED') && "shadow-sm bg-primary/90 hover:bg-primary"
                       )}
                       onClick={(e) => {
                         e.stopPropagation();
                         onBatchClick?.(batch);
                       }}
                     >
-                      {batch.status === 'COMPLETED' ? (
+                      {batch.status === 'COMPLETED' || batch.status === 'CANCELLED' ? (
                         <>
                           <Eye className="h-3.5 w-3.5" />
                           查看
@@ -187,30 +188,61 @@ export function BatchList({ onBatchClick }: BatchListProps) {
 }
 
 function StatusBadge({ status }: { status: string }) {
+
   const config: Record<string, { label: string; color: string; pulse?: boolean }> = {
+
     COMPLETED: { label: '已完成', color: 'bg-green-500' },
+
     STARTED: { label: '进行中', color: 'bg-red-500', pulse: true },
+
     NOTIFIED: { label: '已通知', color: 'bg-blue-500' },
+
     CREATED: { label: '已创建', color: 'bg-slate-400' },
+
+    CANCELLED: { label: '已取消', color: 'bg-gray-400' },
+
   };
+
+
 
   const { label, color, pulse } = config[status] || { label: status, color: 'bg-gray-400' };
 
+
+
   return (
+
     <div className="flex items-center gap-2">
+
       <div className="relative flex h-2.5 w-2.5">
+
         {pulse && (
+
           <span className={cn("animate-ping absolute inline-flex h-full w-full rounded-full opacity-75", color)}></span>
+
         )}
+
         <span className={cn("relative inline-flex rounded-full h-2.5 w-2.5", color)}></span>
+
       </div>
+
       <span className={cn("text-sm font-medium", 
+
         status === 'STARTED' ? "text-red-600" : 
+
         status === 'COMPLETED' ? "text-green-600" : 
+
+        status === 'CANCELLED' ? "text-muted-foreground/70 line-through" :
+
         "text-muted-foreground"
+
       )}>
+
         {label}
+
       </span>
+
     </div>
+
   );
+
 }

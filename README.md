@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Nexus Workbench
 
-## Getting Started
+Nexus Workbench 是一个专为研发团队打造的内部 Web 效率工具集平台。旨在通过一系列原子化的工具，简化研发日常工作中的重复性任务，提升团队整体交付效率。
 
-First, run the development server:
+## 核心功能
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **API 内容快捷创建**: 图形化界面调用接口，实现内容快速生成。
+- **日程报表导出**: 对接生产环境 API，自动将日程数据转换为 Excel 报表。
+- **系统停机发布管理**: 标准化的 4 步向导式流程，精准控制不同环境的停机与恢复。
+- **团队共享资源库**: 存储与共享常用代码片段、配置模板。
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 技术栈
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **框架**: Next.js 16 (App Router)
+- **语言**: TypeScript
+- **数据库**: Prisma ORM (PostgreSQL)
+- **UI 组件**: Radix UI + Tailwind CSS 4
+- **动画**: Framer Motion
+- **测试**: Vitest + React Testing Library
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 目录结构
 
-## Learn More
+- `src/app`: 应用路由与页面逻辑
+- `src/components`: 可复用的 UI 组件
+- `src/lib`: 工具函数与第三方库配置
+- `prisma`: 数据库建模与迁移脚本
+- `conductor`: 项目管理、技术规范与工作流文档
 
-To learn more about Next.js, take a look at the following resources:
+## 快速开始
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **安装依赖**:
+   ```bash
+   pnpm install
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+2. **环境变量**:
+   在根目录创建 `.env` 文件，并配置相应的数据库连接字符串。
 
-## Deploy on Vercel
+3. **数据库初始化**:
+   ```bash
+   npx prisma db push
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+4. **启动开发服务器**:
+   ```bash
+   pnpm dev
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 开发规范
+
+本项目遵循 `conductor/` 目录中定义的详细技术指南和工作流。在开始贡献代码前，请务必阅读相关的 `code_styleguides`。
