@@ -30,6 +30,13 @@ const tools = [
     href: '/apps/schema',
     status: 'coming_soon' as const,
   },
+  {
+    title: 'Jenkins Toolkit',
+    description: 'Monitor builds, check tags, and view job details directly from your workbench.',
+    icon: Terminal,
+    href: '/apps/jenkins',
+    status: 'active' as const,
+  },
 ];
 
 export default function Home() {
