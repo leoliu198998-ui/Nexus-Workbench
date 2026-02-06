@@ -1,5 +1,5 @@
 import { ToolCard } from '@/components/dashboard/tool-card';
-import { FileSpreadsheet, Sparkles, Terminal, Database, Clock, Users } from 'lucide-react';
+import { FileSpreadsheet, Sparkles, Terminal, Database, Clock, Users, Shield } from 'lucide-react';
 
 const tools = [
   {
@@ -14,6 +14,13 @@ const tools = [
     description: '4-step standardized workflow for managing system outages during releases across different environments.',
     icon: Clock,
     href: '/apps/outage-manager',
+    status: 'active' as const,
+  },
+  {
+    title: 'IAM Permission Tool',
+    description: 'Automatically execute 4 IAM API calls in sequence by filling variables. One-click permission publishing with real-time execution logs.',
+    icon: Shield,
+    href: '/permission-tool',
     status: 'active' as const,
   },
   {
