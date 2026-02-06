@@ -26,6 +26,13 @@ const ACTION_MAP: Record<string, { path: string; nextStatus: OutageStatus }> = {
   cancel: { path: '/cancel', nextStatus: OutageStatus.CANCELLED },
 };
 
+interface ExtendedError extends Error {
+  details?: string;
+  apiCall?: Record<string, unknown>;
+  logs?: { steps: Record<string, unknown>[] };
+  status?: number;
+}
+
 export class OutageService {
   private static instance: OutageService;
 
@@ -37,6 +44,73 @@ export class OutageService {
     }
     return OutageService.instance;
   }
+
+  // --- Private Helpers ---
+
+  private formatDateTimeForApi(dateStr: string): string {
+    // Expected format: "YYYY-MM-DD HH:mm"
+    if (dateStr && dateStr.length === 16 && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(dateStr)) {
+      return dateStr.replace('T', ' ');
+    }
+    return dateStr;
+  }
+
+  private parseAndValidateDate(dateStr: string): Date {
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) {
+      throw new Error(`Invalid date provided: ${dateStr}`);
+    }
+    return date;
+  }
+
+  private validateResponse(responseData: Record<string, unknown>, requiredDataFields: string[] = []) {
+    if (String(responseData.errcode) !== '0') {
+      throw new Error((responseData.errmsg as string) || `接口返回错误码: ${responseData.errcode}`);
+    }
+
+    if (requiredDataFields.length > 0) {
+      if (!responseData.data || typeof responseData.data !== 'object') {
+        throw new Error('接口返回数据格式错误: 缺少data对象');
+      }
+
+      const data = responseData.data as Record<string, unknown>;
+      const missingFields = requiredDataFields.filter(field => !(field in data));
+
+      if (missingFields.length > 0) {
+        throw new Error(`接口返回数据格式错误: 缺少必需字段 [${missingFields.join(', ')}]`);
+      }
+    }
+  }
+
+  private wrapExtendedError(apiError: unknown, context: {
+    url: string;
+    method: string;
+    headers: Record<string, string>;
+    payload: unknown;
+    curl: string;
+    response?: {
+      status: number;
+      raw: string;
+      parsed: Record<string, unknown> | null;
+    };
+    logs?: { steps: Record<string, unknown>[] };
+  }): ExtendedError {
+    const error = new Error(apiError instanceof Error ? apiError.message : 'Unknown error') as ExtendedError;
+    error.details = error.message;
+    error.apiCall = {
+      url: context.url,
+      method: context.method,
+      headers: context.headers,
+      body: context.payload,
+      curl: context.curl,
+      ...(context.response ? { response: context.response } : {}),
+    };
+    if (context.logs) error.logs = context.logs;
+    error.status = 502;
+    return error;
+  }
+
+  // --- Public Methods ---
 
   async getBatch(id: string) {
     const batch = await prisma.outageBatch.findUnique({
@@ -54,7 +128,6 @@ export class OutageService {
   async createBatch(data: CreateBatchDto) {
     const { envId, batchName, releaseDatetime, releaseTimeZone, duration, token } = data;
 
-    // 1. Fetch environment info
     const environment = await prisma.releaseEnvironment.findUnique({
       where: { id: envId },
     });
@@ -63,14 +136,8 @@ export class OutageService {
       throw new Error('Environment not found');
     }
 
-    // 2. Call external API
     const externalUrl = `${environment.baseUrl}/devops/release-batch`;
-
-    // Format datetime logic
-    let formattedReleaseDatetime = releaseDatetime;
-    if (releaseDatetime && releaseDatetime.length === 16 && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(releaseDatetime)) {
-      formattedReleaseDatetime = releaseDatetime.replace('T', ' ');
-    }
+    const formattedReleaseDatetime = this.formatDateTimeForApi(releaseDatetime);
 
     const externalPayload = {
       batchName,
@@ -86,18 +153,20 @@ export class OutageService {
 
     const curlCommand = generateCurlCommand(externalUrl, 'POST', requestHeaders, externalPayload);
     const logs: { steps: Record<string, unknown>[] } = { steps: [] };
-    let remoteBatchId = null;
+    let remoteBatchId: string | null = null;
+    let response: Response | null = null;
+    let responseText = '';
+    let responseData: Record<string, unknown> | null = null;
 
     try {
-      const response = await fetch(externalUrl, {
+      response = await fetch(externalUrl, {
         method: 'POST',
         headers: requestHeaders,
         body: JSON.stringify(externalPayload),
       });
 
-      const responseText = await response.text();
-      // Use safeJsonParse to handle BigInt
-      const responseData = safeJsonParse<Record<string, unknown>>(responseText);
+      responseText = await response.text();
+      responseData = safeJsonParse<Record<string, unknown>>(responseText);
 
       logs.steps.push({
         step: 'CREATE_BATCH',
@@ -120,25 +189,9 @@ export class OutageService {
         throw new Error((responseData.errmsg as string) || (responseData.message as string) || 'External API failed');
       }
 
-      if (String(responseData.errcode) !== '0') {
-        throw new Error((responseData.errmsg as string) || `接口返回错误码: ${responseData.errcode}`);
-      }
-
-      if (!responseData.data || typeof responseData.data !== 'object') {
-        throw new Error('接口返回数据格式错误: 缺少data对象');
-      }
+      this.validateResponse(responseData, ['batchId', 'batchName', 'originalDateTime', 'originalTimeZone', 'duration', 'releaseDatetime', 'releaseStatus', 'noticeStatus']);
 
       const batchData = responseData.data as Record<string, unknown>;
-
-      // Validate required fields
-      const requiredFields = ['batchId', 'batchName', 'originalDateTime', 'originalTimeZone', 'duration', 'releaseDatetime', 'releaseStatus', 'noticeStatus'];
-      const missingFields = requiredFields.filter(field => !(field in batchData));
-
-      if (missingFields.length > 0) {
-        throw new Error(`接口返回数据格式错误: 缺少必需字段 [${missingFields.join(', ')}]`);
-      }
-
-      // Validate batchId
       if (!batchData.batchId || (typeof batchData.batchId !== 'number' && typeof batchData.batchId !== 'string')) {
         throw new Error('接口返回的batchId无效');
       }
@@ -147,15 +200,26 @@ export class OutageService {
 
     } catch (apiError: unknown) {
       console.error('External API Error:', apiError);
-      throw apiError;
+      throw this.wrapExtendedError(apiError, {
+        url: externalUrl,
+        method: 'POST',
+        headers: requestHeaders,
+        payload: externalPayload,
+        curl: curlCommand,
+        response: response && responseData ? {
+          status: response.status,
+          raw: responseText,
+          parsed: responseData,
+        } : undefined,
+        logs
+      });
     }
 
-    // 3. Create local record
     const batch = await prisma.outageBatch.create({
       data: {
         envId,
         batchName,
-        releaseDatetime: new Date(releaseDatetime),
+        releaseDatetime: this.parseAndValidateDate(releaseDatetime),
         releaseTimeZone,
         duration,
         token,
@@ -200,10 +264,7 @@ export class OutageService {
     const externalUrl = `${batch.environment.baseUrl}/devops/release-batch/update/${batch.remoteBatchId}`;
 
     // Format datetime
-    let formattedReleaseDatetime = releaseDatetime;
-    if (releaseDatetime && releaseDatetime.length === 16 && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(releaseDatetime)) {
-      formattedReleaseDatetime = releaseDatetime.replace('T', ' ');
-    }
+    const formattedReleaseDatetime = this.formatDateTimeForApi(releaseDatetime);
 
     const externalPayload = {
       batchName,
@@ -219,16 +280,19 @@ export class OutageService {
 
     const curlCommand = generateCurlCommand(externalUrl, 'PUT', requestHeaders, externalPayload);
     const logs = (batch.logs as { steps: Record<string, unknown>[] }) || { steps: [] };
+    let response: Response | null = null;
+    let responseText = '';
+    let responseData: Record<string, unknown> | null = null;
 
     try {
-      const response = await fetch(externalUrl, {
+      response = await fetch(externalUrl, {
         method: 'PUT',
         headers: requestHeaders,
         body: JSON.stringify(externalPayload),
       });
 
-      const responseText = await response.text();
-      const responseData = safeJsonParse<Record<string, unknown>>(responseText);
+      responseText = await response.text();
+      responseData = safeJsonParse<Record<string, unknown>>(responseText);
 
       logs.steps.push({
         step: 'UPDATE_BATCH',
@@ -251,9 +315,7 @@ export class OutageService {
         throw new Error((responseData.errmsg as string) || (responseData.message as string) || 'External API failed');
       }
 
-      if (String(responseData.errcode) !== '0') {
-        throw new Error((responseData.errmsg as string) || `接口返回错误码: ${responseData.errcode}`);
-      }
+      this.validateResponse(responseData);
     } catch (apiError: unknown) {
       console.error('External API Update Error:', apiError);
       // Update logs even on failure
@@ -261,7 +323,19 @@ export class OutageService {
         where: { id },
         data: { logs: logs as unknown as Prisma.InputJsonValue },
       });
-      throw apiError;
+      throw this.wrapExtendedError(apiError, {
+        url: externalUrl,
+        method: 'PUT',
+        headers: requestHeaders,
+        payload: externalPayload,
+        curl: curlCommand,
+        response: response && responseData ? {
+          status: response.status,
+          raw: responseText,
+          parsed: responseData,
+        } : undefined,
+        logs
+      });
     }
 
     // 4. Update local record AND RESET STATUS TO CREATED
@@ -269,7 +343,7 @@ export class OutageService {
       where: { id },
       data: {
         batchName,
-        releaseDatetime: new Date(releaseDatetime),
+        releaseDatetime: this.parseAndValidateDate(releaseDatetime),
         releaseTimeZone,
         duration,
         status: OutageStatus.CREATED,
@@ -444,32 +518,19 @@ export class OutageService {
         data: { logs: logs as unknown as Prisma.InputJsonValue },
       });
 
-      // Wrap the error to include logs and apiCall details
-      interface ExtendedError extends Error {
-        details?: string;
-        apiCall?: Record<string, unknown>;
-        logs?: { steps: Record<string, unknown>[] };
-        status?: number;
-      }
-      const error = new Error(apiError instanceof Error ? apiError.message : 'Unknown error') as ExtendedError;
-      error.details = error.message;
-      error.apiCall = {
+      throw this.wrapExtendedError(apiError, {
         url: externalUrl,
         method: 'POST',
         headers: requestHeaders,
-        body: externalPayload,
+        payload: externalPayload,
         curl: curlCommand,
-        ...(response && responseData ? {
-          response: {
-            status: response.status,
-            raw: responseText,
-            parsed: responseData,
-          },
-        } : {}),
-      };
-      error.logs = logs;
-      error.status = 502; // Default to 502 for external API errors
-      throw error;
+        response: response && responseData ? {
+          status: response.status,
+          raw: responseText,
+          parsed: responseData,
+        } : undefined,
+        logs
+      });
     }
 
     const updatedBatch = await prisma.outageBatch.update({

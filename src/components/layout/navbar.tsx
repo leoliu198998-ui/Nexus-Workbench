@@ -29,15 +29,15 @@ export function Navbar() {
   const pathSegments = pathname.split('/').filter(Boolean);
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md supports-backdrop-filter:bg-background/60">
-      <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
+    <nav className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/70 backdrop-blur-xl supports-backdrop-filter:bg-background/50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
         <div className="flex items-center gap-6 md:gap-8">
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="bg-primary/5 border border-primary/10 p-1 rounded-md group-hover:bg-primary/10 transition-colors">
-              <Box className="w-4 h-4 text-primary" />
+            <div className="bg-primary/10 border border-primary/20 p-1.5 rounded-lg group-hover:bg-primary/20 group-hover:border-primary/30 transition-all duration-200">
+              <Box className="w-5 h-5 text-primary" />
             </div>
-            <span className="font-bold text-base tracking-tight text-foreground/90 group-hover:text-foreground transition-colors">
-              Nexus<span className="text-muted-foreground font-normal ml-1">Workbench</span>
+            <span className="font-semibold text-base tracking-tight text-foreground group-hover:text-primary transition-colors duration-200">
+              Nexus<span className="text-muted-foreground font-normal ml-0.5">Workbench</span>
             </span>
           </Link>
 
@@ -95,29 +95,29 @@ export function Navbar() {
           </Breadcrumb>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-4">
-          <div className="relative hidden sm:block w-64">
-             <div className="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none text-muted-foreground">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="relative hidden sm:block w-56 lg:w-64">
+             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground">
                <Search className="h-4 w-4" />
              </div>
-             <input 
-               type="text" 
-               placeholder="Search tools..." 
+             <input
+               type="text"
+               placeholder="Search tools..."
                aria-label="Search tools"
-               className="w-full h-9 pl-9 pr-4 rounded-md border border-input bg-muted/50 text-sm focus:outline-none focus:ring-1 focus:ring-primary/20 focus:border-primary/50 transition-all placeholder:text-muted-foreground/70"
+               className="w-full h-9 pl-9 pr-12 rounded-lg border border-border bg-muted/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 focus:bg-background transition-all duration-200 placeholder:text-muted-foreground/60"
              />
              <div className="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none">
-               <kbd className="inline-flex h-5 items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+               <kbd className="inline-flex h-5 items-center gap-1 rounded-md border border-border bg-muted/50 px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
                  <span className="text-xs">⌘</span>K
                </kbd>
              </div>
           </div>
 
-          <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+          <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors duration-200">
             <Bell className="w-5 h-5" />
           </Button>
-          
-          <div className="h-8 w-8 rounded-full bg-linear-to-tr from-primary/20 to-primary/10 border border-primary/20 flex items-center justify-center text-xs font-bold text-primary">
+
+          <div className="h-9 w-9 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 border-2 border-primary/30 flex items-center justify-center text-sm font-semibold text-primary cursor-pointer hover:border-primary/50 hover:from-primary/40 hover:to-primary/20 transition-all duration-200">
             L
           </div>
         </div>

@@ -1,0 +1,28 @@
+[
+  {
+    "name": "archegostest",
+    "scopes": [
+      "Changed Tags",
+      "Latest Build"
+    ]
+  },
+  {
+    "name": "build-dukang-service-online",
+    "scopes": [
+      "Verify Tag"
+    ]
+  },
+  {
+    "name": "archegosuat-eu",
+    "scopes": [
+      "Changed Tags",
+      "Latest Build"
+    ]
+  },
+  {
+    "name": "build-service-online-webui-monorepo-feature-node20",
+    "scopes": [
+      "Verify Tag"
+    ]
+  }
+]
