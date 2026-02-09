@@ -12,7 +12,20 @@ export function safeJsonParse<T = unknown>(text: string): T {
     const parse = JSONBig({ storeAsString: true }).parse;
     return parse(text) as T;
   } catch (error) {
-    throw new Error(`Failed to parse JSON: ${error instanceof Error ? error.message : String(error)}`);
+    let errorMessage = 'Unknown error';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    } else if (typeof error === 'object' && error !== null) {
+      try {
+        errorMessage = JSON.stringify(error);
+      } catch {
+        errorMessage = String(error);
+      }
+    } else {
+      errorMessage = String(error);
+    }
+    const textPreview = text.length > 200 ? text.substring(0, 200) + '...' : text;
+    throw new Error(`Failed to parse JSON: ${errorMessage}. Response text: ${textPreview}`);
   }
 }
 

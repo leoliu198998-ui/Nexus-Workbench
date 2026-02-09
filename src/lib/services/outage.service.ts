@@ -166,6 +166,42 @@ export class OutageService {
       });
 
       responseText = await response.text();
+
+      // 检查响应状态和内容
+      if (!response.ok) {
+        // 尝试解析错误响应
+        try {
+          responseData = safeJsonParse<Record<string, unknown>>(responseText);
+        } catch {
+          responseData = null;
+        }
+
+        logs.steps.push({
+          step: 'CREATE_BATCH',
+          url: externalUrl,
+          method: 'POST',
+          request: {
+            headers: requestHeaders,
+            body: externalPayload,
+            curl: curlCommand,
+          },
+          status: response.status,
+          response: {
+            raw: responseText,
+            parsed: responseData,
+          },
+          timestamp: new Date().toISOString(),
+        });
+
+        const errorMsg = responseData?.errmsg as string || responseData?.message as string || `External API returned ${response.status}: ${responseText || 'Empty response'}`;
+        throw new Error(errorMsg);
+      }
+
+      // 解析成功的响应
+      if (!responseText) {
+        throw new Error('External API returned empty response');
+      }
+
       responseData = safeJsonParse<Record<string, unknown>>(responseText);
 
       logs.steps.push({
@@ -185,10 +221,6 @@ export class OutageService {
         timestamp: new Date().toISOString(),
       });
 
-      if (!response.ok) {
-        throw new Error((responseData.errmsg as string) || (responseData.message as string) || 'External API failed');
-      }
-
       this.validateResponse(responseData, ['batchId', 'batchName', 'originalDateTime', 'originalTimeZone', 'duration', 'releaseDatetime', 'releaseStatus', 'noticeStatus']);
 
       const batchData = responseData.data as Record<string, unknown>;
@@ -206,7 +238,7 @@ export class OutageService {
         headers: requestHeaders,
         payload: externalPayload,
         curl: curlCommand,
-        response: response && responseData ? {
+        response: response ? {
           status: response.status,
           raw: responseText,
           parsed: responseData,
@@ -292,6 +324,42 @@ export class OutageService {
       });
 
       responseText = await response.text();
+
+      // 检查响应状态和内容
+      if (!response.ok) {
+        // 尝试解析错误响应
+        try {
+          responseData = safeJsonParse<Record<string, unknown>>(responseText);
+        } catch {
+          responseData = null;
+        }
+
+        logs.steps.push({
+          step: 'UPDATE_BATCH',
+          url: externalUrl,
+          method: 'PUT',
+          request: {
+            headers: requestHeaders,
+            body: externalPayload,
+            curl: curlCommand,
+          },
+          status: response.status,
+          response: {
+            raw: responseText,
+            parsed: responseData,
+          },
+          timestamp: new Date().toISOString(),
+        });
+
+        const errorMsg = responseData?.errmsg as string || responseData?.message as string || `External API returned ${response.status}: ${responseText || 'Empty response'}`;
+        throw new Error(errorMsg);
+      }
+
+      // 解析成功的响应
+      if (!responseText) {
+        throw new Error('External API returned empty response');
+      }
+
       responseData = safeJsonParse<Record<string, unknown>>(responseText);
 
       logs.steps.push({
@@ -311,10 +379,6 @@ export class OutageService {
         timestamp: new Date().toISOString(),
       });
 
-      if (!response.ok) {
-        throw new Error((responseData.errmsg as string) || (responseData.message as string) || 'External API failed');
-      }
-
       this.validateResponse(responseData);
     } catch (apiError: unknown) {
       console.error('External API Update Error:', apiError);
@@ -329,7 +393,7 @@ export class OutageService {
         headers: requestHeaders,
         payload: externalPayload,
         curl: curlCommand,
-        response: response && responseData ? {
+        response: response ? {
           status: response.status,
           raw: responseText,
           parsed: responseData,
@@ -468,6 +532,47 @@ export class OutageService {
       });
 
       responseText = await response.text();
+
+      // 检查响应状态和内容
+      if (!response.ok) {
+        // 尝试解析错误响应
+        try {
+          responseData = safeJsonParse<Record<string, unknown>>(responseText);
+        } catch {
+          responseData = null;
+        }
+
+        logs.steps.push({
+          step: action.toUpperCase(),
+          url: externalUrl,
+          method: 'POST',
+          request: {
+            headers: requestHeaders,
+            body: externalPayload,
+            curl: curlCommand,
+          },
+          status: response.status,
+          response: {
+            raw: responseText,
+            parsed: responseData,
+          },
+          timestamp: new Date().toISOString(),
+        });
+
+        const errorMsg = responseData?.errmsg as string || responseData?.message as string || `External API returned ${response.status}: ${responseText || 'Empty response'}`;
+        try {
+          await logOutageAction(id, `OUTAGE_BATCH_${action.toUpperCase()}_FAILED`, `外部 API 调用失败: ${errorMsg}`);
+        } catch (e) {
+          console.error('[LOGGING] Failed to log action failure (HTTP):', e);
+        }
+        throw new Error(errorMsg);
+      }
+
+      // 解析成功的响应
+      if (!responseText) {
+        throw new Error('External API returned empty response');
+      }
+
       responseData = safeJsonParse<Record<string, unknown>>(responseText);
 
       logs.steps.push({
@@ -486,16 +591,6 @@ export class OutageService {
         },
         timestamp: new Date().toISOString(),
       });
-
-      if (!response.ok) {
-        const errorMsg = (responseData.errmsg as string) || (responseData.message as string) || `External API failed for ${action}`;
-        try {
-          await logOutageAction(id, `OUTAGE_BATCH_${action.toUpperCase()}_FAILED`, `外部 API 调用失败: ${errorMsg}`);
-        } catch (e) {
-          console.error('[LOGGING] Failed to log action failure (HTTP):', e);
-        }
-        throw new Error(errorMsg);
-      }
 
       if (responseData.errcode !== undefined && String(responseData.errcode) !== '0') {
         const errmsg = responseData.errmsg as string;
@@ -524,7 +619,7 @@ export class OutageService {
         headers: requestHeaders,
         payload: externalPayload,
         curl: curlCommand,
-        response: response && responseData ? {
+        response: response ? {
           status: response.status,
           raw: responseText,
           parsed: responseData,
