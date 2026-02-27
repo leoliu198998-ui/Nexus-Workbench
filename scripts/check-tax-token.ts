@@ -1,7 +1,4 @@
-
-import { fetch } from 'undici'; // Use native fetch if Node 18+ or install undici
-// In recent Node versions, fetch is global. If using older node, we might need a polyfill.
-// Assuming Node 18+ environment based on the project context.
+// Use global fetch provided by Node.js 18+.
 
 const VCODE_URL = 'https://awsdktest-workio.bipocloud.com/services/dukang-sms/sms/vcode'; 
 const VCODE_CHECK_URL = 'https://awsdktest-workio.bipocloud.com/services/dukang-sms/sms/vcode_check';
@@ -38,8 +35,7 @@ async function run() {
         console.error('Step 1 Failed:', e);
     }
 
-    console.log('
---- Step 2: Check VCode ---');
+    console.log('\n--- Step 2: Check VCode ---');
     const step2Url = `${VCODE_CHECK_URL}?clientId=${clientId}&areaCode=${mobileAreaCode}&phoneNumber=${mobile}&vcode=${vcode}`;
     try {
         const res2 = await fetch(step2Url, { headers });
@@ -49,8 +45,7 @@ async function run() {
         console.error('Step 2 Failed:', e);
     }
 
-    console.log('
---- Step 3: Get Token ---');
+    console.log('\n--- Step 3: Get Token ---');
     try {
         const res3 = await fetch(TOKEN_URL, {
             method: 'POST',
@@ -68,4 +63,3 @@ async function run() {
 }
 
 run();
-
