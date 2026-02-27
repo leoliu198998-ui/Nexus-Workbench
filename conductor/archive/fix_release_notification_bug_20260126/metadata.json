@@ -1,0 +1,8 @@
+{
+  "track_id": "fix_release_notification_bug_20260126",
+  "type": "bug",
+  "status": "new",
+  "created_at": "2026-01-26T14:45:00Z",
+  "updated_at": "2026-01-26T14:45:00Z",
+  "description": "修复发布通知调用返回 EntityNotFoundException 且流程错误继续的 Bug"
+}

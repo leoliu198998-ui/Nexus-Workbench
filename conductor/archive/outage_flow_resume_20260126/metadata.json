@@ -1,0 +1,8 @@
+{
+  "track_id": "outage_flow_resume_20260126",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-01-26T00:00:00Z",
+  "updated_at": "2026-01-26T00:00:00Z",
+  "description": "停机流程优化：更新环境URL，增强详情页标识，实现 SystemLog 与 OutageBatch 的关联记录。"
+}

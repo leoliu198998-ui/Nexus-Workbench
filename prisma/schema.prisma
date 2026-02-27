@@ -1,0 +1,61 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider   = "prisma-client-js"
+  output     = "../src/generated/client"
+  engineType = "library"
+}
+
+datasource db {
+  provider  = "postgresql"
+}
+
+model User {
+  id    Int     @id @default(autoincrement())
+  email String  @unique
+  name  String?
+}
+
+model SystemLog {
+  id            String       @id @default(uuid())
+  action        String
+  details       String?
+  timestamp     DateTime     @default(now())
+  outageBatchId String?
+  outageBatch   OutageBatch? @relation(fields: [outageBatchId], references: [id])
+}
+
+model ReleaseEnvironment {
+  id        String   @id @default(uuid())
+  name      String
+  baseUrl   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  batches   OutageBatch[]
+}
+
+enum OutageStatus {
+  CREATED
+  NOTIFIED
+  STARTED
+  COMPLETED
+  CANCELLED
+}
+
+model OutageBatch {
+  id              String             @id @default(uuid())
+  envId           String
+  environment     ReleaseEnvironment @relation(fields: [envId], references: [id])
+  batchName       String
+  releaseDatetime DateTime
+  releaseTimeZone String
+  duration        Int
+  remoteBatchId   String?
+  status          OutageStatus       @default(CREATED)
+  token           String
+  logs            Json?
+  systemLogs      SystemLog[]
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+}
