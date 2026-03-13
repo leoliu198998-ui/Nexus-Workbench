@@ -63,6 +63,13 @@ export class OutageService {
     return date;
   }
 
+  private buildExternalAuthHeaders(token: string): Record<string, string> {
+    return {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    };
+  }
+
   private validateResponse(responseData: Record<string, unknown>, requiredDataFields: string[] = []) {
     if (String(responseData.errcode) !== '0') {
       throw new Error((responseData.errmsg as string) || `接口返回错误码: ${responseData.errcode}`);
@@ -146,10 +153,7 @@ export class OutageService {
       duration,
     };
 
-    const requestHeaders = {
-      'Content-Type': 'application/json',
-      'x-dk-token': token,
-    };
+    const requestHeaders = this.buildExternalAuthHeaders(token);
 
     const curlCommand = generateCurlCommand(externalUrl, 'POST', requestHeaders, externalPayload);
     const logs: { steps: Record<string, unknown>[] } = { steps: [] };
@@ -305,10 +309,7 @@ export class OutageService {
       duration
     };
 
-    const requestHeaders = {
-      'Content-Type': 'application/json',
-      'x-dk-token': batch.token,
-    };
+    const requestHeaders = this.buildExternalAuthHeaders(batch.token);
 
     const curlCommand = generateCurlCommand(externalUrl, 'PUT', requestHeaders, externalPayload);
     const logs = (batch.logs as { steps: Record<string, unknown>[] }) || { steps: [] };
@@ -513,10 +514,7 @@ export class OutageService {
     };
 
     const logs = (batch.logs as { steps: Record<string, unknown>[] }) || { steps: [] };
-    const requestHeaders = {
-      'Content-Type': 'application/json',
-      'x-dk-token': batch.token,
-    };
+    const requestHeaders = this.buildExternalAuthHeaders(batch.token);
 
     const curlCommand = generateCurlCommand(externalUrl, 'POST', requestHeaders, externalPayload);
 

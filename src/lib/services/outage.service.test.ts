@@ -23,6 +23,30 @@ vi.mock('./logger', () => ({
 
 global.fetch = vi.fn();
 
+const createSuccessResponse = () => ({
+  ok: true,
+  status: 200,
+  text: async () => JSON.stringify({
+    errcode: '0',
+    data: {
+      batchId: '12345',
+      batchName: 'Test Batch',
+      originalDateTime: '2026-01-01 10:00',
+      originalTimeZone: 'UTC',
+      duration: 60,
+      releaseDatetime: '2026-01-01 10:00',
+      releaseStatus: 'UNPUBLISHED',
+      noticeStatus: 'UNSENT',
+    },
+  }),
+});
+
+const actionSuccessResponse = () => ({
+  ok: true,
+  status: 200,
+  text: async () => JSON.stringify({ errcode: '0', data: {} }),
+});
+
 describe('OutageService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -60,28 +84,43 @@ describe('OutageService', () => {
 
     it('should create batch successfully', async () => {
       (prisma.releaseEnvironment.findUnique as Mock).mockResolvedValue(mockEnv);
-      (global.fetch as Mock).mockResolvedValue({
-        ok: true,
-        text: async () => JSON.stringify({
-          errcode: '0',
-          data: {
-            batchId: '12345',
-            batchName: 'Test Batch',
-            originalDateTime: '2026-01-01 10:00',
-            originalTimeZone: 'UTC',
-            duration: 60,
-            releaseDatetime: '2026-01-01 10:00',
-            releaseStatus: 'UNPUBLISHED',
-            noticeStatus: 'UNSENT'
-          }
-        }),
-      });
+      (global.fetch as Mock).mockResolvedValue(createSuccessResponse());
       (prisma.outageBatch.create as Mock).mockResolvedValue({ id: 'new-batch-id', ...createDto });
 
       const result = await outageService.createBatch(createDto);
       expect(result).toBeDefined();
       expect(prisma.outageBatch.create).toHaveBeenCalled();
       expect(logOutageAction).toHaveBeenCalled();
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://api.example.com/devops/release-batch',
+        expect.objectContaining({
+          method: 'POST',
+          headers: expect.objectContaining({
+            Authorization: 'Bearer test-token',
+            'Content-Type': 'application/json',
+          }),
+        }),
+      );
+      expect((global.fetch as Mock).mock.calls[0]?.[1]?.headers).not.toHaveProperty('x-dk-token');
+
+      expect(prisma.outageBatch.create).toHaveBeenCalledWith(expect.objectContaining({
+        data: expect.objectContaining({
+          token: 'test-token',
+          logs: expect.objectContaining({
+            steps: [
+              expect.objectContaining({
+                request: expect.objectContaining({
+                  headers: expect.objectContaining({
+                    Authorization: 'Bearer test-token',
+                  }),
+                  curl: expect.stringContaining("Authorization: Bearer test-token"),
+                }),
+              }),
+            ],
+          }),
+        }),
+      }));
     });
 
     it('should throw error if environment not found', async () => {
@@ -108,16 +147,38 @@ describe('OutageService', () => {
 
     it('should update batch successfully and reset status', async () => {
       (prisma.outageBatch.findUnique as Mock).mockResolvedValue(mockBatch);
-      (global.fetch as Mock).mockResolvedValue({
-        ok: true,
-        text: async () => JSON.stringify({ errcode: '0', data: {} }),
-      });
+      (global.fetch as Mock).mockResolvedValue(actionSuccessResponse());
       (prisma.outageBatch.update as Mock).mockResolvedValue({ ...mockBatch, ...updateDto });
 
       await outageService.updateBatch('batch-1', updateDto);
 
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://api.example.com/devops/release-batch/update/remote-1',
+        expect.objectContaining({
+          method: 'PUT',
+          headers: expect.objectContaining({
+            Authorization: 'Bearer test-token',
+            'Content-Type': 'application/json',
+          }),
+        }),
+      );
+      expect((global.fetch as Mock).mock.calls[0]?.[1]?.headers).not.toHaveProperty('x-dk-token');
       expect(prisma.outageBatch.update).toHaveBeenCalledWith(expect.objectContaining({
-        data: expect.objectContaining({ status: 'CREATED' })
+        data: expect.objectContaining({
+          status: 'CREATED',
+          logs: expect.objectContaining({
+            steps: [
+              expect.objectContaining({
+                request: expect.objectContaining({
+                  headers: expect.objectContaining({
+                    Authorization: 'Bearer test-token',
+                  }),
+                  curl: expect.stringContaining("Authorization: Bearer test-token"),
+                }),
+              }),
+            ],
+          }),
+        }),
       }));
     });
 
@@ -139,17 +200,45 @@ describe('OutageService', () => {
 
     it('should execute publish action successfully', async () => {
       (prisma.outageBatch.findUnique as Mock).mockResolvedValue(mockBatch);
-      (global.fetch as Mock).mockResolvedValue({
-        ok: true,
-        text: async () => JSON.stringify({ errcode: '0', data: {} }),
-      });
+      (global.fetch as Mock).mockResolvedValue(actionSuccessResponse());
       (prisma.outageBatch.update as Mock).mockResolvedValue({ ...mockBatch, status: 'NOTIFIED' });
 
-      await outageService.executeAction('batch-1', 'publish');
+      const result = await outageService.executeAction('batch-1', 'publish');
 
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://api.example.com/devops/release-batch/publish',
+        expect.objectContaining({
+          method: 'POST',
+          headers: expect.objectContaining({
+            Authorization: 'Bearer test-token',
+            'Content-Type': 'application/json',
+          }),
+        }),
+      );
+      expect((global.fetch as Mock).mock.calls[0]?.[1]?.headers).not.toHaveProperty('x-dk-token');
       expect(prisma.outageBatch.update).toHaveBeenCalledWith(expect.objectContaining({
-        data: expect.objectContaining({ status: 'NOTIFIED' })
+        data: expect.objectContaining({
+          status: 'NOTIFIED',
+          logs: expect.objectContaining({
+            steps: [
+              expect.objectContaining({
+                request: expect.objectContaining({
+                  headers: expect.objectContaining({
+                    Authorization: 'Bearer test-token',
+                  }),
+                  curl: expect.stringContaining("Authorization: Bearer test-token"),
+                }),
+              }),
+            ],
+          }),
+        }),
       }));
+      expect(result.apiCall.request.headers).toEqual(expect.objectContaining({
+        Authorization: 'Bearer test-token',
+        'Content-Type': 'application/json',
+      }));
+      expect(result.apiCall.request.headers).not.toHaveProperty('x-dk-token');
+      expect(result.apiCall.request.curl).toContain("Authorization: Bearer test-token");
     });
 
     it('should handle token update action', async () => {
@@ -158,6 +247,31 @@ describe('OutageService', () => {
       expect(prisma.outageBatch.update).toHaveBeenCalledWith(expect.objectContaining({
         data: { token: 'new-token' }
       }));
+    });
+
+    it('should keep token-only update flow unchanged and use stored token for later bearer requests', async () => {
+      (prisma.outageBatch.update as Mock)
+        .mockResolvedValueOnce({ ...mockBatch, token: 'stored-token' })
+        .mockResolvedValueOnce({ ...mockBatch, token: 'stored-token', status: 'NOTIFIED' });
+      await outageService.executeAction('batch-1', '', 'stored-token');
+
+      (prisma.outageBatch.findUnique as Mock).mockResolvedValue({
+        ...mockBatch,
+        token: 'stored-token',
+      });
+      (global.fetch as Mock).mockResolvedValue(actionSuccessResponse());
+
+      await outageService.executeAction('batch-1', 'publish');
+
+      expect(prisma.outageBatch.update).toHaveBeenNthCalledWith(1, expect.objectContaining({
+        where: { id: 'batch-1' },
+        data: { token: 'stored-token' },
+      }));
+      expect((global.fetch as Mock).mock.calls[0]?.[1]?.headers).toEqual(expect.objectContaining({
+        Authorization: 'Bearer stored-token',
+        'Content-Type': 'application/json',
+      }));
+      expect((global.fetch as Mock).mock.calls[0]?.[1]?.headers).not.toHaveProperty('x-dk-token');
     });
 
     it('should handle fix-batch-id action', async () => {
