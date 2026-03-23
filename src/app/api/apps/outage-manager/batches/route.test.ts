@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { POST } from './route';
+import { GET, POST } from './route';
 import { prisma } from '@/lib/prisma';
 import { NextRequest } from 'next/server';
 
@@ -11,6 +11,8 @@ vi.mock('@/lib/prisma', () => ({
       findUnique: vi.fn(),
     },
     outageBatch: {
+      findMany: vi.fn(),
+      count: vi.fn(),
       create: vi.fn(),
     },
   },
@@ -23,6 +25,79 @@ global.fetch = vi.fn();
 vi.mock('@/lib/services/logger', () => ({
   logOutageAction: vi.fn().mockResolvedValue({ id: 'log-123' }),
 }));
+
+describe('GET /api/apps/outage-manager/batches', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should return first page with 10 items by default', async () => {
+    const mockBatches = [
+      {
+        id: 'batch-1',
+        batchName: 'Batch 1',
+        status: 'CREATED',
+        environment: { name: 'Test Env' },
+      },
+      {
+        id: 'batch-2',
+        batchName: 'Batch 2',
+        status: 'NOTIFIED',
+        environment: { name: 'Test Env' },
+      },
+    ];
+
+    (prisma.outageBatch.count as any).mockResolvedValue(12);
+    (prisma.outageBatch.findMany as any).mockResolvedValue(mockBatches);
+
+    const req = new NextRequest('http://localhost/api/apps/outage-manager/batches');
+    const response = await GET(req);
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(prisma.outageBatch.count).toHaveBeenCalledWith({ where: {} });
+    expect(prisma.outageBatch.findMany).toHaveBeenCalledWith({
+      where: {},
+      orderBy: { createdAt: 'desc' },
+      include: { environment: true },
+      skip: 0,
+      take: 10,
+    });
+    expect(data).toEqual({
+      items: mockBatches,
+      page: 1,
+      pageSize: 10,
+      total: 12,
+      totalPages: 2,
+    });
+  });
+
+  it('should return requested page with correct offset and env filter', async () => {
+    (prisma.outageBatch.count as any).mockResolvedValue(25);
+    (prisma.outageBatch.findMany as any).mockResolvedValue([]);
+
+    const req = new NextRequest('http://localhost/api/apps/outage-manager/batches?page=2&envId=env-1');
+    const response = await GET(req);
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(prisma.outageBatch.count).toHaveBeenCalledWith({ where: { envId: 'env-1' } });
+    expect(prisma.outageBatch.findMany).toHaveBeenCalledWith({
+      where: { envId: 'env-1' },
+      orderBy: { createdAt: 'desc' },
+      include: { environment: true },
+      skip: 10,
+      take: 10,
+    });
+    expect(data).toEqual({
+      items: [],
+      page: 2,
+      pageSize: 10,
+      total: 25,
+      totalPages: 3,
+    });
+  });
+});
 
 describe('POST /api/apps/outage-manager/batches', () => {
   beforeEach(() => {

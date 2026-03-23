@@ -35,3 +35,11 @@ export interface OutageBatch {
   environment?: { name: string };
   logs?: { steps: LogEntry[] };
 }
+
+export interface OutageBatchListResponse {
+  items: OutageBatch[];
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+}

@@ -7,21 +7,35 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const envId = searchParams.get('envId');
+    const pageParam = Number(searchParams.get('page') || '1');
+    const page = Number.isFinite(pageParam) && pageParam > 0 ? Math.floor(pageParam) : 1;
+    const pageSize = 10;
+    const skip = (page - 1) * pageSize;
 
     const where = envId ? { envId } : {};
 
-    const batches = await prisma.outageBatch.findMany({
-      where,
-      orderBy: {
-        createdAt: 'desc',
-      },
-      include: {
-        environment: true,
-      },
-      take: 20,
-    });
+    const [total, batches] = await Promise.all([
+      prisma.outageBatch.count({ where }),
+      prisma.outageBatch.findMany({
+        where,
+        orderBy: {
+          createdAt: 'desc',
+        },
+        include: {
+          environment: true,
+        },
+        skip,
+        take: pageSize,
+      }),
+    ]);
 
-    return NextResponse.json(batches);
+    return NextResponse.json({
+      items: batches,
+      page,
+      pageSize,
+      total,
+      totalPages: Math.max(1, Math.ceil(total / pageSize)),
+    });
   } catch (error) {
     return handleApiError(error, 'Failed to fetch batches');
   }

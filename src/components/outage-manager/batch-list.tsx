@@ -19,9 +19,9 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
-import { RefreshCw, RotateCw, Eye, Play, ArrowRight, Clock, Filter } from 'lucide-react';
+import { RefreshCw, RotateCw, Eye, Play, ArrowRight, Clock, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { OutageBatch } from '@/types/outage';
+import type { OutageBatch, OutageBatchListResponse } from '@/types/outage';
 
 interface BatchListProps {
   onBatchClick?: (batch: OutageBatch) => void;
@@ -32,16 +32,22 @@ export function BatchList({ onBatchClick }: BatchListProps) {
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
-  const fetchBatches = useCallback(async (showLoading = true) => {
+  const fetchBatches = useCallback(async (targetPage: number, showLoading = true) => {
     if (showLoading) setLoading(true);
     else setIsRefreshing(true);
     
     try {
-      const res = await fetch('/api/apps/outage-manager/batches');
+      const res = await fetch(`/api/apps/outage-manager/batches?page=${targetPage}`);
       if (res.ok) {
-        const data = await res.json();
-        setBatches(data);
+        const data: OutageBatchListResponse = await res.json();
+        setBatches(data.items);
+        setPage(data.page);
+        setTotal(data.total);
+        setTotalPages(data.totalPages);
       }
     } catch (error) {
       console.error(error);
@@ -52,8 +58,8 @@ export function BatchList({ onBatchClick }: BatchListProps) {
   }, []);
 
   useEffect(() => {
-    fetchBatches();
-  }, [fetchBatches]);
+    fetchBatches(page);
+  }, [fetchBatches, page]);
 
   const filteredBatches = statusFilter === 'all' 
     ? batches 
@@ -93,7 +99,7 @@ export function BatchList({ onBatchClick }: BatchListProps) {
         <Button 
           variant="ghost" 
           size="sm" 
-          onClick={() => fetchBatches(false)}
+          onClick={() => fetchBatches(page, false)}
           disabled={isRefreshing}
           className="hover:bg-muted"
         >
@@ -183,6 +189,37 @@ export function BatchList({ onBatchClick }: BatchListProps) {
           </Table>
         </div>
       )}
+
+      <div className="flex items-center justify-between gap-3 border-t pt-4">
+        <div className="text-sm text-muted-foreground">
+          第 {page} / {totalPages} 页
+          <span className="ml-2">共 {total} 条</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setPage((currentPage) => Math.max(1, currentPage - 1))}
+            disabled={page <= 1}
+            aria-label="上一页"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            上一页
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setPage((currentPage) => Math.min(totalPages, currentPage + 1))}
+            disabled={page >= totalPages}
+            aria-label="下一页"
+          >
+            下一页
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
