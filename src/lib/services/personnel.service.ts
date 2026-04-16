@@ -200,7 +200,13 @@ export class PersonnelService {
     
     const headers: Record<string, string> = {
       ...this.defaultHeaders,
-      'authorization': token, // 确保这里使用了正确的 token
+      'origin': baseUrl,
+      'authorization': token,
+      'priority': 'u=1, i',
+      'sec-fetch-dest': 'empty',
+      'sec-fetch-mode': 'cors',
+      'sec-fetch-site': 'same-origin',
+      'x-session-id': 'bi41afml', // 模拟浏览器的 session id
       'x-actived-menu': 'Common-All Projects',
       'referer': `${baseUrl}/projects/all-projects/${projectId}/candidate`,
     };
@@ -295,7 +301,13 @@ export class PersonnelService {
     
     const headers: Record<string, string> = {
       ...this.defaultHeaders,
+      'origin': baseUrl,
       'authorization': token,
+      'priority': 'u=1, i',
+      'sec-fetch-dest': 'empty',
+      'sec-fetch-mode': 'cors',
+      'sec-fetch-site': 'same-origin',
+      'x-session-id': 'bi41afml',
       'x-actived-menu': 'Common-All Projects',
       'referer': `${baseUrl}/projects/all-projects/${projectId}/candidate?clientId=${userInfo.clientId || ''}&tabKey=Candidate&locationId=${locationId}`,
     };
@@ -577,7 +589,13 @@ export class PersonnelService {
 
     const headers: Record<string, string> = {
       ...this.defaultHeaders,
+      'origin': baseUrl,
       'authorization': token,
+      'priority': 'u=1, i',
+      'sec-fetch-dest': 'empty',
+      'sec-fetch-mode': 'cors',
+      'sec-fetch-site': 'same-origin',
+      'x-session-id': 'bi41afml',
       'x-actived-menu': 'Common-All Projects',
       'referer': `${baseUrl}/projects/all-projects/${projectId}/candidate`,
     };
@@ -616,7 +634,13 @@ export class PersonnelService {
 
     const headers: Record<string, string> = {
       ...this.defaultHeaders,
+      'origin': baseUrl,
       'authorization': token,
+      'priority': 'u=1, i',
+      'sec-fetch-dest': 'empty',
+      'sec-fetch-mode': 'cors',
+      'sec-fetch-site': 'same-origin',
+      'x-session-id': 'bi41afml',
       'x-actived-menu': 'Common-All Projects',
       'referer': `${baseUrl}/projects/all-projects/${projectId}/contractor`,
     };
@@ -655,7 +679,13 @@ export class PersonnelService {
 
     const headers: Record<string, string> = {
       ...this.defaultHeaders,
+      'origin': baseUrl,
       'authorization': token,
+      'priority': 'u=1, i',
+      'sec-fetch-dest': 'empty',
+      'sec-fetch-mode': 'cors',
+      'sec-fetch-site': 'same-origin',
+      'x-session-id': 'bi41afml',
       'x-actived-menu': 'Common-All Projects',
       'referer': `${baseUrl}/projects/all-projects/${projectId}/applicant?clientId=${userInfo.clientId || ''}&tabKey=Applicant&locationId=${locationId}`,
     };
