@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
         'x-actived-menu': 'SD-All Calendar Schedule',
         'x-biz': 'SERVICE_ONLINE_SD',
         'x-contact-id': '202203310914110067',
-        'x-dk-token': token,
+        'Authorization': `Bearer ${token}`,
         'x-language': 'en',
         'x-session-id': 'q3q025q5',
         'x-sse-session-id': '6b9638f9-d183-469d-ba1f-532929379d02',

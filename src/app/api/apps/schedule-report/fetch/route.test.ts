@@ -45,7 +45,7 @@ describe('Schedule Report Fetch API', () => {
       expect.objectContaining({
         method: 'POST',
         headers: expect.objectContaining({
-          'x-dk-token': 'test-token',
+          'Authorization': 'Bearer test-token',
           'x-biz': 'SERVICE_ONLINE_SD',
           'content-type': 'application/json',
           'origin': 'https://global.butterglobe.com',

@@ -103,7 +103,7 @@ export function CreateBatchForm({ onSuccess }: CreateBatchFormProps) {
           </div>
 
           <div className="space-y-2 pt-2 border-t">
-            <Label htmlFor="token">鉴权 Token (x-dk-token)</Label>
+            <Label htmlFor="token">鉴权 Token (Authorization)</Label>
             <Input
               id="token"
               type="password"

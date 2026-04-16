@@ -29,7 +29,7 @@ export default function Home() {
         <Wizard>
           <WizardStep 
             title="Authentication" 
-            description="Enter your x-dk-token to access the schedule data source."
+            description="Enter your Authorization Token to access the schedule data source."
           >
             {(next) => (
               <div className="space-y-6 max-w-md">
@@ -37,13 +37,13 @@ export default function Home() {
                    <div className="bg-primary/5 border border-primary/10 rounded-lg p-4 flex items-start gap-3">
                      <KeyRound className="w-5 h-5 text-primary mt-0.5" />
                      <div className="text-sm">
-                       <p className="font-medium text-foreground">X-DK-Token Required</p>
-                       <p className="text-muted-foreground mt-1">Please enter your valid Dukang token. This token will be used to securely fetch the latest schedule information.</p>
+                       <p className="font-medium text-foreground">Authorization Token Required</p>
+                        <p className="text-muted-foreground mt-1">Please provide your Authorization Token to fetch the latest schedule report data.</p>
                      </div>
                    </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="token">Access Token (x-dk-token)</Label>
+                    <Label htmlFor="token">Access Token (Authorization)</Label>
                     <Input
                       id="token"
                       placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."

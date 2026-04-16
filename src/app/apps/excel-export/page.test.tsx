@@ -5,8 +5,8 @@ import { describe, it, expect } from 'vitest'
 describe('Schedule Report Exporter Page', () => {
   it('renders authentication step by default', () => {
     render(<Page />)
-    expect(screen.getByText(/X-DK-Token Required/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/Access Token \(x-dk-token\)/i)).toBeInTheDocument()
+    expect(screen.getByText(/Authorization Token Required/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/Access Token \(Authorization\)/i)).toBeInTheDocument()
   })
 
   it('contains back to dashboard link', () => {
