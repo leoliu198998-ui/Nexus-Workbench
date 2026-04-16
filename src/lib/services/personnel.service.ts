@@ -122,7 +122,7 @@ export class PersonnelService {
 
       // 如果 Body 没有，再尝试从 Header 获取
       if (!token) {
-        const headerToken = response.headers.get('x-dk-token');
+        const headerToken = response.headers.get('authorization') || response.headers.get('x-dk-token');
         if (headerToken) {
           token = headerToken;
         }
@@ -199,7 +199,7 @@ export class PersonnelService {
     
     const headers: Record<string, string> = {
       ...this.defaultHeaders,
-      'x-dk-token': token, // 确保这里使用了正确的 token
+      'authorization': token, // 确保这里使用了正确的 token
       'x-actived-menu': 'Common-All Projects',
       'referer': `${baseUrl}/projects/all-projects/${projectId}/candidate`,
     };
@@ -220,7 +220,7 @@ export class PersonnelService {
     console.log('Using token for Project Info request:', token.substring(0, 20) + '...');
     console.log('Request Headers (Partial):', {
       'x-contact-id': headers['x-contact-id'],
-      'x-dk-token': headers['x-dk-token']?.substring(0, 10) + '...',
+      'authorization': headers['authorization']?.substring(0, 15) + '...',
       'cookie': headers['cookie'] ? 'Present' : 'Missing'
     });
 
@@ -293,7 +293,7 @@ export class PersonnelService {
     
     const headers: Record<string, string> = {
       ...this.defaultHeaders,
-      'x-dk-token': token,
+      'authorization': token,
       'x-actived-menu': 'Common-All Projects',
       'referer': `${baseUrl}/projects/all-projects/${projectId}/candidate?clientId=${userInfo.clientId || ''}&tabKey=Candidate&locationId=${locationId}`,
     };
@@ -573,7 +573,7 @@ export class PersonnelService {
 
     const headers: Record<string, string> = {
       ...this.defaultHeaders,
-      'x-dk-token': token,
+      'authorization': token,
       'x-actived-menu': 'Common-All Projects',
       'referer': `${baseUrl}/projects/all-projects/${projectId}/candidate`,
     };
@@ -612,7 +612,7 @@ export class PersonnelService {
 
     const headers: Record<string, string> = {
       ...this.defaultHeaders,
-      'x-dk-token': token,
+      'authorization': token,
       'x-actived-menu': 'Common-All Projects',
       'referer': `${baseUrl}/projects/all-projects/${projectId}/contractor`,
     };
@@ -651,7 +651,7 @@ export class PersonnelService {
 
     const headers: Record<string, string> = {
       ...this.defaultHeaders,
-      'x-dk-token': token,
+      'authorization': token,
       'x-actived-menu': 'Common-All Projects',
       'referer': `${baseUrl}/projects/all-projects/${projectId}/applicant?clientId=${userInfo.clientId || ''}&tabKey=Applicant&locationId=${locationId}`,
     };
