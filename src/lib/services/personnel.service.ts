@@ -554,13 +554,22 @@ export class PersonnelService {
       });
 
       const responseText = await response.text();
+      const apiResult: any = safeJsonParse(responseText);
 
       if (!response.ok) {
-        console.error(`${logPrefix} API Error:`, responseText);
-        throw new Error(`Failed to ${logPrefix.toLowerCase()}: ${response.status} ${response.statusText} - ${responseText.substring(0, 200)}`);
+        console.error(`${logPrefix} HTTP Error:`, responseText);
+        throw new Error(`Failed to ${logPrefix.toLowerCase()}: ${response.status} ${response.statusText}`);
       }
 
-      const apiResult: any = safeJsonParse(responseText);
+      // 关键修复：判断业务层面的错误码
+      // 假设 errcode 存在且不等于 '0' 就认为是业务失败
+      if (apiResult && apiResult.errcode !== undefined && String(apiResult.errcode) !== '0') {
+        console.error(`${logPrefix} Business Error:`, responseText);
+        // 抛出具体的业务错误信息，方便上层捕获并展示给用户
+        const errorMessage = apiResult.errmsg || apiResult.message || `API returned errcode: ${apiResult.errcode}`;
+        throw new Error(`${errorMessage}`);
+      }
+
       return {
         ...(apiResult || {}),
         _sentAttributes: payload.attributes
