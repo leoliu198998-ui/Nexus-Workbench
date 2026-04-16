@@ -103,6 +103,7 @@ export class PersonnelService {
         method: 'POST',
         headers: headers,
         body: JSON.stringify(payload),
+        cache: 'no-store', // 禁用缓存，确保每次获取最新 token
       });
 
       const responseText = await response.text();
@@ -229,6 +230,7 @@ export class PersonnelService {
       const response = await fetch(url, {
         method: 'GET',
         headers: headers,
+        cache: 'no-store', // 禁用缓存
       });
 
       const responseText = await response.text();
@@ -324,6 +326,7 @@ export class PersonnelService {
         method: 'POST',
         headers: headers,
         body: JSON.stringify(payload),
+        cache: 'no-store', // 禁用缓存
       });
 
       const responseText = await response.text();
@@ -535,6 +538,7 @@ export class PersonnelService {
         method: 'POST',
         headers: headers,
         body: JSON.stringify(payload),
+        cache: 'no-store', // 禁用缓存
       });
 
       const responseText = await response.text();
