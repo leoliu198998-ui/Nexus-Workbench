@@ -133,13 +133,18 @@ export class PersonnelService {
         throw new Error('Token not found in response');
       }
 
+      // 添加 Bearer 前缀并去除首尾空白字符（包括换行）
+      token = `Bearer ${token.trim()}`;
+
       // 解析 Token 获取用户信息 (特别是 externalId 作为 x-contact-id)
       let userInfo: Record<string, any> = {};
       try {
-        const tokenParts = token.split('.');
+        // 由于添加了 Bearer 前缀，解析时需要去掉前缀
+        const actualToken = token.replace('Bearer ', '');
+        const tokenParts = actualToken.split('.');
         if (tokenParts.length === 3) {
           // 修复：直接截取字符串中的 externalId，避免 JSON 解析导致的大整数精度丢失
-          const payloadString = Buffer.from(tokenParts[1], 'base64').toString();
+          const payloadString = atob(tokenParts[1]);
           
           // 尝试用正则精确匹配 externalId
           const externalIdMatch = payloadString.match(/"externalId":\s*(\d+)/);
